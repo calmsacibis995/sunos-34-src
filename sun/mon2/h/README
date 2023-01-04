@@ -1,0 +1,13 @@
+The  h  directory contains all the header files for the ROM monitor.
+
+Note: various of these files also include other header files, in particular
+globram.h includes many others.  Where this has caused problems, the
+included files have been modified to only expand themselves usefully one
+time, by doing #ifndef FOO, #define FOO, ...(the real body), #endif FOO.
+Often, the file would be #define-ing something anyway, so that was used
+instead of making up a FOO.
+
+I am trying to discourage this trend, but it is necessary in some
+places to avoid every module's having to include eight or ten files.
+
+@(#)README 1.1 86/09/25 Copyright (c) 1983 by Sun Microsystems, Inc.

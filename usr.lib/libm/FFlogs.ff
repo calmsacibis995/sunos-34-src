@@ -1,0 +1,111 @@
+c	.data
+c	.asciz	"@(#)FFlogs.ff 1.1 86/09/25 Copyr 1985 Sun Micro"
+c	.even
+c	.text
+
+c	Copyright (c) 1985 by Sun Microsystems, Inc.
+
+	real function FFlogapprox (x)
+	real x
+c	FFlogapprox computes loge(1+x)
+c	for 2**-0.5 <= x <= 2**+0.5
+	real s1, s2, s3
+	parameter ( s1 = 0.66666948800000000e+00 )
+	parameter ( s2 = 0.39965793500000000e+00 )
+	parameter ( s3 = 0.30100327700000000e+00 )
+	real z, z2
+
+	z = x/(2.0+x)
+	z2 = z * z
+	FFlogapprox = x - z * ( x - z2 * ( s1 + z2 * (s2  + z2 * s3)))
+	end
+
+	integer function FFgetexp(x)
+	real x
+c	FFgetexp computes an approximation
+c	to the unbiased exponent of x = log(x)/log(2)
+
+	integer ikluge
+	real rkluge
+	equivalence (ikluge,rkluge)
+	
+	rkluge = x
+	FFgetexp = ikluge/8388608 - 127
+	end
+
+	real function FFtwoton ( n )
+	integer n
+c	FFtwoton computes 2**n
+
+	integer ikluge
+	real rkluge
+	equivalence (ikluge,rkluge)
+
+	ikluge = 8388608 * (n + 127)
+	FFtwoton = rkluge
+	end
+
+	real function FFlogs(x)
+	real x
+c	FFlogs computes loge(x)
+
+	real p, FFtwoton, FFlogapprox
+	integer FFgetexp, n
+	real maxnorm, minnorm, sqrt2, sqrthalf
+	real loge2a, loge2b, xn
+	parameter (maxnorm = 1.701411733192644299e+38)
+	parameter (minnorm = 1.175494350822287508e-38)
+	parameter (sqrt2 =   1.414213538169860840)
+	parameter (sqrthalf= 7.071067690849304199e-1)
+	parameter (loge2a =  6.931457519531250000e-1)
+	parameter (loge2b =  1.428606765330187045e-6)
+
+	if ((x .gt. sqrthalf) .and. (x .le. sqrt2)) then
+		FFlogs = FFlogapprox(x-1.0)
+	elseif ((x .ge. minnorm) .and. (x .le. maxnorm)) then 
+		n = FFgetexp(x)
+		p = x * FFtwoton(-n)
+		if ( p .gt. sqrt2) then
+			p = 0.5 * p
+			n = n + 1
+		endif
+		xn = n
+		FFlogs = xn * loge2a + (xn * loge2b + FFlogapprox(p-1.0))
+	else
+		FFlogs = log(dble(x))
+	endif
+	end
+
+	real function FFlog1s(x)
+	real x
+c	FFlogs computes loge(1+x)
+
+	real FFlogapprox, FFlogs
+	real twom25, sqrthalfm1, sqrt2m1, sqrteighthm1
+	parameter (twom25     = 2.980232238769531250e-8)
+c	twom25 = 2**-25 = 33 00 00 00
+	parameter (sqrteighthm1 = -6.464465856552124023e-1)
+	parameter (sqrthalfm1 = -2.928932309150695801e-1)
+	parameter (sqrt2m1    =  4.142135679721832275e-1)
+	real loge2a, loge2b
+	parameter (loge2a =  6.931457519531250000e-1)
+	parameter (loge2b =  1.428606765330187045e-6)
+
+	if (abs(x) .lt. twom25) then
+		FFlog1s = x
+	else if (x .gt. 0.0) then
+		if (x .le. sqrt2m1) then
+			FFlog1s = FFlogapprox(x)
+		else
+			FFlog1s = FFlogs(1.0+x)
+		endif
+	else
+		if (x .ge. sqrthalfm1) then
+			FFlog1s = FFlogapprox(x)
+		else if (x .ge. sqrteighthm1) then
+			FFlog1s = (FFlogapprox(2.0*(x+0.5)) - loge2b) - loge2a
+		else
+			FFlog1s = FFlogs(1.0+x)
+		endif
+	endif
+	end

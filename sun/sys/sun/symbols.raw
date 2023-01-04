@@ -1,0 +1,173 @@
+#      @(#)symbols.raw 1.1 86/10/02 SMI
+#ps
+	_proc
+	_Usrptmap
+	_usrpt
+	_text
+	_nswap
+	_maxslp
+	_ccpu
+	_ecmx
+	_nproc
+	_ntext
+	_dmmin
+	_dmmax
+#w
+	_proc
+	_swapdev
+	_Usrptmap
+	_usrpt
+	_nswap
+	_avenrun
+	_boottime
+	_nproc
+	_dmmin
+	_dmmax
+#iostat
+	_dk_busy
+	_dk_time
+	_dk_xfer
+	_dk_wds
+	_tk_nin
+	_tk_nout
+	_dk_seek
+	_cp_time
+	_dk_bps
+	_hz
+	_mbdinit
+#vmstat
+	_cp_time
+	_rate
+	_total
+	_deficit
+	_forkstat
+	_sum
+	_firstfree
+	_maxfree
+	_boottime
+	_dk_xfer
+#	_rectime
+#	_pgintime
+	_hz
+	_mbdinit
+#dmesg
+	_msgbuf
+#pstat
+	_inode
+	_text
+	_proc
+#	_dz_tty
+#	_dz_cnt
+	_cons
+	_file
+	_Usrptmap
+	_usrpt
+	_nswap
+	_swapmap
+#	_dh11
+#	_ndh11
+	_nproc
+	_ntext
+	_nfile
+	_ninode
+	_nswapmap
+	_pt_tty
+	_dmmin
+	_dmmax
+	_nswdev
+	_swdevt
+#	_dmf_tty
+#	_ndmf
+	_npty
+#	_dhu_tty
+#	_ndhu
+	_zs_tty
+	_nzs
+	_Sysmap
+#netstat
+	_mbstat
+	_ipstat
+	_tcb
+	_tcpstat
+	_udb
+	_udpstat
+	_rawcb
+	_Sysmap
+	_Syssize
+	_ifnet
+#	_hosts
+	_rthost
+	_rtnet
+	_icmpstat
+	_rtstat
+#nfsstat
+	_rcstat
+	_clstat
+	_rsstat
+	_svstat
+	_ndstat
+#savecore
+	_dumpdev
+	_dumplo
+	_time
+	_dumpsize
+	_version
+	_panicstr
+	_dumpmag
+#rwhod
+	_avenrun
+	_boottime
+#analyze
+	_proc
+	_usrpt
+	_Usrptmap
+	_firstfree
+	_maxfree
+	_text
+	_freemem
+	_cmap
+	_ecmap
+	_swapmap
+	_nproc
+	_ntext
+	_nswapmap
+	_dmmin
+	_dmmax
+	_dmtext
+#route
+	_rthost
+	_rtnet
+#rstatd
+	_cp_time
+	_sum
+	_ifnet
+	_dk_xfer
+	_boottime
+	_avenrun
+	_hz
+#in.routed
+	_ifnet
+#arp
+	_arptab
+	_arptab_size
+#gcore
+	_proc
+	_Usrptmap
+	_usrpt
+	_nswap
+	_nproc
+	_dmmin
+	_dmmax
+#kgmon
+#	_Sysmap
+#	_Syssize
+#	_froms
+#	_profiling
+#	_s_lowpc
+#	_s_textsize
+#	_sbuf
+#	_ssiz
+#	_tos
+#trpt
+#	_tcp_debug
+#	_tcp_debx

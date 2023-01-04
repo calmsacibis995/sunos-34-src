@@ -1,0 +1,15 @@
+#	nd.local	1.1	86/09/25
+#
+# nd.local - net disk local initialization file
+# 
+# Commands (see nd(4) for details):
+#
+# son
+# soff
+# user [ipaddr] [hisunit] [mydev] [myoff] [mysize] [mylunit]
+# ether [ipaddr] [etheraddr]
+# clear
+# version [versionnumber]
+#
+clear
+version 1

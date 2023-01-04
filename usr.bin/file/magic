@@ -1,0 +1,41 @@
+#
+#	@(#)magic 1.1 86/09/25 SMI; from S5R2 1.7
+#
+#		file cmd's magic file
+#
+#
+#	Basically, the fields of this file are as follows:
+#	byte offset, value type, optional operator (= by default), value
+#	to match (numeric or string), and string to be printed.  Numeric
+#	values may be decimal, octal, or hex.  Also note that the last
+#	string may have 1 printf format spec.
+#	The '>' in occasional column 1's is magic: it forces file to
+#	continue scanning and matching additional lines.  The first line
+#	afterwards not so marked terminates the search.
+#
+0	short		070707		cpio archive
+0	short		0143561		byte-swapped cpio archive
+0	string		070707		ASCII cpio archive
+0	long		0177555		very old archive
+0	short		0177545		old archive
+0	long		0100554		APL workspace (Ken's original?)
+0	long		0101555		PDP-11 single precision APL workspace
+0	long		0101554		PDP-11 double precision APL workspace
+0	long		0101557		VAX single precision APL workspace
+0	long		0101556		VAX double precision APL workspace
+0	short		017437		old packed data
+0	string		\037\036	packed data
+0	string		\377\037	compacted data
+0	string		\037\235	compressed data
+>2	byte&0x80	>0		block compressed
+>2	byte&0x1f	x		%d bits
+0	string		<ar>		System V Release 1 archive
+0	string		!<arch>\n__.SYMDEF	archive random library
+0	string		!<arch>		archive
+0	long		0x1010101	MMDF mailbox
+0	string		<!OPS		Interleaf ASCII document
+# version number follows, in the form <!OPS, Version n.n>
+0	string		%!		PostScript document
+# version ID follows, in the form PS-Adobe-nn
+0	string		Interpress/Xerox	Interpress document
+# version ID follows, in the form /n.n

@@ -1,0 +1,16 @@
+c       .data
+c       .asciz  "@(#)FWsinhs.fw 1.1 86/09/25 Copyr 1985 Sun Micro"
+c       .even
+c       .text
+
+c       Copyright (c) 1985 by Sun Microsystems, Inc.
+
+	real*4 function FWsinhs ( x )
+	real*4 x,t
+	if (abs(x) .lt. 0.5) then
+		FWsinhs = sinh(dble(x))
+	else
+		t = exp(x)
+		FWsinhs = 0.5*(t-1.0/t)
+	endif
+	end

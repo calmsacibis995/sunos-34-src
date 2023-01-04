@@ -1,0 +1,9 @@
+#! /bin/sh
+#
+# @(#)software.sizing.script 1.1 86/09/25 SMI; from UCB X.X XX/XX/XX
+#
+arch=$1
+cd /sys/dist/exclude.lists
+files=`ls usr.* | sed -e /usr.sys/d`
+/sys/dist/disk_usage -s -t -a $arch /proto/usr $files
+/sys/dist/disk_usage -s -p 30 -a $arch /proto root.pub

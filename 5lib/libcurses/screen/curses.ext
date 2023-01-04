@@ -1,0 +1,21 @@
+/*	@(#)curses.ext 1.1 86/09/24 SMI; from S5R2 1.1	*/
+
+/*
+ * External variables for the library
+ *
+ * @(#)curses.ext	1.2 (Berkeley) 3/5/81
+ */
+
+/* LINTLIBRARY */
+
+# define CURSES	/* We are internal to curses */
+
+# ifdef NONSTANDARD
+#  include "RecStruct.h"
+#  include "VTio.h"
+# endif ITC
+
+# include "curses.h"
+# include "term.h"
+# include "curshdr.h"
+# include "unctrl.h"

@@ -1,0 +1,53 @@
+#! /bin/sh
+#
+# @(#)xtr_client 1.1 86/09/25 SMI; from UCB X.X XX/XX/XX
+#
+#
+# Make 1st diskless user
+# Get the files from the tape
+#
+if [ $# != 4 ]; then
+	echo Usage: $0 to_ndl tapedev fsf blocksize
+	exit
+fi
+
+to_ndl=$1
+tapedev=$2
+fsf=$3
+bs=$4
+
+if [ "$tapeserver" != "" ]; then
+	remote="rsh $tapeserver"
+fi
+
+#
+# At this point (examples in parens),
+#   to_ndl      - full name of nd logical partition to copy to (/dev/ndl5)
+#   tapedev     - raw tape device (/dev/rst0)
+#   fsf         - fsf this many files to get to the client image (8)
+#   bs		- blocksize for this tape (126)
+#
+
+#
+# Make a file system for the client and extract the files
+# from the tape.
+#
+set -x
+mkdir /nd.root
+/etc/mount $to_ndl /nd.root
+cd /nd.root
+$remote mt -f $tapedev rew
+$remote mt -f $tapedev fsf $fsf
+if [ "$tapeserver" = "" ]; then
+	tar xpfbv $tapedev $bs
+else 
+	$remote -n dd if=$tapedev bs=${bs}b | tar xpfBv -
+fi
+if [ $? != 0 ]; then
+	exit 13
+fi
+$remote mt -f $tapedev rew
+cd /
+/etc/umount $to_ndl
+rm -rf /nd.root
+sync

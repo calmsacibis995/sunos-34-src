@@ -1,0 +1,330 @@
+.\" @(#)loopbackusr.msun 1.1 86/09/25 SMI;
+.\" ******************** beginning of Title Page ***********************
+.LP
+.B
+.ps 14
+.nf
+SUN  Microsystems
+.sp 14
+.ce 100
+.ps 20
+\fIloopback\fP
+.sp 2
+Serial Port Diagnostic
+.sp 3
+.ps 20
+User's Document
+.sp 3
+.ps 14
+Part Number 750-1010-01
+.sp 14
+.ps 14
+Steven Cavin
+.sp 2
+.sp 2
+.\"
+.\" I: The appropriate revision letter replaces "A" below.
+.\"
+Revision 50
+.ce 0
+.fi
+.\" *********************** end of Title Page **************************
+.\" 
+.\" 
+.\" ******************** beginning of document *************************
+.R
+.bp 1
+.ps 12
+.EH 'SUN  Microsystems''Systech Diagnostic'
+.OH 'SUN  Microsystems''Systech Diagnostic'
+.\" 
+.\" I: The appropriate revision letter replaces "A" in the two lines 
+.\" I: below.
+.\" 
+.EF '\*(DY'Revision 50'page \\\\n(PN'
+.OF '\*(DY'Revision 50'page \\\\n(PN'
+.P1
+.H 1 "Preface"
+.PP
+This test is the first level data test for any serial device under 
+.UX.
+It verifies
+that data can be written to and read from a given port reliably.
+
+.H 2 "Purpose"
+.PP
+This test identifies those ports which can succesfully write data out to the
+loopback and then read it back.
+
+.H 2 "Audience"
+.PP
+Anyone who wants to know if a given serial port is working may use this test
+to verify function.
+
+.H 1 "Revision History"
+.LP
+Revision 01 April 1,1985	Initial release of this document.
+.LP
+Revision 02 May 22,1985		Initial release of this document.
+.LP
+Revision 50 June 12, 1985	Engineering Release of this document.
+.\"
+.H 1 "Glossary"
+.\"
+
+serial port:  a channel or connection which allows the transmission of stream
+of bits which can be re-combined into characters.
+
+RS-232:  a popular standard interface for serial ports
+
+loopback plug:  a DB25(RS-232) connector with its inputs wired into its
+outputs, causing output data to "loop" back as input when connector is plugged
+in.
+.H 1 "Introduction"
+.PP
+This test will test any serial device by name, sending data and reading it back one
+byte at a time.
+.H 1 "Requirements"
+.PP
+.H 2 "Hardware Requirements"
+.PP
+A loopback connector should be installed (plugged in!) on each port to be
+tested.  Ports can be ignored without hanging the test.  Ports not equipped
+with loopback connectors are reported as "not responding".
+.H 2 "Software Requirements"
+.PP
+This test runs under 
+.UX.  
+In order to avoid conflicts with 
+.UX
+login or
+shell processing,  the user should change the status in the "etc/ttys" file
+to "0" for each port to be tested.  Then (as superuser) type "kill -1 1" to 
+tell 
+.UX
+to reload the new ttys file you've just created. Failure to do this will cause 
+.UX
+to "steal" characters in its attempt to process commands, and the test will 
+fail.
+.H 2 "Firmware Requirements"
+.PP
+Test runs under 
+.UX 
+and does not directly access the firmware.
+.H 1 "General Information"
+.PP
+.H 2 "Hardware-Related Information"
+.PP
+The serial ports are located on the back of the machine and are typically
+labeled "Serial" or "RS-232" followed by a letter (CPU board) or number
+(Systech or other expansion board).  Loopback plugs or fixtures should be
+plugged on before running the test.
+
+.H 2 "Software-Related Information"
+.PP
+The name of a given serial port is determined by its device name in the
+"/dev" directory.  For example, the first RS-232 port on the CPU board is
+called "/dev/ttya", the first RS-232 port on the Systech MTI 800B/1600B is
+called "/dev/tty00".
+
+.H 1 "Operating Instructions"
+.PP
+.H 2 "Loading And Starting"
+.PP
+Type "loopback" followed by the name of the source device followed by the
+name of the receiving device.  Data will be sent to the source device and
+read from the receiving device.  If only a source device name is entered,
+the receiving device will be the same as the source (single loopback).
+For example,
+loopback /dev/tty00" would test port 0 of the systech board, looping back to
+itself.  Typing "loopback /dev/tty00 /dev/tty07" would send the test data to 
+port 0 on the Systech board and read it back from port 7 (double loopback connection).
+There are special names (listed below) which indicate a group of ports.  Typing
+"loopback all" would test all 16 ports (tty00-tty0f) on the Systech board.
+
+.H 2 "User Interface"
+.PP
+.H 3 "Command Line"
+.PP
+The form of the command line is:
+.IP " " 8
+"loopback <source> <receiver>"
+.IP " " 8
+source => full name of source device
+.IP " " 10
+e.g. "/dev/ttya" or "/dev/tty00-07"
+.IP " " 8
+receiver => full name of receiver device
+.IP " " 10
+(in the case of paired loopback cable)
+.IP " " 10
+e.g. "/dev/ttyb" or "/dev/tty07,02,04"
+.PP
+If no receiver is given, it is assumed to be the 
+same as the source.  If a range is given, a table
+of device names is constructed.  The same applies to
+a list.  Construction  uses the full root, replacing
+each instance with the number of bytes given in the
+range or list.  Example:
+.IP " " 8
+"/dev/tty00-3"
+.LP
+expands to:
+.IP " " 8
+/dev/tty00
+.IP " " 8
+/dev/tty01
+.IP " " 8
+/dev/tty02
+.IP " " 8
+/dev/tty03
+
+and
+.IP " " 8
+"/dev/tty00,2,7,11"
+.LP
+expands to:
+.IP " " 8
+/dev/tty00
+.IP " " 8
+/dev/tty02
+.IP " " 8
+/dev/tty07
+.IP " " 8
+/dev/tty11
+.PP
+In addition, some special keys are provided:
+.DS
+	single8	(first 8 systech ports)
+	single14(first 14 systech ports)
+	double8 (same as single8, but double port loop)
+	double14(same as single14, double port loop)
+	all (all 16 systech ports, single loopback)
+	pairs (all 16 systech ports, double loop)
+.DE
+.PP
+These special names are expanded into lists and then processed just as though
+the list had been entered.  The translation of the above special names is:
+.DS
+	"single8","/dev/tty00-7","dev/tty00-7",
+	"single14","/dev/tty00-9,a-d","/dev/tty00-9,a-d",
+	"double8","/dev/tty00-7","dev/tty07,2,1,4,3,6,5,0",
+	"double14","/dev/tty00-9,a-d","/dev/tty07,2,1,4,3,6,5,0,d,a,9,c,b,8",
+	"all","/dev/tty00-9,a-f","/dev/tty00-9,a-f",
+	"pairs","/dev/tty00-9,a-f","/dev/tty07,2,1,4,3,6,5,0,f,a,9,c,b,e,d,8",
+.DE
+.H 3 "Modes"
+.PP
+There are only 2 modes, pairs and single.  Pairs mode uses a loopback
+connector which allows data to be sent to one port and received by
+another. In single mode, the data is sent and received by the same port.
+The mode is determined by the number of devices named on the command line.
+If two names are given, the first becomes the source and the second becomes
+the receiver.  If only one name is given, it becomes both source and receiver.
+.H 3 "Parameters"
+.PP
+There are two parameters, the names of the devices to be tested.
+.H 3 "Tools"
+.PP
+The tools required are the loopback connectors, cables, or fixtures used
+to provide the physical connection between pins 2 and 3, 4 and 5, and
+6 and 20 on the ports under test.
+.H 3 "Test"
+.PP
+The test opens the port as a serial device, sets the mode to RAW (unprocessed)
+input and output, and sends the pattern 0x00 through 0xff.  After each byte
+is written, the test attempts to read it back, and compares it to the written
+byte.  If the data is not there or does not match, test stops and status is
+reported.
+.H 3 "Sequencing"
+.PP
+Sequence is not important.  Ports may be tested in any order.
+.H 3 "Defaults"
+.PP
+No default is provided.  If the test is run without parameters (no source or device
+name entered) the test prints the acceptable forms to enter and then exits.
+.H 1 "Error Handling"
+.PP
+The "siodat" function within the test will stop on four conditions:
+.RS
+.IP 1)
+device does not exist
+.IP 2)
+device does not respond
+.IP 3)
+data does not match
+.IP 4)
+test completed successfull (end of pattern)
+.RE
+The test may be cancelled at any time by typing <ctrl-C><return>.
+.H 2 "Message Interpretation"
+.PP
+.RS
+.IP 1)
+(device name) not found. Check "/dev" directory.  -  The device name requested
+does not exist in the /dev directory.  Remember if you are not already in the
+/dev directory you must specify the full name (e.f. /dev/tty00).
+.IP 2)
+(device name) does not respond. Check loopback connector.  -  Data was sent out
+but nothing came back.  Port may be broken or loopback connector may not be
+there.
+.IP 3)
+(device name) data does not match.  Wrote: nnH  Read: xxH:  Xor: yyH  -  Data which was read back was different that the data sent.  Xor lists bits that were
+different.  Could be noisy line, framing error, or bad baud rate generator.
+.IP 4)
+(device name) tested OK.  -  Good!  Entire sequence 0x00 -0xff was written and
+read back successfully.
+.RE
+.PP
+.H 2 "Field Replaceable Units"
+.PP
+Once a port has been identified as defective, it may be effective to simply
+replace the cable which connects the port to the board.  If this fails, the
+board which contains the USART for that port must be replaced.
+.H 1 "Recommended Test Procedure"
+.PP
+Edit the "/etc/ttys" file first, changing the first number to "0" for each device (port)
+you intend to test.  This will prevent interference from 
+.UX.  
+You may wish to save
+a copy of the file before editing so that the original version can be restored by
+a simple copy rather than editing it twice.  Then (as superuser) type "kill -1 1" to 
+tell 
+.UX
+to reload the new ttys file you've just created.
+.PP
+Place the looback connectors on all ports to be tested.  If you don't have enough
+loopbacks, you will need to run the test, move the connectors, and run the test again.
+If a port is reported bad, check first to see if the loopback connector is completely
+plugged on and that none of the wires have been pulled loose.  Often, the port is good
+but the loopback is broken or misplaced.
+.H 1 "Future Considerations"
+This test will eventually be integrated into the "sysdiag" system test.
+.H 1 "Summary"
+.PP
+This test tests serial ports by name.  It is a data test only and does not necessarily
+exercise the control/handshaking signals of the port under test.  The data is sent
+and then read back one byte at a time, beginning with 0x00 and ending with 0xFF.  While
+the test is in operation, the port being tested cannot be used.  The test can be safely
+cancelled at any time by typing <ctrl-c>.
+.H 1 "References"
+.DS
+System Interface Manual for the Sun Workstation
+Revision E, 7 January 1984
+Section (2) System Calls
+Section (4) Special Files
+.DE
+.\"
+.\" I: For each reference, (1) add a line containing ".LP".  Then (2)
+.\" I: add a line containing "title, Revision x, MD,Y, author." where
+.\" I: "title" is replaced by the title of the referenced document,
+.\" I: "x" is replaced by the appropriate revision of the document,
+.\" I: "MD,Y" is replaced by the date when the document was released and
+.\" I: "author" is replaced by the author of the document (if known).
+.\" I: SUGGESTION: Put the entries in alphabetical order by title.
+.\" I: For example:
+.\"    .LP
+.\"    Theory of Operation Manual for the Sun-2/120' Video Board, 
+.\"    Revision A, September 26, 1984.
+.\"
+.\"  end of document 

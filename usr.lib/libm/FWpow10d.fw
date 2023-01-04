@@ -1,0 +1,20 @@
+c       .data
+c       .asciz  "@(#)FWpow10d.fw 1.1 86/09/25 Copyr 1985 Sun Micro"
+c       .even
+c       .text
+
+c       Copyright (c) 1985 by Sun Microsystems, Inc.
+
+	real*8 function FWpow10d ( x )
+	real*8 x,dix,z
+	integer ix
+	if (abs(x) .lt. 308.5d0) then
+	ix = nint(x)
+	dix = ix
+	z = 10.0d0 ** ix
+	if (x .ne. dix) z = z * exp( (x-dix) * 2.30258 50929 94045 68401 79914 d0)
+	else
+	z = exp(x * 2.30258 50929 94045 68401 79914 d0)
+	endif
+	FWpow10d = z
+	end

@@ -1,0 +1,30 @@
+The  dpy  directory contains source for the graphics support in the ROM
+monitor.  This support provides terminal emulation which appears like a mix
+of the Tek 4014 (for graphics applications) and an ANSI standard terminal
+(ANSI X3.64, Additional Controls for Use with ASCII).
+
+The character font is in subdirectory "gallant", which is the name of the
+font.  It was designed by hand by Vaughan Pratt.  
+
+The font is not stored in ROM in its full-blown form; rather, it is compressed
+by eliminating duplicated rows and by packing the bits together (only 12 bits
+per row are used, tho 16 are stored in the uncompressed form).  The "compress"
+and "expand" programs are used to transform the font.
+
+Compress simply #includes the original font file, and contains code which
+creates gallmash.c, which defines the compressed font, complete with SCCS
+header comments and such.  Expand includes both the original and compressed
+font files, expands the compressed one into RAM, and compares the two.
+
+The compressed font file (the gallmash.c file output by compress) is the one
+which is included by the actual ROM code.
+
+The textual output code has been hand-optimized to operate at high speeds
+in order that we can keep up at high baud rates in transparent mode, and to
+generally avoid wasting time while filling the screen with direct 68000
+output.  If you make extensive changes, or move to a new compiler, it would
+be a good idea to look at the generated code from <fwritechar> on down,
+and figure the path length.  Try to avoid multiplies in the inner loop --
+I did and it went from 2400 to 9600 baud.
+
+@(#)README 1.1 83/09/16 Copyright (c) 1983 by Sun Microsystems, Inc.

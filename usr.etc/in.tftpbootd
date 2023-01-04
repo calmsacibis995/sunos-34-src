@@ -1,0 +1,5 @@
+#! /bin/sh
+# @(#)in.tftpbootd 1.1 86/09/25 Copyright (c) 1986 Sun Microsystems, Inc.
+# This provides a slightly more "secure" tftp server for
+# booting only.  Copy in.tftpd into /tftpboot and ln -s . tftpboot.
+exec /usr/etc/chroot /tftpboot /in.tftpd $1

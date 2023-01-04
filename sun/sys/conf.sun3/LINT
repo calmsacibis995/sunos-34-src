@@ -1,0 +1,128 @@
+#
+# LINT SUN3 (a dusty old bird used for type checking)
+#
+machine		"sun3"
+cpu		"SUN3_160"	# (Sun-3/160 or Sun-3/75 cpu)
+cpu		"SUN3_50"
+cpu		"SUN3_260"
+cpu		"SUN3_110"
+cpu		"SUN3_60"
+ident		GENERIC
+timezone	8 dst
+maxusers	4
+options		INET
+options		SYSACCT
+options		QUOTA
+options		NFS
+options		NIT
+#options	PUP		# not supported
+options		PCFS
+options		IPC		#(temporary)::required for any IPC support
+options		IPCMESSAGE	# SystemV IPC Message Facility
+options		IPCSEMAPHORE	# SystemV IPC Semaphore Facility
+options		IPCSHMEM	# SystemV IPC Shared-Memory Facility
+
+config		vmunix		swap generic
+
+pseudo-device	pty
+pseudo-device	bk
+pseudo-device	ether
+pseudo-device	loop
+pseudo-device	nd
+pseudo-device	win128
+pseudo-device	dtop4
+pseudo-device	ms3
+pseudo-device	kb3
+
+# connections for machine type 1 (SUN3_160)
+controller	virtual 1 at nexus ?
+controller	obmem 1 at nexus ?
+controller	obio 1 at nexus ?
+controller	vme16d16 1 at nexus ?
+controller	vme24d16 1 at nexus ?
+controller	vme32d16 1 at nexus ?
+controller	vme16d32 1 at nexus ?
+controller	vme24d32 1 at nexus ?
+controller	vme32d32 1 at nexus ?
+
+# connections for machine type 2 (SUN3_50)
+controller	virtual 2 at nexus ?
+controller	obmem 2 at nexus ?
+controller	obio 2 at nexus ?
+
+# connections for machine type 3 (SUN3_260)
+controller	virtual 3 at nexus ?
+controller	obmem 3 at nexus ?
+controller	obio 3 at nexus ?
+controller	vme16d16 3 at nexus ?
+controller	vme24d16 3 at nexus ?
+controller	vme32d16 3 at nexus ?
+controller	vme16d32 3 at nexus ?
+controller	vme24d32 3 at nexus ?
+controller	vme32d32 3 at nexus ?
+
+# connections for machine type 4 (SUN3_110)
+controller	virtual 4 at nexus ?
+controller	obmem 4 at nexus ?
+controller	obio 4 at nexus ?
+controller	vme16d16 4 at nexus ?
+controller	vme24d16 4 at nexus ?
+controller	vme32d16 4 at nexus ?
+controller	vme16d32 4 at nexus ?
+controller	vme24d32 4 at nexus ?
+controller	vme32d32 4 at nexus ?
+
+# connections for machine type 7 (SUN3_60)
+controller	virtual 7 at nexus ?
+controller	obmem 7 at nexus ?
+controller	obio 7 at nexus ?
+
+controller	xyc0 at vme16d16 ? csr 0xee40 priority 2 vector xyintr 0x48
+controller	xyc1 at vme16d16 ? csr 0xee48 priority 2 vector xyintr 0x49
+disk		xy0 at xyc0 drive 0
+disk		xy1 at xyc0 drive 1
+disk		xy2 at xyc1 drive 0
+disk		xy3 at xyc1 drive 1
+controller	sc0 at vme24d16 ? csr 0x200000 priority 2 vector scintr 0x40
+disk		sd0 at sc0 drive 0 flags 0
+disk		sd1 at sc0 drive 1 flags 0
+tape		st0 at sc0 drive 32 flags 1
+disk		sd2 at sc0 drive 8 flags 0
+tape		st1 at sc0 drive 40 flags 1
+disk		sf0 at sc0 drive 8 flags 2
+controller	si0 at vme24d16 ? csr 0x200000 priority 2 vector siintr 0x40
+controller	si0 at obio ? csr 0x140000 priority 2
+disk		sd0 at si0 drive 0 flags 0
+disk		sd1 at si0 drive 1 flags 0
+tape		st0 at si0 drive 32 flags 1
+disk		sd2 at si0 drive 8 flags 0
+tape		st1 at si0 drive 40 flags 1
+disk		sf0 at si0 drive 8 flags 2
+device		zs0 at obio ? csr 0x20000 flags 3 priority 3
+device		zs1 at obio ? csr 0x00000 flags 0x103 priority 3
+device		mti0 at vme16d16 ? csr 0x620 flags 0xffff priority 4 vector mtiintr 0x88
+device		ie0 at obio ? csr 0xc0000 priority 3
+device		ie1 at vme24d16 ? csr 0xe88000 priority 3 vector ieintr 0x75
+device		le0 at obio ? csr 0x120000 priority 3
+controller	tm0 at vme16d16 ? csr 0xa0 priority 3 vector tmintr 0x60
+controller	tm1 at vme16d16 ? csr 0xa2 priority 3 vector tmintr 0x61
+tape		mt0 at tm0 drive 0 flags 1
+tape		mt1 at tm1 drive 0 flags 1
+controller	xtc0 at vme16d16 ? csr 0xee60 priority 3 vector xtintr 0x64
+controller	xtc1 at vme16d16 ? csr 0xee68 priority 3 vector xtintr 0x65
+tape		xt0 at xtc0 drive 0 flags 1
+tape		xt1 at xtc1 drive 0 flags 1
+device		gpone0 at vme24d16 ? csr 0x210000 priority 4 vector gponeintr 0xac
+device		cgtwo0 at vme24d16 ? csr 0x400000 priority 4 vector cgtwointr 0xa8
+device		cgfour0 at obmem 4 csr 0xff000000 priority 4
+device		cgfour0 at obmem 7 csr 0xff400000 priority 4
+device		bwtwo0 at obmem 1 csr 0xff000000 priority 4
+device		bwtwo0 at obmem 2 csr 0x100000 priority 4
+device		bwtwo0 at obmem 3 csr 0xff000000 priority 4
+device		bwtwo0 at obmem 4 csr 0xff000000
+device		bwtwo0 at obmem 7 csr 0xff000000 priority 4
+device		bwtwo1 at obmem 7 csr 0xff400000
+device		vpc0 at vme16d16 ? csr 0x480 priority 2 vector vpcintr 0x80
+device		vpc1 at vme16d16 ? csr 0x500 priority 2 vector vpcintr 0x81
+device		des0 at obio ? csr 0x1c0000
+device		fpa0 at virtual ? csr 0xe0000000

@@ -1,0 +1,45 @@
+#! /bin/sh
+#
+# @(#) ext_usrsys 1.1 86/09/25
+#
+# ext_opt archtype tapedev server
+#
+PATH=/bin:/usr/bin:/etc:/usr/etc:/usr/ucb:/usr/etc/upgrade
+
+CMDNAME=$0
+archtype=$1
+TAPE=$2
+SERVER=$3
+
+USAGE="usage: ${CMDNAME} archtype tapedev server"
+LIST="Sys Usr"
+
+if [ "$#" -lt 2 -o "$#" -gt 3 ]; then
+        echo "${CMDNAME}: incorrect number of arguments."
+        echo "${USAGE}" 
+        exit 1
+fi
+
+if [ "$TAPE" = "ar" -o "$TAPE" = "st" ]; then
+	tape_n=2
+	Sys="2,2"
+	Usr="2,5"
+	BS=126
+	ck_arch_tape ${archtype} ${tape_n} /dev/nr${TAPE}0 ${SERVER}
+elif [ "$TAPE" = "mt" -o "$TAPE" = "xt" ]; then
+	tape_n=1
+	Sys="1,9"
+        Usr="1,12"
+        BS=20
+fi
+#
+# extract Sys and Usr from release tape
+#
+for ITEM in ${LIST}; do
+           while : ; do
+		INFO=`eval echo '$'${ITEM}`
+                newf_skip=`echo ${INFO} | awk '{FS=","; print $2}'`
+                extract /dev/nr${TAPE}0 ${newf_skip} ${BS} ${ITEM} ${SERVER}
+		break
+	   done
+done

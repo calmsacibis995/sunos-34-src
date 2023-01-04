@@ -1,0 +1,91 @@
+#
+# @(#)Makefile.customer 1.1 86/09/25 SMI
+#
+
+BASE_FILES= basetools.h
+OTHER_FILES= othertools.h
+MOREOBJS=
+
+DESTDIR=
+CPUFLAG= -m68010
+
+DBX=
+CFLAGS=	-O -I. -I$(INCLUDE)
+CFLAGS_LOCAL=
+
+CFLAGS_NOT_ROI_DATA= $(CFLAGS) $(DBX) $(CFLAGS_LOCAL) $(CPUFLAG)
+
+LDFLAGS= ${DBX}
+
+LIBS=	${DESTDIR}/usr/lib/libtoolmerge.a\
+	${DESTDIR}/usr/lib/libsuntool.a\
+	${DESTDIR}/usr/lib/libsunwindow.a\
+	${DESTDIR}/usr/lib/libpixrect.a
+
+BASETOOLS_BIN=	suntools
+OTHERTOOLS_BIN=	othertools
+BASETOOLS_CMDS=`cat basetools.h | sed '/suntools_main/ d;/view_surface/ d; /demo/ d;s/"//; s/".*/\ \\\/; $ s/\\\//'`
+OTHERS= `cat othertools.h | sed '/view_surface/ d; /demo/ d;s/"//; s/".*/\ \\\/; $ s/\\\//'`
+BASE_DEMOS= `cat basetools.h | sed '/demo/ !d;s/"//; s/".*/\ \\\/; $ s/\\\//'`
+OTHERS_DEMOS= `cat othertools.h | sed '/demo/ !d;s/"//; s/".*/\ \\\/; $ s/\\\//'`
+BASE_INLIB= view_surface
+OTHERS_INLIB=
+
+
+all:  basetools othertools
+
+basetools: basetools.o ${LIBS} ${MOREOBJS}
+	cc ${LDFLAGS} -o suntools basetools.o ${MOREOBJS} ${LIBS} \
+	-ltermcap -lm -lrpcsvc
+	
+basetools.o:	toolmerge.c basetools.h
+	cc $(CFLAGS_NOT_ROI_DATA) -c toolmerge.c -DTOOLSLIST=\"basetools.h\"
+	mv toolmerge.o basetools.o
+	
+othertools:	othertools.o ${LIBS} ${MOREOBJS} 
+	cc ${LDFLAGS} -o othertools othertools.o ${MOREOBJS} ${LIBS} \
+	-ltermcap -lm -lrpcsvc
+		
+othertools.o:	toolmerge.c othertools.h
+	cc $(CFLAGS_NOT_ROI_DATA) -c toolmerge.c -DTOOLSLIST=\"othertools.h\"
+	mv toolmerge.o othertools.o
+	
+
+FRC:
+# non-existent so always younger
+
+install: install_base install_others
+		  
+install_base: 
+	-for i in ${BASETOOLS_BIN}; do \
+		install $$i ${DESTDIR}/usr/bin; \
+	done 
+	-for i in ${BASETOOLS_CMDS} ; do \
+		rm ${DESTDIR}/usr/bin/$$i; \
+		ln -s ${BASETOOLS_BIN} ${DESTDIR}/usr/bin/$$i; \
+	done
+	-for i in ${BASE_DEMOS}; do \
+		rm ${DESTDIR}/usr/demo/$$i; \
+		ln -s ../bin/${BASETOOLS_BIN} ${DESTDIR}/usr/demo/$$i; \
+	done
+	-for i in ${BASE_INLIB}; do \
+		rm ${DESTDIR}/usr/lib/$$i; \
+		ln -s ../bin/${BASETOOLS_BIN} ${DESTDIR}/usr/lib/$$i; \
+	done
+
+install_others:
+	-for i in ${OTHERTOOLS_BIN}; do \
+		install $$i ${DESTDIR}/usr/bin; \
+	done
+	-for i in ${OTHERS} ; do \
+		rm ${DESTDIR}/usr/bin/$$i; \
+		ln -s ${OTHERTOOLS_BIN} ${DESTDIR}/usr/bin/$$i; \
+	done
+	-for i in ${OTHERS_DEMOS}; do \
+		rm ${DESTDIR}/usr/demo/$$i; \
+		ln -s ../bin/${OTHERTOOLS_BIN} ${DESTDIR}/usr/demo/$$i; \
+	done
+	-for i in ${OTHERS_INLIB}; do \
+		rm ${DESTDIR}/usr/lib/$$i; \
+		ln -s ../bin/${OTHERTOOLS_BIN} ${DESTDIR}/usr/lib/$$i; \
+	done

@@ -1,0 +1,294 @@
+#! /bin/csh -f
+#
+#       @(#)memtop 1.1 9/25/86 Copyright 1985 Sun Micro
+#
+#	script to handle memory scanner and tester
+#
+set run_pmem
+set run_vmem
+set return = 0
+onintr finit
+set path=($path $SYSDIAG_DIRECTORY)
+@ pass = 1
+@ errors = 0
+@ error_limit = 5
+set mode 
+set test_args
+@ log_interval = 60
+set shoebox
+if ($?SHOEBOX_TEST) set shoebox = "shoebox "
+
+if ($?RUN_ON_ERROR) then
+  if ($RUN_ON_ERROR == enabled) then
+     set run_on_error
+  endif
+endif
+foreach arg ($argv) 
+  if ($arg == auto || $arg == select || $arg == verify || $arg == pmem || $arg == vmem) then
+    set mode = $arg
+  else if ($arg == test) then 
+    set testing 
+  else if ($arg == cf) then 
+    set make_core_file 
+  else 
+    set test_args = ($test_args $arg) 
+  endif 
+  if ($arg == d) set debug 
+  if ($arg == lt) set load_test 
+  if ($arg == re) set run_on_error 
+end 
+
+if ($mode == '') then
+  if ($?SYSDIAG_MODE) then
+    set mode = $SYSDIAG_MODE
+  endif 
+endif
+
+if ($?SHOEBOX_TEST && $mode == auto) set mode = select
+
+echo 'memtop: '$shoebox''$mode' mode.'
+
+if ($mode == verify) then
+  pmem v
+  vmem v
+  exit
+endif
+
+if ($mode == select) then
+  pmem v
+  if ($status == 0) then
+    set run_pmem
+    while (("$run_pmem" != y) && ("$run_pmem" != n))
+      echo -n 'pmem: Test physical memory ? '
+      set k = $<
+      set run_pmem = ($k)
+    end
+  else
+    set run_pmem = n
+  endif
+    
+  vmem v
+  set run_vmem
+  while (("$run_vmem" != y) && ("$run_vmem" != n)) 
+    echo -n 'vmem: Test virtual memory ? '
+    set k = $<
+    set run_vmem = ($k)
+  end 
+  
+  if ($TERM != sun) then     # if not sun workstation return with tests to run
+    if (($run_pmem == n) && ($run_vmem == n)) exit(0) # no tests
+    if (($run_pmem == y) && ($run_vmem == n)) exit(1) # run pmem
+    if (($run_pmem == n) && ($run_vmem == y)) exit(2) # run vmem
+    if (($run_pmem == y) && ($run_vmem == y)) exit(3) # run both
+  endif
+
+else 
+  if ($mode == vmem) then 
+    set run_pmem = n
+    set run_vmem = y   
+  else
+    if ($mode == pmem) then  
+      set run_pmem = y 
+      set run_vmem = n  
+    else
+      set run_pmem = y
+      set run_vmem = y
+    endif
+  endif
+endif
+
+if (($run_pmem == y) || ($run_vmem == y)) then
+   @ pass = 1
+   @ errors = 0
+   @ corefiles = 0
+   set logname=`nextlog vmem`
+   if ($run_pmem == y) then 
+     pmem sd $test_args & 
+   endif
+   if ($run_vmem == y) then
+     @ return =0 
+     @ lowMemory = 0
+     set end_vmem = no
+     if ($?debug || $?load_test) then
+       echo No sleep
+     else  sleep 60
+     endif
+     echo vmem: Started. `date` | tee $logname
+     set start_logged
+
+     if ($?LOG_PASS_MSG) then
+       set dt = `date`
+       set start_month = $dt[2]
+       @ d = $dt[3]
+       set hm = $dt[4]
+       @ h = `expr substr $hm 1 2`
+       @ m = `expr substr $hm 4 2`
+       @ aa = $m + $log_interval
+       while ($aa >= 60)
+         @ h = $h + 1
+         @ aa = $aa - 60
+       end
+       @ m = $aa
+       if ($h >= 24) then
+         @ d = $d + 1
+         @ h = $h - 24
+       endif
+       @ d = $d * 10000
+       @ h = $h * 100
+       @ log_time = $d + $h
+       @ log_time = $log_time + $m
+       set start_minute = $m
+       @ start_day = $d
+     endif
+   endif
+
+   while (1)
+     if ($run_vmem == y) then
+	set k=`pstat -s | egrep 'max\ ' | awk '{print $5}'` >& /dev/null
+#	set k = 1000k
+        if ($k != "") then
+	  vmem sd s=$k $test_args
+	  set return=$status
+	else set return = 3
+	endif
+	if ($?debug) echo Return status is $return
+        if ($?make_core_file) cp /dev/null core
+	if (-e core) then
+	  set corename=`nextlog core`
+	  mv core $corename
+	  @ corefiles++
+	  echo memtop: Corefile moved to "'$corename'". `date` \
+			| tee -a $logname
+	  if ($return !~ [6789] && ($corefiles == 3 || (!($?run_on_error)))) then
+	    if ($run_pmem == y) then
+               set k=`ps -a | egrep '\ pmem\ ' | awk '{print $1}'`
+               if ($?debug) echo Kill pmem job number = $k
+               if ($k != "") then
+		 kill -INT $k
+	       else set pmem_still_running
+	       endif
+	    endif
+	    goto finit
+	  endif
+	endif
+
+	if ($return == 20) goto finit  
+
+	if ($return =~ [3-5]) then
+           @ lowMemory++
+           if ($lowMemory > 99999) set end_vmem = yes
+        endif
+
+	if ($return =~ [6789] && $?run_on_error) then
+	  @ errors++
+	  set log_error_msg
+	  if ($corefiles < 3) set return = 0
+	endif
+
+	if (($return !~ [3-50]) || ($end_vmem == yes)) then
+		set reason = 'status = '$return'.'
+	   	if ($return == 3) set reason = 'could not allocate any memory.' 
+	   	if ($return == 4) set reason = 'insufficient memory available.' 
+	   	if ($return == 5) set reason = 'lost memory.' 
+	   	if ($return =~ [67]) set reason = 'compare error.'
+	   	if ($return == 8) set reason = 'bus error.' 
+	   	if ($return == 9) set reason = 'segmentation violation.' 
+		if ($return =~ [6789])  @ errors++
+		echo ERROR: vmem, $reason `date` | tee -a $logname
+                echo vmem: Stopped, pass $pass, errors $errors. `date` \
+                            | tee -a $logname
+		set run_vmem = n
+                if ($run_pmem == y) then 
+                  set k=`ps -a | egrep '\ pmem\ ' | awk '{print $1}'`
+                  if ($?debug) echo Kill pmem job number = $k
+                  if ($k != "") then
+		    kill -INT $k
+	          else set pmem_still_running
+	          endif
+		endif
+	        goto finit
+	else
+	  if ($return == 0) then
+            if ($?LOG_PASS_MSG) then
+              set dt = `date`
+              set current_month = $dt[2]
+              @ d = $dt[3]
+              set hm = $dt[4]
+              @ h = `expr substr $hm 1 2`
+              @ m = `expr substr $hm 4 2`
+              @ d = $d * 10000
+              @ h = $h * 100
+              @ current_time = $d + $h
+              @ current_time = $current_time + $m
+              if ($current_month != $start_month) then
+                @ log_time = 10000
+                set start_month = $current_month
+              endif
+              if ($current_time >= $log_time) then
+                set log_pass_msg
+                @ aa = $m + $log_interval
+                while ($aa >= 60)
+                  @ h = $h + 100
+                  @ aa = $aa - 60
+                end
+                if ($h >= 2400) then
+                  @ d = $d + 10000
+                  @ h = $h - 2400
+                endif
+                @ start_minute = $aa
+                @ start_day = $d
+                @ log_time = $d + $h
+                @ log_time = $log_time + $start_minute
+              endif
+            endif
+
+            if ($?log_pass_msg || $?log_error_msg) then
+              echo vmem: Pass $pass, errors $errors. `date` | tee -a $logname
+              unset log_pass_msg
+	      unset log_error_msg
+	      if ($errors >= $error_limit) then
+	        echo memtop: Error limit exceeded. `date` | tee -a $logname
+	        goto finit
+	      endif 
+	      set return = 0
+            else
+              echo vmem: Pass $pass, errors $errors.
+            endif
+
+   	    @ pass++
+
+            @ lowMemory = 0
+            if ($?SUN_MANUFACTURING) then
+              if ($SUN_MANUFACTURING == yes) then
+                echo vmem: Sleeping for $VMEM_WAIT_TIME minutes.
+                @ sleep_time = $VMEM_WAIT_TIME
+                @ sleep_time = $sleep_time * 60
+                sleep $sleep_time
+              endif
+            endif
+          else if (!($?debug)) sleep 2
+          endif   # if ($return == 0)
+	endif   # (($return !~ [3-50]) || ($end_vmem == yes))
+     else
+       sleep 60
+     endif              # if ($run_vmem == y)
+   end
+endif  # if (($run_pmem == y) || ($run_vmem == y))
+
+finit:
+   if ($run_vmem == y && $?start_logged) then
+       if (($pass == 1) && ($return =~ [3-5])) then
+	 set reason = 'status = '$return'.'
+         if ($return == 3) set reason = 'could not allocate any memory.' 
+         if ($return == 4) set reason = 'insufficient memory available.' 
+         if ($return == 5) set reason = 'lost memory.' 
+         echo vmem: Not run, $reason `date` | tee -a $logname
+       endif
+       echo vmem: Stopped, pass $pass, errors $errors. `date` | tee -a $logname
+   endif
+   if ($?pmem_still_running) then
+      onintr finit1
+      sleep 2000000000
+   endif
+finit1:
+if($TERM == sun) exec /bin/csh

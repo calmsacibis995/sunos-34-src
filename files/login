@@ -1,0 +1,3 @@
+stty dec
+set path=($path /etc /usr/etc)
+set noglob; eval `tset -Q -s`; unset noglob

@@ -1,0 +1,24 @@
+/*	@(#)sky_init.include 1.1 86/09/24 SMI	*/
+
+/*
+ * Copyright (c) 1983 by Sun Microsystems, Inc.
+ */
+
+	.globl	skyused, __skyinit, __skybase, skyvector
+sky_init:| the sky board has been directly accessed
+	| in this program -- make sure it is accessable.
+	jsr	__skyinit
+	tstl	d0
+	bnes	3f
+	pea	SZ
+	pea	1f
+	pea	2
+	jsr	_write
+	pea	99
+	jsr	__exit
+3:	jmp	skyvector
+skyused:	.asciz	"SKY board used in compiled code\012"
+1:	.asciz	"SKY board not available -- program requires it\012"
+	SZ	=	.-1b
+	.bss
+__skybase:	.=.+4

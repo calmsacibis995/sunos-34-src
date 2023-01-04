@@ -1,0 +1,14 @@
+#! /bin/sh -x
+cd ${DESTDIR}/usr/hosts
+rm -f [a-z]*
+if (ypcat hosts > /dev/null 2>&1 ) then
+	for i in `ypcat hosts | awk '!/^#/ {print $2}' `
+	do
+		ln -s /usr/ucb/rsh $i
+	done
+else
+	for i in `awk '!/^#/ {print $2}' ${DESTDIR}/etc/hosts`
+	do
+		ln -s /usr/ucb/rsh $i
+	done
+fi

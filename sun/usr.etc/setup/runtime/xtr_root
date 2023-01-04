@@ -1,0 +1,47 @@
+#! /bin/sh
+#
+# @(#)xtr_root 1.1 86/09/25 SMI; from UCB X.X XX/XX/XX
+#
+if [ $# != 3 ]; then
+	echo Usage: $0 tapedev fsf blocksize
+	exit 1
+fi
+tapedev=$1
+fsf=$2
+bs=$3
+
+if [ "$tapeserver" != "" ]; then
+	remote="rsh $tapeserver"
+fi
+
+#
+# At this point (examples in parens),
+#   tapedev     - raw tape device (/dev/rst0)
+#   fsf         - fsf this many files to get to the mini-root (6)
+#   bs		- blocksize to use on the tape (126)
+#   tapeserver	- may contain the name of a remote machine with a tape
+
+#
+# Extract the root files
+#
+set -x
+$remote mt -f $tapedev rew
+$remote mt -f $tapedev fsf $fsf
+cd /setup.root
+if [ "$tapeserver" = "" ]; then
+	tar xpfbv $tapedev $bs
+else 
+	$remote -n dd if=$tapedev bs=${bs}b | tar xpfBv -
+fi
+if [ $? != 0 ]; then
+	exit 13
+fi
+$remote mt -f $tapedev rew
+rm -rf usr
+
+#
+# Build some device files on the new root partition
+#
+cd /setup.root/dev
+./MAKEDEV std pty0 pty1 pty2 win0 win1 win2
+sync

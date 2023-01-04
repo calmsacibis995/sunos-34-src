@@ -1,0 +1,19 @@
+# !/bin/sh
+#
+#	Script written to convert 3.0fcs crontab to 3.2fcs crontab
+#
+#       @(#)  3.0crontab_3.2crontab 1.1 86/09/25
+#
+#       Copyright (c) 1986 by Sun Microsystems, Inc.
+#
+
+ed $1 <<NEW
+/nfsjunk/
+i
+7 2 * * * /usr/etc/fpa/fparel
+.
+/nfsjunk/
+s/nfsjunk/nfs/
+w
+q
+NEW

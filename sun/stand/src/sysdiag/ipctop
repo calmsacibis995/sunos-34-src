@@ -1,0 +1,162 @@
+#! /bin/csh -f
+#
+#       @(#)ipctop 1.1 9/25/86 Copyright 1985 Sun Micro
+#
+#	script to find ipc devices we want to test,
+#	and to (optionally) ask operator to approve list.
+#
+
+onintr finit
+set path=($path $SYSDIAG_DIRECTORY)
+set mode
+set test_args
+set shoebox  
+if ($?SHOEBOX_TEST) set shoebox = "shoebox "
+
+if ($?RUN_ON_ERROR) then
+  if ($RUN_ON_ERROR == enabled) then
+     set run_on_error
+  endif
+endif
+foreach arg ($argv)
+  if ($arg == auto || $arg == select || $arg == verify) then
+    set mode = $arg
+  else if ($arg == test) then 
+    set testing 
+  else if ($arg == cf) then
+    set make_core_file
+  else
+    set test_args = ($test_args $arg) 
+  endif 
+  if ($arg == d) set debug 
+  if ($arg == re) set run_on_error
+end 
+
+if ($mode == '') then
+  if ($?SYSDIAG_MODE) then
+    set mode = $SYSDIAG_MODE
+  endif 
+endif
+
+if ($?SHOEBOX_TEST && $mode == auto) set mode = select
+
+echo 'ipctop: '$shoebox''$mode' mode.'
+
+if ($TERM != sun && -e $SD_LOG_DIRECTORY/ipctop_selected) then
+  set usedev = (`cat $SD_LOG_DIRECTORY/ipctop_selected`)
+  if ($?debug) echo ipc\'s in select file - $usedev
+  rm -f $SD_LOG_DIRECTORY/ipctop_selected
+else
+
+  echo "ipctop: Probing for devices ..."
+
+  if ($?testing) then
+    set devs = (none ipc0 ipc2)
+    set devs = (none ipc0)
+    set devs = (none ipc0 ipc1 ipc2 ipc3)
+    set test_args = ($test_args us)
+  else
+
+    set devs= (none)
+
+#                            probe for ipc boards
+    foreach i (0 1 2 3)
+        if (-e /dev/pc${i}) then
+                set devs=($devs "ipc${i}")
+		if ($i == 0) then
+		  if ($?IPC_DISK_d3) set devs=($devs d0)
+		  if ($?IPC_PPORT_pp0) set devs=($devs pp0)
+		else if ($i == 1) then 
+		  if ($?IPC_DISK_d1) set devs=($devs d1)
+		  if ($?IPC_PPORT_pp1) set devs=($devs pp1)
+		else if ($i == 2) then  
+		  if ($?IPC_DISK_d2) set devs=($devs d2)
+		  if ($?IPC_PPORT_pp2) set devs=($devs pp2)
+		else if ($i == 3) then  
+		  if ($?IPC_DISK_d3) set devs=($devs d3)
+		  if ($?IPC_PPORT_pp3) set devs=($devs pp3)
+		endif
+        endif
+    end
+  endif
+
+  if ($#devs != 1) then
+     echo ipctop: Devices found - $devs[2-$#devs]
+  endif
+
+  if ("$mode" == verify) then
+    if ($#devs == 1) echo ipctop: No devices found, no tests to run.
+    exit
+  else
+
+    set devs=($devs[2-$#devs])
+
+    @ n=1
+    set usedev="k"
+    while($n <= $#devs)
+	if ("$mode" == select) then
+		set r
+		while ("$r" != y && "$r" != n)
+		  echo -n "ipctop: Test "$devs[$n]" ? "
+		  set k = $<
+		  set r = ($k)
+		end
+		if ($r == y) then
+		  set usedev=($usedev $devs[$n])
+		else
+		  if ($devs[$n] =~ ipc*) then
+		    @ nn = $n + 1
+		    if ($n < $#devs) then
+		      if ($devs[$nn] =~ [pd]*) @ n++
+		    endif
+		    @ nn = $n + 1
+		    if ($n < $#devs) then
+		      if ($devs[$nn] =~ [pd]*) @ n++
+		    endif
+		  endif
+		endif
+	else
+	  set usedev=($usedev $devs[$n])
+	endif
+	@ n++
+    end
+
+    if ($#usedev == 1) then
+        echo ipctop: No devices found, no tests to run.
+	if ($TERM == sun) then 
+          exec /bin/csh
+	else exit
+        endif
+    else
+      set usedev=($usedev[2-$#usedev])
+    endif
+  endif
+
+  if ("$mode" == select && $TERM != sun) then
+    echo $usedev >! $SD_LOG_DIRECTORY/ipctop_selected
+    exit(1)				# exit = run test
+  endif
+
+endif    #if ($TERM != sun && -e $SD_LOG_DIRECTORY/ipctop_selected)
+
+  set logname=`nextlog ipctop`
+  set return = 0
+  set start_logged
+  echo ipctop: Started on $usedev. `date` | tee $logname
+
+  if ($?debug) echo ipctest sd $usedev $test_args
+  ipctest sd $usedev $test_args
+  set return = $status
+  if ($?debug) echo Return status = $return
+
+finit: 
+
+  if ($?start_logged) then
+    if (!($return == 0 || $return == 20)) then
+      echo ipctop: Terminated abnormally. `date` | tee -a $logname
+    else
+      echo ipctop: Stopped. `date` | tee -a $logname
+    endif
+  endif
+
+if($TERM == sun) exec /bin/csh

@@ -1,0 +1,31 @@
+#!/bin/csh
+# @(#)version	1.1 (Sun) 9/25/86
+# Usage:
+#	version diffs
+# produces a list of diffs since the files in this
+# directory were checked in for release 3.2DEV3
+#	version get
+# retrieves the versions of the files in this
+# directory used to build release 3.2DEV3
+#
+if ($#argv == 1) then
+    set cmd = $argv[1]
+else
+    echo version "{diffs|get}"
+    exit(1)
+endif
+sccs $cmd -r1.13 Makefile
+sccs $cmd -r1.6 cg_ir.h
+sccs $cmd -r1.5 cg_main.c
+sccs $cmd -r1.6 debug.c
+sccs $cmd -r1.5 do_ir_archive.c
+sccs $cmd -r1.2 goff.c
+sccs $cmd -r1.5 intr_map.c
+sccs $cmd -r1.7 misc.c
+sccs $cmd -r1.2 onepass_init.c
+sccs $cmd -r1.3 onepass_proc.c
+sccs $cmd -r1.13 pcc.c
+sccs $cmd -r1.4 pcc_defines.h
+sccs $cmd -r1.5 pccfmt.c
+sccs $cmd -r1.6 read_ir.c
+sccs $cmd -r1.4 rewrite.c

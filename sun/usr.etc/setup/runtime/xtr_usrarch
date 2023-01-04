@@ -1,0 +1,105 @@
+#! /bin/sh
+#
+# @(#)xtr_usrarch 1.1 86/09/25 SMI; from UCB X.X XX/XX/XX
+#
+
+#
+# Extract the usr stuff
+#
+if [ $# != 6 ]; then
+	echo Usage: $0 server pub arch tapedev fsf blocksize
+	exit 1
+fi
+server=$1
+pubpart=/dev/$2
+arch=$3
+tapedev=$4
+fsf=$5
+bs=$6
+
+pub=pub.$arch
+usr=usr.$arch
+private=private.$arch
+
+if [ "$tapeserver" != "" ]; then
+	remote="rsh $tapeserver"
+fi
+
+#
+# At this point (examples in parens)
+#   server	- name of the server workstation
+#   pubpart     - full name of pub partition (/dev/xy0f)
+#   tapedev     - full name of no-rewind raw tape device (/dev/nrst0)
+#   fsf		- fsf this many files to get to the usr file on the tape (11)
+#   bs		- blocksize for this tape (126)
+#   arch	- name of this architecture (MC68010)
+#   pub		- name of pub directory for this architecture (pub.MC68010)
+#   usr		- name of usr directory for this architecture (usr.MC68010)
+#   private	- name of private directory for this arch (private.MC68010)
+
+#
+# Extract usr - go to a subdir for this architecture.
+#
+set -x
+cd /setup.root
+cd $usr
+mkdir $server
+$remote mt -f $tapedev rew
+$remote mt -f $tapedev fsf $fsf
+if [ "$tapeserver" = "" ]; then
+	tar xpfbv $tapedev $bs
+else 
+	$remote -n dd if=$tapedev bs=${bs}b | tar xpfBv -
+fi
+if [ $? != 0 ]; then
+	exit 13
+fi
+$remote mt -f $tapedev rew
+
+#
+# Put some boot blocks on the pub partition.
+#
+/usr/mdec/installboot /setup.root/$usr/mdec/bootnd $pubpart
+sync
+
+#
+# Setup private usr files
+#
+cd /setup.root
+mkdir $private
+PRIVATE="adm preserve spool tmp"
+mkdir $private/usr
+cd $usr
+tar cfv - $PRIVATE | (cd /setup.root/$private/usr; tar xfp -)
+rm -rf $PRIVATE
+for i in $PRIVATE
+do
+	ln -s ../$private/usr/$i $i
+done
+cd /setup.root
+sync
+
+#
+# Setup /private directory for private copies of things in /usr/lib
+#
+mkdir $private/usr/lib
+mkdir $private/usr/lib/uucp
+mkdir $private/usr/lib/news
+PRIVATE="aliases aliases.dir aliases.pag crontab"
+cd /setup.root/$usr/lib
+tar cfv - $PRIVATE | (cd /setup.root/$private/usr/lib; tar xfBp -)
+rm -rf $PRIVATE sendmail.cf
+for i in $PRIVATE sendmail.cf news uucp
+do
+	ln -s ../../$private/usr/lib/$i $i
+done
+
+#
+# Make some standard directories so clients will be able to do remote mounts
+#
+cd /setup.root/$usr
+mkdir games
+mkdir man
+mkdir src
+mkdir local
+sync

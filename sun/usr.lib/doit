@@ -1,0 +1,17 @@
+#! /bin/sh -x
+
+cd libcgi; make install; cd ..
+cd libcgi77; make install; cd ..
+cd libcore; make install; cd ..
+cd libcore77; make install; cd ..
+cd libcorepas; make install; cd ..
+cd libcorefp; make install; cd ..
+cd libg; make install; cd ..
+cd libpixrect; make devinstall; cd ..
+cd libsuntool; make install; cd ..
+cd libsunwindow; make install; cd ..
+cd rasfilters; make install; cd ..
+cd bb_count; make install; cd .. 
+cd iropt; make install; cd ..
+cd ilfiles; make install; cd ..
+install -s inline /usr/lib/inline

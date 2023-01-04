@@ -1,0 +1,338 @@
+.de SX		\" call 'so' something else so derof
+.so \\$1
+..
+.\" .SX /usr/lib/tmac/tmac.e
+.po 1.5i
+.nr PO 1.5i
+.hy 14		\" don't hyphenate in bad places
+.pn 1		\" start page number at 'A'
+.af % A
+.ds PN "\\\\n%
+.nr sf 3	\" set section headings in bold face
+.nr si 2	\" indent nested sections 2 spaces
+.de $0		\" macro to enter section heading in to table of contents
+.(x C
+.if (\\$3=1) .sp
+\\$2   \\$1
+.)x \\*(PN
+..
+.de [R		\" routine declaration
+.ds RC \\$1
+.sp
+.ne 10
+.(l L
+.fi
+.na
+..
+.de *Q
+.ds RM \\$1 \\$2
+\\*(RM
+..
+.de *R
+.ds RN \\$1
+.(x R
+\\*(RN - \\*(RC
+.)x
+\\$1
+..
+.de {R
+\\*(RN
+.nf
+.ad
+..
+.de [R
+.)l
+..
+.de }R
+..
+.de {E			\" possible errors sub-section
+.lp
+Possible errors:
+.nr ps 0n
+.LB \\(bu
+..
+.de }E
+.LE
+.nr ps 1n
+.lp
+..
+.de WP
+.lp
+\fb***\fp
+..
+.de IP
+.ip "\fB\\$1\fP"
+..
+.de EB
+.sp -1
+.nf
+\L'|\\$1-1'\h'-1n'\1'\\n(.lu'\h-1n'\L'-1\\$1+1'\1-\\ln(.lu'
+.fi
+..
+.nr ii 5
+.nr hm 3v
+.nr tm 6v
+.nr fm 4v
+.nr bm 7v
+.de $h
+.tl 'APPROVAL SECTION''\*(PN'
+..
+.de $f
+.tl '\*(td''DO NOT COPY'
+.tl 'SUN MICROSYSTEMS INC''COMPANY CONFIDENTIAL'
+..
+.bp
+.sp
+.ce 2
+\fBE X T E R N A L  S P E C I F I C A T I O N
+(User Perspective)
+.sp
+.\" Fill in you project's name in place of the dot below and elsewhere
+.\" in this file.
+TITLE	     : 	Sky diagnostic FFPUSR External Specification\fR
+.sp
+AUTHOR	     :	Sunny Kirsten
+.sp
+REPORT NO.   :
+.sp
+REVISION NO. :	@(#) ffpusr.txt 1.1 9/25/86
+.sp
+DATE         : \*(td	\"td=printing date if reformated
+.sp
+STATUS       :  Draft
+.sp 2
+.(l L
+APPROVALS    :						DATE
+.de SG			\" Macro to define signiture lines
+.ip "\\$1" 20n		\" Position and signiture line
+------------------------------------------------------------
+.br
+\\$2			\" Name Underneath
+..
+.SG "Originator:		Sunny Kirsten"
+.SG "Test Engineering"
+.SG "Manufacturing"
+.SG "Production"
+.SG "Quality Control"
+.)l
+.bp
+.(l L
+.ce
+Document Review Form
+.lp
+Please make note and initial on this page all corrections and/or
+proposed amendments by page number and/or section number.
+.sp
+.ce
+---------------------------------------------
+Recommendations, Differences, Construction Errors, and comments:
+.sp 36
+.ce 2
+---------------------------------------------
+Typographical Errors:
+.sp 4
+.ce 2
+---------------------------------------------
+Attach additional sheet(s) as needed.
+.)l
+.\" redefine headers for the body of the document
+.de $h
+.tl '. EXTERNAL SPECIFICATION ''
+.tl '(User\'s Perspective)''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fB. EXTERNAL SPECIFICATION\fR
+.sh 1 "INTRODUCTION"
+.sh 2 "Purpose"
+.\"	1.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+	The Sky board diagnostic FFPUSR is a component of SYSDIAG, and
+is used as a UNIX-based board test.  It is a quick
+Go/NoGo test of the Sky board hardware.  It is not intended to thoroughly
+exercise the Sky microcode, but instead focuses on functional testing
+of sufficient level as to reject an obviously bad piece of hardware.
+.sh 2 "Applicable Documents"
+.\"	1.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+	The Sun document 800-1104-01 describes the Sky board, and its
+installation in a Multibus system, and tells something of the Sky version
+of FFPUSR, and associated software.  This document is not needed to operate
+the program, though it would be useful if you wanted to decipher hardware
+bit patterns mentioned in error messages, to isolate problems within the
+Sky board. Since Sun does not repair these boards in-house,
+internal fault isolation is not intended.
+.sh 2 "Definitional Conventions"
+.\"	1.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 3 "Notations"
+.\"	1.3.1
+	FFP is an acronym for Fast Floating Point
+.sh 3 "Syntax"
+.\"	1.3.2
+.sh 3 "Terminology"
+.\"	1.3.3
+.sp 2
+.sh 1 "SYSTEM OVERVIEW"
+.\"	2.
+.sh 2 "General Description"
+.\"	2.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+	The Sky board diagnostic FFPUSR is a Sun customization of the
+Sky supplied f77 program FFPUSR.  The modifications by Sun added code
+to allow operation in a Go/No-Go environment, where the amount of user
+interaction was to be minimized, rather than the full manual control
+offered by the version supplied by Sky.
+.sh 2 "Features"
+.\"	2.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+	This program is typically used in board level test by executing
+the FFPUSR command a (Auto), for automatic test of the basic math
+functions, and simple context switch operations.  The system level test
+SYSDIAG uses FFPUSR with the commad d (Diagnose) in the devtest section.
+.sh 2 "Required Configuration"
+.\"	2.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+	The required configuration is a Sun system with one Sky board.  
+Installation details are contained in the referenced documentation.  Note that
+for Multibus, the connections on JP-01 should be 1-11, and on JP-02 should be
+1-3-6 and 4-5.  For actual use in a UNIX system, the file /dev/sky must
+exist.  The file /dev/sky must be removed for FFPUSR to operate correctly.  If
+/dev/sky exists, UNIX will believe it has use of the board.  When you run
+FFPUSR, it thinks it has use of the board.  If both occur simultaneously,
+then they will interfere with each other and the result will be a system crash.
+.sh 2 "Error Handling"
+.\"	2.4
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+	Errors are reported in messages directed to stdout.  Testing continues.
+.sh 2 "General Performance Characteristics"
+.\"	2.5
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+	The test will typically take on the order of 6 minutes to complete
+one error-free pass.
+.sh 2 "Planned Extensions"
+.\"	2.5
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+	For board-test usage, ffpusr will be replaced by skytest,
+a stand-alone program, not requiring UNIX as the current test does.
+.sh 2 "Limitations"
+.\"	2.7
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+	The existing test exercises only single precision add, subtract
+multiply, divide, and sine math functions, along with a simple
+"between-operations" context switch.  The program allows 1 bit of difference
+between the answers produced by the Sky board, and those of UNIX' floating
+point libraries.  It further allows 5e bits difference in the sine function.
+It also contends with the Sky board's handling of underflow towards zero.
+.sp 2
+.\" Replace the dot below with the name of the major component you are
+.\" describing.  Repeat the entire section for each of your major components.
+.\" The subsections below are some of the ones that may be applicable.
+.\" Delete the ones that do not apply, and add new ones as necessary.
+.sh 1 ". SPECIFICATION"
+.sh 2 "User Interface"
+.\"	3.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+	The user interface is based on menus and simple, one character
+commands.  The program prompts with a "?".  If the user replies with a "?",
+the program will display a command menu.  Since this is an extension of the
+Sky code, it includes all the low-level bit-fiddling commands Sky provided.
+The main command used by Sun is "a" for automatic testing
+which will produce error messages for any detected errors, and which
+produces a performance summary for each math operation, at the end of the test.	
+This command may be used only once per invocation of the program.
+.sh 2 "Input/Output"
+.\"	3.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+	Stdin and stdout are used for commands and program responses.  The
+program will expect to find the microcode files in the current directory.
+.sh 2 "Operation"
+.\"	3.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+	Login as root, rm /dev/sky, cd to the directory containing FFPUSR.
+Enter the command "ffpusr", and once the program loads and prompts with a "?",
+enter the command "a" to start the test.  After testing the registers,
+and then the RAM, the program will load the microcode into the board, and
+then test math functions,
+completing with a summary of bit differences between the Sky board and
+the UNIX floating point library.  It is normal to see the entry "1" for all
+the functions add, subtract, multiply, and divide.  Sine, however, may be
+up to 0x5e.  If any of these had been overlimit, there would have been
+error messages produced previously with full details.
+.sh 2 "Error Handling"
+.\"	3.4
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+	Errors are reported in messages directed to stdout.  Testing continues.
+.sh 2 "Performance"
+.\"	3.5
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+	Performance is minimal, but sufficient to reject a truly bad board.
+.\" Redefine headers for the appendix.
+.ds PN "A-\\\\n%
+.de $h
+.tl '. APPENDIX''\*(PN'
+..
+.pn 1	\" restart page numbering beginning with 'A-1'
+.af % 1
+.bp	\" NOW we can begin the new page
+.ce
+\fBAPPENDIX\fR
+.sh 1 "APPENDIX SECTION"
+
+ valid function codes are:
+
+ ? = help (display this table)
+ h = help (display this table)
+ a = automatic GO/NOGO diagnostics
+ d = Diagnose for SysDiag
+ r = register diagnostics
+ m = memory diagnostics
+ l = load ascii microcode into ffp
+ i = initialize the ffp
+ t = test selected math functions
+ e = execute a pio sequence
+ p = pio communication
+ f = do a spfp ffp function
+ s = do a special function
+ b = base address modifier
+ c = user context swap
+ q = quit - return to o.s.
+
+.ds PN "I-\\\\n%	\" redefine headers for the index.
+.de $h
+.tl '. INDEX''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fBINDEX\fR
+.sh 1 "INDEX SECTION"
+.ds PN "\\\\n%
+.de $h
+.tl 'TABLE OF CONTENTS''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fBTABLE OF CONTENTS\fR
+.sp 3
+.xp C

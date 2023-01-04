@@ -1,0 +1,25 @@
+#! /bin/sh
+#
+# @(#)software.sizing.010 1.1 86/09/25 SMI; from UCB X.X XX/XX/XX
+#
+#
+# Create an edit script iwth the sizes of the optional software
+# groups (as well as /usr and /pub).
+#
+#
+software.sizing.script 010 > edit.script
+rsh pest '(cd /usr/src/sun/sys/dist; software.sizing.script 020)' >> edit.script
+cat >> edit.script <<END
+w
+q
+END
+
+#
+# Update setup.config
+#
+sccs get /usr/src/sun/usr.etc/setup/runtime/setup.config
+chmod +w setup.config
+ex - setup.config < edit.script
+chmod -w setup.config
+cp setup.config /proto/usr/etc/setup.files/setup.config
+#rm setup.config edit.script

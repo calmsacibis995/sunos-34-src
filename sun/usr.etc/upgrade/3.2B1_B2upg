@@ -1,0 +1,305 @@
+#! /bin/sh
+#
+# @(#) 3.2B1_B2upg 1.1 86/09/25
+#
+# 3.2B1_B2upg {ar|st|mt|xt} {server|tapefull|tapeless server_name}
+#
+
+HOME=/; export HOME
+PATH=/bin:/usr/bin:/etc:/usr/etc:/usr/ucb:/usr/etc/upgrade
+
+REL=3.2
+CMDNAME=$0
+INSTALL=upgrade
+TAPE=$1
+TYPE=$2
+SERVER=$3
+
+USAGE="usage: ${CMDNAME} {ar|st|mt|xt} {server|tapefull|tapeless server_name}"
+CLEANING="Do you want to remove the saved data files from 3.2BETA? [y/n]: "
+YPMESG="Enter yp type for machine? [master|slave|client|none]: "
+
+if [ "$#" -lt 2 -o "$#" -gt 3 ]; then
+	echo "${CMDNAME}: incorrect number of arguments."
+	echo "${USAGE}" 
+        exit 1
+fi
+if [ "$TAPE" != "ar" -a "$TAPE" != "st" -a "$TAPE" != "mt" -a "$TAPE" != "xt" ]; then
+	echo "${CMDNAME}: missing or invalid tape type \"${TAPE}\"."
+        echo "${USAGE}"
+        exit 1
+fi
+
+if [ "${TYPE}" != "tapefull" -a "${TYPE}" != "tapeless" -a "${TYPE}" != "server" ]; then
+	echo
+        echo "${CMDNAME}: bad argument \"${TYPE}\"."
+        echo "${USAGE}"
+        exit 1
+fi
+
+if [ "$TAPE" = "ar" -o "$TAPE" = "st" ]; then
+        BS=126
+elif [ "$TAPE" = "mt" -o "$TAPE" = "xt" ]; then
+        BS=20
+else
+        echo
+        echo "${CMDNAME}: bad argument \"${TYPE}\"."
+        echo "${USAGE}"
+        exit 1
+fi
+
+echo
+echo "Beginning ${REL} ${INSTALL}."
+
+echo -n "Enter root disk partition? (e.g. xy0a): ";
+read rtdisk;
+echo -n "Enter user disk partition? (e.g. xy0g): ";
+read usrdisk;
+echo "Change directory to \"/dev\" and make device entries ..."
+cd /dev
+rt_dk=`expr ${rtdisk} : '\([a-z][a-z][0-9]\)[a-z]'`
+/dev/MAKEDEV ${rt_dk} 2> /dev/null
+u_dk=`expr ${usrdisk} : '\([a-z][a-z][0-9]\)[a-z]'`
+if [ "${rt_dk}" != "${u_dk}" ]; then
+        /dev/MAKEDEV ${u_dk} 2> /dev/null
+fi
+/dev/MAKEDEV ${TAPE}0 2> /dev/null
+
+echo
+echo "Checking filesystems ..."
+fsck -p /dev/r${rtdisk}
+fsck -p /dev/r${usrdisk}
+if mount /dev/${rtdisk} /a
+then
+	:
+else
+     echo "can't mount /dev/${rtdisk}, get help!"
+     exit 1
+fi
+
+echo
+echo -n "Checking machine type ..."
+if [ -f /bin/sun2 ] && /bin/sun2; then 
+	machtype="sun2"
+elif [ -f /bin/sun3 ] && /bin/sun3; then
+        machtype="sun3"
+fi
+case  "$machtype" in
+ 	"sun2" )
+                archtype="MC68010" ;;
+        "sun3" )   
+                archtype="MC68020" ;;
+        * )    
+                echo;echo "ERROR: Not a sun2 or sun3 machine." ;;
+esac
+echo
+echo "Changing directory to \"/\". "
+cd /a
+ 
+if [ "$TYPE" = "tapefull" -o "$TYPE" = "tapeless" ]; then
+
+        if mount /dev/${usrdisk} /a/usr
+        then
+            :
+        else
+	    echo "can't mount /dev/${usrdisk}, get help!"
+            exit 1
+        fi
+	echo
+	echo -n "${YPMESG}";
+	read yp_type;
+	
+	host_name=`awk -F= '/hostname=/ { print $2 }' < /a/etc/rc.boot`
+	conf_type="standalone"
+	# reserve the some data files during the single user mode upgrade
+	#
+	echo
+	echo "Saving data files from 3.2BETA release ..."
+	beta_upgrade save ${host_name} ${conf_type} ${yp_type}
+	#
+	# check the inserted tape for machine type and tape #
+	#
+	ck_arch_tape ${archtype} 1 /dev/nr${TAPE}0 ${SERVER}
+	#
+	# extract root, pub from release tape 
+	#
+	extract /dev/nr${TAPE}0 6 ${BS} root ${SERVER} 
+	extract /dev/nr${TAPE}0 7 ${BS} pub ${SERVER} 
+	#
+	# remove the old files from 3.2BETA system /usr
+	#
+	echo
+	echo "Changing directory to \"usr\". "
+	cd /a/usr
+	echo
+	echo "Removing 3.2BETA files from \"/usr\"..."
+	rm -fr `cat /usr/etc/upgrade/B2_opt_mv` > /dev/null 2>&1
+	#
+	# extract sys and usr from release tape 
+	#
+	ext_usrsys ${archtype} ${TAPE} ${SERVER}
+	#
+	# extract optional software from release tape
+	#
+	ext_opt ${archtype} ${TAPE} ${SERVER}
+	#
+	# restore the saved data files back to the system 
+	#
+	echo
+	echo "Restoring data files from 3.2BETA release ..."
+
+	beta_upgrade restore ${host_name} ${conf_type} ${yp_type}
+
+	echo
+	echo -n "${CLEANING}";
+	read answer;
+	case "${answer}" in
+	y | yes )
+		beta_upgrade clean ${host_name} ${conf_type} ${yp_type}
+		;;
+	n | no )
+		;;
+	esac
+	cd /
+	umount /dev/${usrdisk} 2>&1
+	umount /dev/${rtdisk} 2>&1
+	echo 
+	echo "Checking filesystems ..."
+	fsck -p /dev/r${usrdisk}
+	fsck -p /dev/r${rtdisk}
+
+	echo;echo "${REL} ${INSTALL} completed."
+	echo "Now reboot your system and config a kernel for your system."
+
+elif [ "${TYPE}" = "server" ]; then
+	
+        if mount /dev/${usrdisk} /a/usr.${archtype}
+        then
+            :
+        else
+	    echo "can't mount /dev/${usrdisk}, get help!"
+            exit 1
+        fi
+	echo
+        echo -n "${YPMESG}";
+        read yp_type;
+	host_name=`awk -F= '/hostname=/ { print $2 }' < /a/etc/rc.boot`
+	# reserve the some data files during the single user mode upgrade
+        #
+        echo
+        echo "Saving data files from 3.2BETA release ..."
+        beta_upgrade save ${host_name} server ${yp_type}
+	#
+        # check the inserted tape for machine type and tape #
+        #
+        ck_arch_tape ${archtype} 1 /dev/nr${TAPE}0 ${SERVER}
+        #
+        # extract root, pub from release tape 
+        #
+        extract /dev/nr${TAPE}0 6 ${BS} root ${SERVER}
+	echo
+	echo -n "Enter pub disk partition? (e.g. xy0f): ";
+	read pubdisk;
+	mount /dev/${pubdisk} /a/pub.${archtype} 2>&1
+	echo;echo "Changing directory to \"/pub\". "
+	cd /a/pub.${archtype}
+        extract /dev/nr${TAPE}0 7 ${BS} pub ${SERVER}
+	#
+	# For safty reason upgrade the boot under "pub"
+	#
+	if [ -f ./pub.boot ]; then
+		mv ./pub.boot ./boot > /dev/null 2>&1
+	fi
+	#
+	# must copy boot, vmunix and stand from "pub" back to the
+	# root and move tftpboot back to root, so the server can 
+	# use them too.
+	#
+	cp boot ..
+	cp vmunix ..
+	cp -r stand ..
+	mkdir /a/tftpboot > /dev/null 2>&1
+	cd tftpboot;tar cf - .|(cd /a/tftpboot;tar xpf -) 2>&1
+	cd /a/pub.${archtype}
+	rm -fr tftpboot > /dev/null 2>&1
+	#
+	# extract client image 
+	#
+        echo
+        echo "Beginning ${REL} ${INSTALL} on diskless clients."
+
+	cat /a/etc/nd.local.beta1|awk '$1 == "user" && $3 == 0 && $7 != -1 { print $0 }' > /tmp/CLIENT_F
+        for HOST in `awk '$1 == "user" && $3 == 0 { print $2 }' < /tmp/CLIENT_F`
+        do
+
+		echo
+		echo "Looping to upgrade client \"${HOST}\". "
+		PARTITION=`cat /tmp/CLIENT_F|grep $HOST|awk '{print $7}'`
+                DISK=ndl${PARTITION}
+        	mkdir /a/${HOST}
+                if mount /dev/${DISK} /a/${HOST}; then
+
+			cd /a/${HOST}
+                        echo
+                        echo "Beginning ${REL} ${INSTALL} on client ${HOST}."
+			extract /dev/nr${TAPE}0 8 ${BS} client_image ${SERVER}
+			echo
+		        echo "Restoring data files from 3.2BETA release for client ${HOST} ..."
+        		beta_upgrade restore ${HOST} diskless ${yp_type}
+			/bin/sync; cd /
+
+                        umount /dev/${DISK} 2>&1
+
+                        echo
+                        echo "Completed ${REL} ${INSTALL} on client ${HOST}."
+
+                else
+
+                        echo "Can't mount client \"${HOST}\" disk partition /dev/${DISK}."
+			rm -fr /a/${HOST}  > /dev/null 2>&1
+                        echo "${REL} upgrade procedure aborting."
+                        exit 1
+
+                fi
+		rm -fr /a/${HOST} > /dev/null 2>&1
+	done
+        # remove the old files from 3.2BETA system /usr
+        #
+	echo;echo "Changing directory to \"usr\". "
+        cd /a/usr.${archtype}
+        echo
+        echo "Removing 3.2BETA files from \"/usr\"..."
+        rm -fr `cat /usr/etc/upgrade/B2_opt_mv` > /dev/null 2>&1
+	#
+        # extract sys and usr from release tape 
+	ext_usrsys ${archtype} ${TAPE} ${SERVER}
+	#
+	# extract optional software from release tape
+	ext_opt ${archtype} ${TAPE} ${SERVER}
+	#
+        # restore the saved data files back to the system
+        echo;echo "Restoring data files from 3.2BETA release for server ..."
+	beta_upgrade restore ${host_name} server ${yp_type}
+	echo
+        echo -n "${CLEANING}";
+	read answer;
+	case "${answer}" in
+        y | yes )
+                beta_upgrade clean ${host_name} server ${yp_type}
+                ;;
+        n | no )
+                ;;
+        esac
+	cd /
+	umount /dev/${usrdisk} 2>&1
+	umount /dev/${pubdisk} 2>&1
+	umount /dev/${rtdisk} 2>&1
+	echo 
+	echo "Checking filesystems ..."
+	fsck -p /dev/r${usrdisk}
+	fsck -p /dev/r${pubdisk}
+	fsck -p /dev/r${rtdisk}
+	echo
+        echo "Completed ${REL} ${INSTALL} on diskless clients."
+	echo "Now reboot your system and config a kernel for your system."
+fi

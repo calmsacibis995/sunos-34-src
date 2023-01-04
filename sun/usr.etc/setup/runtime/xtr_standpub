@@ -1,0 +1,41 @@
+#! /bin/sh
+#
+# @(#)xtr_standpub 1.1 86/09/25 SMI; from UCB X.X XX/XX/XX
+#
+#
+# Extract the "pub" tape file and put in on a standalone workstation's
+# root file system.
+#
+if [ $# != 3 ]; then
+	echo Usage: $0 tapedev fsf blocksize
+	exit 1
+fi
+tapedev=$1
+fsf=$2
+bs=$3
+
+if [ "$tapeserver" != "" ]; then
+	remote="rsh $tapeserver"
+fi
+
+#
+# At this point (examples in parens),
+#   tape	- name of tape controller (st)
+#   tapedev	- raw tape device (/dev/rst0)
+#   fsf         - fsf this many files to get to the usr files (2)
+#   bs		- block size to use for this tape (20)
+#
+set -x
+cd /setup.root
+$remote mt -f $tapedev rew
+$remote mt -f $tapedev fsf $fsf
+if [ "$tapeserver" = "" ]; then
+	tar xpfbv $tapedev $bs
+else 
+	$remote -n dd if=$tapedev bs=${bs}b | tar xpfBv -
+fi
+if [ $? != 0 ]; then
+	exit 13
+fi
+$remote mt -f $tapedev rew
+sync

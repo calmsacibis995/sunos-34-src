@@ -1,0 +1,150 @@
+#! /bin/sh
+#
+# @(#)extract_diags 1.2 85/11/21 SMI; from UCB X.X XX/XX/XX
+#
+
+case  $# in
+    0)
+	# Check to see if the tape variable was set in the command line
+	if [ $tape ]; then
+		tape=/dev/nr${tape}0
+	else #If not, ask what it should be
+		echo
+		echo -n "What tape device are you using? [st, ar, mt]: "
+		read reply
+		tape=/dev/nr${reply}0
+	fi	
+	if [ $destdir ]; then
+		: #all okay
+	else
+		destdir=/usr/stand
+	fi
+    ;;
+    1)
+	if [ $1 = st -o $1 = ar -o $1 = mt ]; then
+		tape=/dev/nr${1}0
+		destdir=/usr/stand
+	else
+		echo
+		echo "You entered an invalid tape device type."
+		echo "The currently allowed devices are:"
+		echo
+		echo "		st	(SCSI)"
+		echo "		ar	(archive)"
+		echo "		mt	(1/2\" magnetic)"
+		echo
+		echo "Restart extract_diags. Exiting."
+		echo
+		exit 5
+	fi
+    ;;
+    2)
+	if [ $1 = st -o $1 = ar -o $1 = mt ]; then
+		tape=/dev/nr${1}0
+		destdir=$2
+	else
+		echo
+		echo "You have entered an invalid tape device type."
+		echo "The currently allowed devices are:"	
+		echo
+		echo "		st	(SCSI)"
+		echo "		ar	(archive)"
+		echo "		mt	(1/2\" magnetic)"
+		echo
+		echo "Restart extract_diags. Exiting."
+		echo
+		exit 5
+	fi
+    ;;
+    *)
+	echo
+	echo "usage:	extract_diags {ar,mt,st} [destination_directory]; or"
+	echo "	tape={ar,mt,st} [destdir=...] extract_diags"
+	echo
+	exit 5
+    ;;
+esac
+
+echo
+echo "The tape device is \"$tape\" and the destination directory is \"$destdir\"."
+echo "Type ^C if this is incorrect and you wish to abort extract_diags."
+sleep 10
+
+tenpagesize=2K
+pagesize=8K
+
+# Pagesize for sun3.
+minblksize=512
+
+#mt -f $tape retension
+
+mt -f $tape rewind
+mt -f $tape fsf 2
+# Skip past the 020/010 boots.
+dd if=$tape of=toc.temp
+
+echo
+echo "This tape contains:"
+echo
+more toc.temp
+
+sed -n -e "/6 /,$ s/.* //p" toc.temp > temp1.list
+sed -n -e "/opyright/ d" -e "1,$ p" temp1.list > temp.list
+
+# I used "opyright" here since I don't know if I want to use an uppercase C.
+# Remove the last Copyright file and the extract_diags script (this script).
+rm -f temp1.list
+echo
+echo "The files to be extracted are:"
+echo
+more temp.list
+
+mt -f $tape rewind
+mt -f $tape fsf 5
+
+# Skip past the boots, toc, extract script, and copyright files.
+
+# Extract the files.
+
+# I don't exactly know what to use here, but "tapefile" figures it out.
+skip=1
+#pagesize=2K
+ibs=32
+
+# The file was written as;
+#	first 32 bytes, expanded to 512 bytes, expanded to 8K,
+#	followed by all the other 32 byte records, packed in 8K chunks.
+
+echo " "
+echo "Now extracting:"
+echo
+
+for file in `cat temp.list`; do
+	echo $file;
+	# Read the file in from tape, work with it on disk.
+	dd if=$tape of=hold.file bs=$pagesize; 
+
+	# Read first 32 bytes. (in a 512 byte record!)
+	#dd if=hold.file of=hold.file2 bs=$minblksize obs=32 count=1;
+	# then write these 32 bytes out followed by all the others.
+	(dd if=hold.file bs=32 count=1; \
+	    dd if=hold.file ibs=512 obs=512 skip=1) > $destdir/$file;
+	# use destdir here......
+done
+
+# This is how the files were built, for reference.
+
+#for file in `cat tableofcontents`; do
+#	echo $file; 
+#	dd if=$file of=hold.file ibs=$ibs obs=$pagesize skip=$skip;
+#	(dd if=$file bs=$minblksize count=1 conv=sync; \
+#	    dd if=hold.file bs=$pagesize conv=sync) > $tape;
+#       rm hold.file;
+#done
+
+# Now clean up the mess I have left.
+rm hold.file
+rm toc.temp
+rm temp.list
+
+mt -f $tape rewind

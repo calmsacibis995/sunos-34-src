@@ -1,0 +1,3 @@
+stty dec
+PATH=/etc:/usr/etc:/usr/ucb:/bin:/usr/bin:.
+export PATH TERM

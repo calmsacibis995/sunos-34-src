@@ -1,0 +1,23 @@
+#! /bin/sh
+#	@(#)buildmini	1.4	1/11/85
+#
+. buildmini.config.int
+#
+date
+umount /dev/${miniroot}
+mkfs /dev/r${miniroot} ${minisize} 32 8 8192 1024
+fsck /dev/r${miniroot}
+tunefs -m 0 /dev/r${miniroot}
+mount /dev/${miniroot} /mnt
+cd /mnt; sh -x /sys/dist/get
+cp /sys/dist/release/upgrscripts/upgrade_* /mnt
+chmod +x /mnt/upgrade_*
+cp /etc/hosts /mnt/etc/hosts
+cp /proto/bin/tee /mnt/bin/tee
+strip /mnt/bin/tee
+cp /proto/usr/etc/route /mnt/usr/etc/route
+strip /mnt/usr/etc/route
+cd /sys/dist; sync
+umount /dev/${miniroot}
+fsck /dev/${miniroot}
+date

@@ -1,0 +1,17 @@
+#! /bin/sh
+# 
+#       @(#)buildmini 1.1 86/09/25 SMI
+#
+. buildmini.config
+#
+date
+umount /dev/${miniroot}
+mkfs /dev/r${miniroot} ${minisize} 32 8 8192 1024
+fsck /dev/r${miniroot}
+tunefs -m 0 /dev/r${miniroot}
+mount /dev/${miniroot} /mnt
+cd /mnt; sh -x /sys/dist/get
+cd /sys/dist; sync
+umount /dev/${miniroot}
+fsck /dev/${miniroot}
+date

@@ -1,0 +1,48 @@
+#! /bin/sh
+#
+# @(#)xtr_rootarch 1.1 86/09/25 SMI; from UCB X.X XX/XX/XX
+#
+if [ $# != 4 ]; then
+	echo Usage: $0 arch tapedev fsf bs
+	exit1
+fi
+set -x
+arch=$1
+tapedev=$2
+fsf=$3
+bs=$4
+
+pub=pub.$arch
+
+if [ "$tapeserver" != "" ]; then
+	remote="rsh $tapeserver"
+fi
+
+#
+# At this point (examples in parens),
+#   tapedev     - raw no-rewind tape device (/dev/nrst0)
+#   fsf         - fsf this many files to get to the mini-root (6)
+#   arch	- name of architecture (MC68020)
+#   bs	        - block size on tape (20)
+#   pub		- the architecture-dependent pub partition
+#
+
+cd /setup.root
+mkdir /setup.root/$pub/bin
+cd /setup.root/$pub
+$remote mt -f $tapedev rew
+$remote mt -f $tapedev fsf $fsf
+if [ "$tapeserver" = "" ]; then
+	tar xpfbv $tapedev $bs
+else 
+	$remote -n dd if=$tapedev bs=${bs}b | tar xpfBv -
+fi
+if [ $? != 0 ]; then
+	exit 13
+fi
+$remote mt -f $tapedev rew
+
+if [ -f ./pub.boot ]; then
+	mv ./pub.boot ./boot
+fi
+sync

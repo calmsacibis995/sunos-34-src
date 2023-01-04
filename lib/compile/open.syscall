@@ -1,0 +1,4 @@
+#@(#)open.syscall	1.1 9/24/86. 86/01/17 SMI
+int	open(!path, flags, mode) char *path; int flags; int mode; {return(0);} /*VARARGS2*/ #include <sys/file.h> $
+(vroot_args.returns.test >= 0)
+((flags & (O_CREAT|O_APPEND)) != 0) ? rw_write : rw_read

@@ -1,0 +1,318 @@
+#! /bin/sh
+#
+#       @(#)maketape 4.63 86/05/06 SMI
+#
+#	maketape type [1|2|3|4]
+#
+cmdname=`basename $0`
+tapetype=`expr $1 : '\(..\).*'` 
+if [ "$tapetype" != "mt" -a "$tapetype" != "ar" -a "$tapetype" != "st" ]; then
+	echo ${cmdname}: missing or invalid tape type $tapetype
+	exit 2
+fi
+if [ "$2" = "4" -a "$tapetype" != ar -a "$tapetype" != st ]; then
+	echo ${cmdname}: ar or st only for tape \4#
+	exit 2
+fi
+if [ -n "$2" -a "$2" != 1 -a "$2" != 2 -a "$2" != 3  -a "$2" != 4 ]; then
+	echo ${cmdname}: invalid partial maketape specified $2
+	exit 2
+fi
+if [ `whoami` != root ]; then
+	echo ${cmdname}: must be run as root
+	exit 2
+fi
+#
+# create table of contents for each tape
+# Make sure the setup.config file has upto date sizes in it.
+#
+maketoc
+. maketape.config
+if [ ! -f /proto/usr/etc/setup.files/setup.config ]; then
+	echo Sizing software
+	software.sizing
+fi
+#
+case "${tapetype}" in
+    "mt" | "xt" )
+	toc=t.h.${archtype}
+        tape=/dev/nr${1}0 ;;
+    "ar" | "st" )
+	toc=t.q.${archtype}
+	tape=/dev/nr${1}0 ;;
+    * )
+	tape=/dev/nr${1} ;;
+esac
+if [ -f /bin/arch -a -s /bin/arch ] 
+then 
+        machtype=`/bin/arch` 
+        if [ -z "$machtype" ] 
+        then
+                pagesize=2k
+                echo;echo ">>>>> pagesize defaulting to 2k."
+        else
+ 
+        case  "$machtype" in
+        "sun2" )
+                pagesize=2k ;;
+        "sun3" )   
+                pagesize=8k ;;
+        * )    
+                pagesize=2k ;
+                echo;echo ">>>>> pagesize defaulting to 2k." ;;
+        esac
+        fi
+else
+        echo;echo "Error: Can't find file /bin/arch !! "
+        exit 2
+fi
+minblksize=512
+#
+exclude_dir="/usr/src/sun/sys/dist/exclude.lists"
+root_exclude_flags="XX"
+root_exclude_list=" $exclude_dir/lost.found $exclude_dir/root.pub"
+#
+usr_exclude_flags="XXXXXXXXXXXXXXXXXXXXX"
+#
+# 21 X's	   ^^^^^^^^^^^^^^^^^^^^^
+# 21 filenames	   |||||||||||||||||||||
+#
+usr_exclude_list="\
+$exclude_dir/usr.net $exclude_dir/usr.debug \
+$exclude_dir/usr.text $exclude_dir/usr.setup \
+$exclude_dir/usr.sys $exclude_dir/usr.vsys $exclude_dir/usr.stand \
+$exclude_dir/usr.fortran $exclude_dir/usr.diag $exclude_dir/usr.demo \
+$exclude_dir/usr.games $exclude_dir/usr.graphics $exclude_dir/usr.man \
+$exclude_dir/usr.pascal $exclude_dir/usr.profiled \
+$exclude_dir/usr.src $exclude_dir/usr.sunview_users \
+$exclude_dir/usr.sunview_prog \
+$exclude_dir/usr.uucp \
+$exclude_dir/usr.vtroff $exclude_dir/lost.found"
+#
+if [ "$tapetype" = "ar" -o "$tapetype" = "st" ]; then
+	bs=200
+else
+	bs=20
+fi
+set -x
+#
+date
+umount /dev/${usrfs}
+umount /dev/${rootfs}
+mount /dev/${rootfs} /proto
+mount /dev/${usrfs} /proto/usr
+sync
+#
+if [ -z "$2" -o "$2" = 1 ]; then
+	mt -f $tape rew
+	cd /sys/dist
+	echo "Build 1st level boot block files"
+	: Tpboot is raw program image, with no a.out header
+	dd if=../sunstand/tpboot of=$tape bs=$pagesize conv=sync
+	: Copy 413 files to tape
+        : TOC goes here
+        dd if=${toc}.1 of=$tape conv=sync
+        : new location for Copyright
+        dd if=Copyright of=$tape conv=sync
+	: a.out header must be a separate record, of minblksize size
+	: program text must start with next record
+	file=/proto/stand/diag
+ 	tapefile $file
+	case $? in
+	  16 | 32 )
+	    pagesize=8k
+	    skip=1
+	    ibs=32 ;;
+	  0 | 1 )
+	    skip=1
+	    pagesize=2k
+	    ibs=32 ;;
+	  2 )
+	    skip=1
+	    pagesize=2k
+	    ibs=$pagesize ;;
+	  18 | 34 )
+	    skip=0
+	    pagesize=8k
+	    ibs=32 ;;
+	  17 | 33 )
+	    echo "Warning: NMAGIC files cannot be executed from tape"
+	    pagesize=8k
+	    skip=1
+	    ibs=32 ;;
+	  * )
+	    echo "Diag not an executable file"
+	    exit -1 ;;
+	esac
+	dd if=$file of=hold.file ibs=$ibs obs=$pagesize skip=$skip
+	(dd if=$file bs=$minblksize count=1 conv=sync; \
+	   dd if=hold.file bs=$pagesize conv=sync) > $tape
+
+	file=../stand/tpcopy
+ 	tapefile $file
+	case $? in
+	  16 | 32 )
+	    pagesize=8k
+	    skip=1
+	    ibs=32 ;;
+	  0 | 1 )
+	    skip=1
+	    pagesize=2k
+	    ibs=32 ;;
+	  2 )
+	    skip=1
+	    pagesize=2k
+	    ibs=$pagesize ;;
+	  18 | 34 )
+	    skip=0
+	    pagesize=8k
+	    ibs=32 ;;
+	  17 | 33 )
+	    echo "Warning: NMAGIC files cannot be executed from tape"
+	    pagesize=8k
+	    skip=1
+	    ibs=32 ;;
+	  * )
+	    echo "Tpcopy not an executable file"
+	    exit -1 ;;
+	esac
+	dd if=$file of=hold.file ibs=$ibs obs=$pagesize skip=$skip
+	(dd if=$file bs=$minblksize count=1 conv=sync; \
+	   dd if=hold.file bs=$pagesize conv=sync) > $tape
+	rm hold.file
+
+	echo "Add dump of mini-root file system"
+	sccs get buildmini
+	sccs get get
+	chmod +x buildmini
+	buildmini
+	sccs get buildclient
+	chmod +x buildclient
+	buildclient
+	dd if=/dev/${miniroot} of=$tape ibs=1b obs=${bs}b count=$minirootsize
+	echo "Add tar image of real file system"
+	: really root image minus root.pub
+	: unmount /proto/usr so that we can tar root without recursively
+	: descending into any of the directories on /proto/usr
+	umount /dev/${usrfs}
+	cd /proto
+	tar crvfb$root_exclude_flags $tape $bs $root_exclude_list .
+	: add root.pub, minus optional software
+	tar crvfb $tape $bs `cat $exclude_dir/root.pub`
+	mount /dev/${clientdisk} /mnt
+	cd /mnt
+	tar crvfb $tape $bs .
+        cd /sys/dist
+	umount /dev/${clientdisk}
+	mount /dev/${usrfs} /proto/usr
+	if [ `expr $1 : '\(..\).*'` = "mt" ]; then
+                : optional software for tapes #s 1 or 2
+                cd /proto/usr
+                tar crvfb $tape $bs `cat $exclude_dir/usr.sys`
+                tar crvfb $tape $bs `cat $exclude_dir/usr.net`
+                tar crvfb $tape $bs `cat $exclude_dir/usr.debug`
+		echo "Add tar image of /usr"
+		tar crvfb$usr_exclude_flags $tape $bs $usr_exclude_list .
+	fi
+	cd /sys/dist
+	dd if=Copyright of=$tape conv=sync
+	mt -f $tape rew
+	echo "Completed tape #1, remove tape"
+fi
+#
+if [ \( "$tapetype" = "ar" -o "$tapetype" = "st" \) -a \( -z "$2" -o "$2" = "2" \) ]; then
+	if [ -z "$2" ]; then
+		echo "load new tape, press RETURN"
+		read x
+	fi
+	mt -f $tape rew
+	cd /sys/dist
+	dd if=Copyright of=$tape conv=sync
+        : TOC goes here
+        dd if=${toc}.2 of=$tape conv=sync
+	: optional software for tapes #s 1 or 2
+        cd /proto/usr
+	tar crvfb $tape $bs `cat $exclude_dir/usr.sys`
+        tar crvfb $tape $bs `cat $exclude_dir/usr.net`
+	tar crvfb $tape $bs `cat $exclude_dir/usr.debug`
+        echo "Add tar image of /usr"
+        tar crvfb$usr_exclude_flags $tape $bs $usr_exclude_list .
+	cd /sys/dist
+	dd if=Copyright of=$tape conv=sync
+	mt -f $tape rew
+	echo "Completed tape #2, remove tape"
+fi
+#
+if [ -z "$2" -o  \( `expr $1 : '\(..\).*'` = "mt" -a "$2" = "2" \) \
+	 -o "$2" = "3" ]; then
+	if [ -z "$2" ]; then
+		echo "load new tape, press RETURN"
+		read x
+	fi
+	case "${tapetype}" in
+		"mt" | "xt" )
+			tapenum=2 ;;
+		"ar" | "st" )
+			tapenum=3 ;;
+	esac
+	mt -f $tape rew
+	cd /sys/dist
+	dd if=Copyright of=$tape conv=sync
+        : TOC goes here
+        dd if=${toc}.${tapenum} of=$tape conv=sync
+	echo "Add tar image of various software categories"
+#	no optional software on root, now
+#	cd /proto
+#	for i in $root_exclude_list; do
+#		if [ "$i" = "$exclude_dir/lost.found" ]; then
+#			continue
+#		fi
+#		tar crvfb $tape $bs `cat $i`
+#	done
+	cd /proto/usr
+        tar crvfb $tape $bs `cat $exclude_dir/usr.sunview_users`
+        tar crvfb $tape $bs `cat $exclude_dir/usr.sunview_prog`
+        tar crvfb $tape $bs `cat $exclude_dir/usr.src`
+        tar crvfb $tape $bs `cat $exclude_dir/usr.text`
+        tar crvfb $tape $bs `cat $exclude_dir/usr.setup`
+        tar crvfb $tape $bs `cat $exclude_dir/usr.stand`
+        tar crvfb $tape $bs `cat $exclude_dir/usr.fortran`
+        tar crvfb $tape $bs `cat $exclude_dir/usr.diag`
+        tar crvfb $tape $bs `cat $exclude_dir/usr.graphics`
+        tar crvfb $tape $bs `cat $exclude_dir/usr.pascal`
+        tar crvfb $tape $bs `cat $exclude_dir/usr.profiled`
+        tar crvfb $tape $bs `cat $exclude_dir/usr.uucp`
+	cd /sys/dist
+	dd if=Copyright of=$tape conv=sync
+	mt -f $tape rew
+	echo "Completed tape #3, remove tape"
+fi
+if [ -z "$2" -o  \( `expr $1 : '\(..\).*'` = "mt" -a "$2" = "3" \) \
+         -o "$2" = "4" ]; then
+        if [ -z "$2" ]; then
+                echo "load new tape, press RETURN"
+                read x
+        fi
+        case "${tapetype}" in
+                "mt" | "xt" ) 
+                        tapenum=3 ;; 
+                "ar" | "st" )   
+                        tapenum=4 ;; 
+        esac
+        mt -f $tape rew
+        cd /sys/dist
+        dd if=Copyright of=$tape conv=sync
+        : TOC goes here
+        dd if=${toc}.${tapenum} of=$tape conv=sync
+        cd /proto/usr
+        echo "Add tar image of SysV man, demo, games, vtroff"
+	tar crvfb $tape $bs `cat $exclude_dir/usr.vsys`
+        tar crvfb $tape $bs `cat $exclude_dir/usr.man`
+        tar crvfb $tape $bs `cat $exclude_dir/usr.demo`
+        tar crvfb $tape $bs `cat $exclude_dir/usr.games`
+        tar crvfb $tape $bs `cat $exclude_dir/usr.vtroff`
+        cd /sys/dist
+        dd if=Copyright of=$tape conv=sync
+        mt -f $tape rew
+        echo "Last tape completed, remove now"
+fi

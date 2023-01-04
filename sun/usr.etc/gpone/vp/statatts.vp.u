@@ -1,0 +1,216 @@
+| Copyright (c) 1985 by Sun Microsystems, Inc.
+|	@(#)statatts.vp.u 1.1 86/09/25 SMI
+
+
+| texture and width registers
+#define stoff r[0]
+#define options r[1]
+#define numargs r[16]
+#define veccmd r[17]
+
+
+
+|	incw cmdptr,cmdptr;	;		jmap SETCOLOR;	;
+SETCOLOR:
+	addw frameptr,COLOR_FRMOFF,y;;		;		;
+	IMM;			am->shmemp;	;		;
+	movw acc,y;		am->shmem;	jmap getcmd;	;
+
+
+
+|	add2nw 1,cmdptr,cmdptr;	shmem->am;	jmap SETROP;	;
+SETROP:	addw frameptr,ROP_FRMOFF,y;;		;		;
+	IMM;			am->shmemp;	;		;
+	movw d,y;		am->shmem;	jmap getcmd;	;
+
+
+
+|	incw cmdptr,cmdptr;	;		jmap SETFBINDX;	;
+SETFBINDX:
+	addw frameptr,FBINDX_FRMOFF,y;;		;		;
+	IMM;			am->shmemp;	;		;
+	movw acc,y;		am->shmem;	jmap getcmd;	;
+
+
+
+|	incw cmdptr,cmdptr;	;		jmap SETPIXPLANES;;
+SETPIXPLANES:
+	addw frameptr,PIXPLNS_FRMOFF,y;;	;		;
+	IMM;			am->shmemp;	;		;
+	movw acc,y;		am->shmem;	jmap getcmd;	;
+
+
+
+|	movw 0,y;		am->fpdp;	jmap SETMATRIX_3D; ;			  | zero fpr dst ptr
+SETMATRIX_3D: rolw 5,acc,y;	am->am;		push,go 15;	;			  | d <- index*32 (index is passed in acc)
+	addw d,XFRM_FRMOFF,acc;	shmem->fpregh;	;		;		shp+	  | copy from cmd list in shmem to fpr[0]
+	IMM;			shmem->fpregl;	rfct;		;		shp+,dp+  | acc <- XFRM_FRMOFF + index*32
+	addw frameptr,acc,y;	am->shmemp;	;		;			  | shmemp <- addr to store matrix
+	movw 0,y;		am->fpap;	push,go 15;	;			  | zero fpr src ptr
+	movw 33,acc;		fpregh->shmem;	;		;		shp+	  | copy from fpr[0] to frame in shmem
+	IMM;			fpregl->shmem;	rfct;		;		shp+,abp+
+	addw cmdptr,acc,cmdptr;	;		jmap getcmd;	;
+
+
+
+|	movw 0,y;		am->fpdp;	jmap GETMATRIX_3D; ;			  | zero fpr dst ptr
+GETMATRIX_3D: rolw 5,acc,acc;	0->fpap;	;		;			  | acc <- index*32 (index is passed in acc)
+	addw d,acc,acc;		XFRM_FRMOFF->am;;		;			  | fpap <- 0
+	addw frameptr,acc,y;	am->shmemp;	push,go 15;	;			  | shmemp <- addr to retrieve matrix
+	incw cmdptr,acc;	shmem->fpregh;	;		;		shp+	  | copy from frame in shmem to fpr[0]
+	;			shmem->fpregl;	rfct;		;		shp+,dp+  | acc has shmem addr of flag
+	incw acc,y;		am->shmemp;	push,go 15;	;			  | shmemp <- addr to store matrix
+	addw acc,33,cmdptr;	fpregh->shmem;	;		;		shp+	  | copy from fpr[0] to shmem cmd area
+	IMM;			fpregl->shmem;	rfct;		;		shp+,abp+ | cmdptr += 34
+	movw acc,y;		am->shmemp;	;		;
+	movw 0,y;		am->shmem;	jmap getcmd;	;			  | flag <- 0; jump to cmd loop
+
+
+|	incw cmdptr,cmdptr;	;		jmap SETHIDDENSURF;;
+SETHIDDENSURF:
+	addw frameptr,HIDDENSURF_FRMOFF,y;;	;		;
+	IMM;			am->shmemp;	;		;
+	movw acc,y;		am->shmem;	jmap getcmd;	;
+
+
+
+|	incw cmdptr,cmdptr;	;		jmap SELECTMATRIX;;			  | cmdptr += 1
+SELECTMATRIX:
+	rolw 5,acc,acc;		MATRIXPTR_FRMOFF->am;;		;			  | acc <- index*32 (index is passed in acc)
+	addw d,frameptr,y;	am->shmemp;	;		;			  | shmemp <- addr to store matrixptr
+	addw frameptr,acc,acc;	XFRM_FRMOFF->am;;		;			  | acc <- frameptr + index*32
+	addw d,acc,y;		am->shmem;	jmap getcmd;	;			  | matrixptr <- frameptr + XFRM_FRMOFF +
+											  | index*32; jump back to cmd loop
+
+
+
+|	movw 0,y;		am->fpdp;	jmap SETVWP_3D; ;			  | zero fpr dst ptr
+SETVWP_3D: movw 0,y;		am->fpap;	push,go 5;	;			  | zero fpr src ptr
+	movw VWPXSCL_FRMOFF,acc;shmem->fpregh;	;		;		shp+	  | copy from cmd list in shmem to fpr[0]
+	IMM;			shmem->fpregl;	rfct;		;		shp+,dp+
+	addw frameptr,acc,y;	am->shmemp;	push,go 5;	;			  | add frameptr and viewport frame offset
+	movw 13,acc;		fpregh->shmem;	;		;		shp+	  | copy from fpr[0] to frame in shmem
+	IMM;			fpregl->shmem;	rfct;		;		shp+,abp+
+	addw cmdptr,acc,cmdptr;	;		jmap getcmd;	;
+
+
+
+|	movw d,r[0];		shmem->am;	jmap SETCLPLST;	;		shp+	  | r[0] <- NRECTS
+SETCLPLST: subw,s d,r[0],y;	61->am;		;		;
+	rolw,s 2,r[0],y;	am->am;		cjp,~cry getlst;;			  | d<-NRECTS*4; if 0 <= NRECTS < 60, getlst
+	addw d,-240,cmdptr;	;		cjp,zer nullst;	;			  | else use 1st 60 rects; fix cmdptr to
+	IMM;			239->brreg;	ldct 239;	;			  | skip other rects; brreg<-60*4-1
+	movw 0,acc;		am->fpdp;	cjp,go getlst1;	;			  | zero acc and fpdp
+getlst:	sub2nw 0,d,y;		am->brreg;	cjp,zer nullst;	;			  | brreg<-NRECTS*4-1; if NRECTS==0, nullst
+	movw 0,acc;		am->fpdp;	ldct;		;			  | zero acc and fpdp
+getlst1: incw acc,acc;		shmem->fpregh;	rpct .;		;		shp+,dp+  | move from cmd blk to fpregs; cnt in acc
+	addw frameptr,RECTS_FRMOFF,y; 0->fpap;	;		;			  | zero fpap
+	IMM;			am->shmemp;	;		;			  | shmemp <- clipping list address
+	rolw 14,acc,acc;	am->shmem;	push,go;	;		shp+	  | # of rects actually used is acc/4
+	incw cmdptr,cmdptr;	fpregh->shmem;	rfct;		;		shp+,abp+ | move from fpregs to static blk
+	add2nw 1,cmdptr,cmdptr;	;		jmap getcmd;	;			  | cmdptr is now adjusted for next cmd
+nullst:	addw frameptr,RECTS_FRMOFF,y; ;		;		;
+	IMM;			am->shmemp;	;		;			  | shmemp <- clipping list address
+	incw 0,y;		am->shmem;	push,go 3;	;		shp+	  | set NRECT to 1
+	movw 0,y;		am->shmem;	rfct;		;		shp+	  | rect coords are 0,0,0,0
+	add2nw 1,cmdptr,cmdptr;	;		jmap getcmd;	;			  | cmdptr is now adjusted for next cmd
+
+|	incw,s 0,y;		;		jmap SET_LINE_TEX; ;			  
+SET_LINE_TEX:
+	movw 0,y;		am->fpdp;	ldct 15;	;			  | Load counter & fp d-reg addr.
+stexlp:	movw,s d,y;		shmem->am;	cjp, zer setstoff;;		shp+	  | Cc for 1st set in main.vp.u.
+	movw d,y;		am->fpregh;	rpct stexlp;	;		dp+	  | Pull segs till 16 or zero segment.
+	movw d,y;		shmem->am;	;		;		shp+	  | If had 16 segs, should be null term.
+	movw d,stoff;		shmem->am;	cjp, go setopt;	;		shp+	  | Fetch stoff.
+setstoff: movw d,stoff;		;		;		;			  | Move d-latch into stoff.
+setopt:	movw d,options;		shmem->am;	;		;			  | Fetch options.
+setstore: addw frameptr,STOFF_FRMOFF,y; ;	;		;			  | Store stoff,options, then texture.
+	IMM;			am->shmemp;	;		;			  | Address where texture is stored.
+	movw stoff,y;		am->shmem;	;		;		shp+	  | stoff->att. block.
+	bclrw 0,options;	am->shmem;	;		;		shp+	  | options->att. block. (clear 5080 bit).	
+	movw,s d,numargs;	1->am;		;		;			  | Set status for first seg,numargs=1.
+	movw 0,y;		am->fpap;	ldct 15;	;			  | Load counter & fp a-reg addr.
+storlp:	movw,s d,y;		fpregh->am;	cjp, zer setckfr; ;			  | Pull segment & set status.
+	incw numargs,numargs;	fpregh->shmem;	rpct storlp;	;		shp+,abp+ | numargs++, store & loop till 0 or 16.
+	incw numargs,numargs;	;		;		;			  | If was 16, must count null term also.
+setckfr: ;			TEXPPFRMPTR->shmemp; ;		;			  | Check which frames texture on PP.
+	xorw,s d,frameptr,y;	shmem->am;	;		;			  | 
+	add2nw 1,cmdptr;	am->am;		;		;			  | cmdptr+2 -> d-latch.
+	addw d,numargs,cmdptr;	;		cjp, ~zer stend; ;			| cmdptr += numargs(numargs+=1).
+	movw frameptr,y;	am->shmem;	cjs, go sendtex; ;			  |  Update PP w/new texture.
+stend:	;			;		jmap getcmd;	;			| 
+
+
+|	movw 0,y;		am->fpdp;	jmap SET_LINE_WIDTH; ;
+SET_LINE_WIDTH:
+	;			shmem->fpregh;	;		;		shp+,dp+  | Pull width.
+	;			shmem->fpregh;	;		;		          | Pull width.options.
+	addw frameptr,WID_FRMOFF,y; ;		;		;			  | 
+	IMM;			am->shmemp;	;		;			  | 
+	movw 0,y;		am->fpap;	;		;			  | 
+	;			fpregh->shmem;	;		;		shp+,abp+ | width->static block.
+	;			fpregh->shmem;	;		;		shp+	  | width.options->static block.
+	add2nw 0,cmdptr;	TEXPPFRMPTR->shmemp; ;		;			  | Check which frames texture on PP.
+	xorw,s d,frameptr,y;	shmem->am;	;		;			  | If this frame, need to update 
+	add2nw 1,cmdptr;	;		cjp, ~zer swidend; ;			| cmdptr+=3 (total cmds + 1).
+	movw frameptr,y;	am->shmem;	;		;			|  PP w/new texture.
+	addw frameptr,WID_FRMOFF,y; ;		;		;			| 
+	IMM;			am->shmemp;	push, ~go;	;			| 
+	;			PPSETLINEWID->fifo1; loop, f1nf; ;			| setwidth command->fifo1 (PP).
+	;			shmem->fifo1;	cjp, f1f .;	;			| width->fifo1.
+	;			;		;		;		shp+	| 
+	;			shmem->fifo1;	cjp, f1f .;	;			| width.options->fifo1, jump to getcmd.
+swidend: ;			;		jmap getcmd;	;			| 
+
+
+
+
+
+|	tvec_attr_pp -- jmap'ed to from vp bank
+|
+|	Input Parameters:	shmemp -- points at frame's texture
+
+tvec_attr_pp:
+	addw frameptr,WID_FRMOFF,y; ;		;		;			| 
+	IMM;			am->shmemp;	cjp, ~zer tveca2; ;			| Jump if textured.
+	sub2nw,s 1,d,y;		shmem->am;	;		;			| Compute (width-2).
+	movw frameptr,y;	am->shmemp;	cjp, ~neg tveca2; ;			| 
+	;			;		jmap vec_attr;	;			| Jmp if solid, width 1.
+tveca2:	;			TEXPPFRMPTR->shmemp; ;		;			| Check which frames texture on PP.
+	xorw,s d,frameptr,y;	shmem->am;	;		;			| Check if this frames texture on PP.
+	;			;		cjp, zer tveca3; ;			| If not, send tex,width, & update ptr.
+	movw frameptr,y;	am->shmem;	cjs, go sendtex; ;			| Send texture to PP.
+	;			;		push, ~go;	;			| Send width by hand, since shmemp corr.
+	;			PPSETLINEWID->fifo1; loop, f1nf; ;			| setwidth command->fifo1 (PP).
+	;			shmem->fifo1;	cjp, f1f .;	;			| width->fifo1.
+	;			;		;		;		shp+	| 
+	;			shmem->fifo1;	cjp, f1f .;	;			| width.options->fifo1.
+tveca3:	movw frameptr,y;	am->shmemp;	push, ~go;	;			| Restore shmemp & fall through.
+	;			PPXFLINEINIT->fifo1; loop, f1nf; ;			| Send line initialization command to pp.
+	movw d,veccmd;		PPXFLINE->am;	;		;			| Textured vector command->veccmd.
+	subw,s d,fbindx,y;	shmem->am;	jmap vecatt2;	;			| tst oldfbindx - newfbindx & jump.
+
+
+
+|   Sendtex sends the offset, options, and then the pattern, which is null terminated, except in the case
+|   where it is exactly 16 segments long, and it is not null terminated.
+sendtex: addw frameptr,STOFF_FRMOFF,y; ;	;		;			| 
+	IMM;			am->shmemp;	push, ~go;	;			| 
+	;			PPSETLINETEX->fifo1; loop, f1nf; ;			| settex command->fifo1 (PP).
+	;			shmem->fifo1;	cjp, f1f .;	;			| stoff->fifo1.
+	;			;		;		;		shp+	| 
+	;			shmem->fifo1;	cjp, f1f .;	;			| options->fifo1.
+	movw d,acc;		WID_FRMOFF->am;	;		;		shp+	| Width offset in acc.
+	;			shmem->am;	ldct 15;	;		shp+	| Fetch first pattern segment.
+tveclp:	movw,s d,y;		am->fifo1;	cjp, f1f .;	;			| segment->fifo1.
+	;			shmem->am;	cjp, zer tvwid;	;		shp+	| Jump if just sent zero segment.
+	;			;		rpct tveclp;	;			| Loop until counter hits zero.
+tvwid:	addw frameptr,acc,y;	am->shmemp;	crtn, go;	;			| Return & set pointer to width.
+	
+	
+
+#undef stoff 
+#undef options 
+#undef numargs 
+#undef veccmd 
+

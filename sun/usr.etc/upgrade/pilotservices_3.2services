@@ -1,0 +1,15 @@
+# !/bin/sh
+#
+#	Script to convert 3.2pilot services to 3.2fcs services
+#
+#       @(#)  pilotservices_3.2services 1.1 86/09/25 
+#
+#       Copyright (c) 1986 by Sun Microsystems, Inc.
+#
+
+ed $1 <<NEW
+/SMI/
+s/86\/02\/28/86\/07\/07/
+w
+q
+NEW

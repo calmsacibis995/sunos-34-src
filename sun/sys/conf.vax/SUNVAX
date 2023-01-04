@@ -1,0 +1,27 @@
+#
+# SUNVAX
+#
+machine		vax
+cpu		"VAX750"
+ident		SUNVAX
+timezone	8 dst
+maxusers	16
+options		INET
+options		RPC
+options		NFS
+
+config		vmunix		root on hp
+
+pseudo-device	pty
+pseudo-device	ether
+pseudo-device	loop
+
+controller	uba0	at nexus ?
+controller	mba0	at nexus ?
+
+disk		hp0	at mba? drive 0
+device		dz0	at uba? csr 0160100 flags 0xff	vector dzrint dzxint
+controller	zs0	at uba? csr 0172520		vector tsintr
+device		ts0	at zs0 drive 0
+device		ec0	at uba? csr 0164330 vector ecrint eccollide ecxint
+device		il0	at uba? csr 0164000 vector ilrint ilcint

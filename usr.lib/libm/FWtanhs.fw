@@ -1,0 +1,16 @@
+c       .data
+c       .asciz  "@(#)FWtanhs.fw 1.1 86/09/25 Copyr 1985 Sun Micro"
+c       .even
+c       .text
+
+c       Copyright (c) 1985 by Sun Microsystems, Inc.
+
+	real*4 function FWtanhs ( x )
+	real*4 x,t
+	if (abs(x) .lt. 0.5) then
+		FWtanhs = tanh(dble(x))
+	else
+		t = exp(-abs(x))
+		FWtanhs = sign(((1.0-t)*(1.0+t))/(1.0+t*t),x)
+	endif
+	end

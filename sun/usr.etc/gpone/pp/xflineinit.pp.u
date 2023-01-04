@@ -1,0 +1,67 @@
+|  "@(#)xflineinit.pp.u 1.4 87/01/07"   
+
+| Copyright 1986 by Sun Microsystems, Inc.
+| Written by Stuart Levy
+
+ 
+|   The options field is broken down as follows:
+|  	 bit 15 - startpt	bit 14 - endpt		bit 13 - balancing	bit 12 - givenpattern
+|  	 bit 11 - fat		bit 10 - poly		bit 9 - mvlist		bit 8 - righthalf
+|   	 bit 7 - close		bit 6 - cliprt		bit 5 - solid		bit 4 - pixrect
+|   	 bit 3 - nosetup	bit 2 - clipbit		bit 1 - firstvec
+
+|   This routine does initialization necessary for xfline.  It transfers numsegs,patln and stoff from the
+|   attribute area of scrmem to the 'scratch' section of memory where it is accessed by the pixrect level
+|   code.  It also fills in the firstvec and solid (if applicable) fields of the options word, and puts 
+|   it in the appropriate register.  The width is also placed in a register.  The addresses used for the
+|   vector attributes are defined in pp.h, while those in 'scratch' memory are defined here.
+
+#define firstvec	1
+#define nosetup		3
+#define pixrect		4
+#define solid		5
+
+#define numsegs		r[0]
+#define patln		r[1]
+#define stoff		r[2]
+
+#define width		r[21]
+#define options		r[24]
+
+#define savtex		0x120
+#define savxflnwid	0x136
+
+xflineinit: bclrw pixrect,options; NumsegsAddr->scrmemp; ;			| tex->options.pixrect = 0.
+	bclrw nosetup,options;	=xfinitsol->brreg; ;				| Must initially setup rop chips.
+	movw d,numsegs;		scrmem->am;	;			scrmp+	| scrmem(att)->numsegs.
+	movw d,patln;		scrmem->am;	;			scrmp+	| scrmem(att)->patln.
+	movw d,stoff;		scrmem->am;	;			scrmp+	| scrmem(att)->stoff.
+	movw d,options;		scrmem->am;	;			scrmp+	| scrmem(att)->options.
+	movw d,width;		scrmem->am;	;				| scrmem(att)->width.
+	bsetw firstvec,options;	PatternAddr->scrmemp; ;				| tex->options.firstvec=1.
+	movw,s d,y;		scrmem->am;	;			scrmp+	| 
+	movw,s d,y;		scrmem->am;	cjp, zer;			| Check if pattern is one segment only (solid).
+	bclrw solid,options;	savtex->scrmemp; cjp, zer;			| Jump if pattern is one segment.
+	movw stoff,y;		am->scrmem;	;			scrmp+	| stoff->scrmem (for toctant).
+	movw patln,y;		am->scrmem;	;			scrmp+	| patln->scrmem.
+	movw numsegs,y;		am->scrmem;	cjp, go start;			| numsegs->scrmem & return.
+	
+xfinitsol: bsetw solid,options;	savxflnwid->scrmemp; ;				| If solid vector, want to save
+	movw width,y;		am->scrmem;	cjp, go start;			|  width at location in scrmem.
+	
+
+
+#undef firstvec
+#undef nosetup
+#undef pixrect
+#undef solid
+
+#undef numsegs	
+#undef patln	
+#undef stoff	
+
+#undef width	
+#undef options	
+
+#undef savtex	
+#undef savxflnwid

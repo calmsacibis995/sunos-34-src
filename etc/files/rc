@@ -1,0 +1,87 @@
+#
+#	@(#)rc 1.1 86/09/24 SMI; from UCB 4.2
+#
+# Note that all "echo" commands are in parentheses.  This is done
+# because all commands that redirect the output to "/dev/console"
+# must be done in a child of the main shell, so that the main shell
+# does not open a terminal and get its process group set.  Since
+# "echo" is a builtin command, redirection for it will be done
+# in the main shell unless the command is run in a subshell.
+#
+HOME=/; export HOME
+PATH=/bin:/usr/bin
+if [ -r /fastboot ]
+then
+	rm -f /fastboot
+elif [ $1x = autobootx ]
+then
+	(echo Automatic reboot in progress...)			>/dev/console
+else
+	(echo Multiuser startup in progress...)			>/dev/console
+fi
+date >/dev/console
+rm -f /etc/nologin
+
+# attempt to rationally recover the passwd file if needed
+if [ -s /etc/ptmp ]
+then
+	if [ -s /etc/passwd ]
+	then
+		ls -l /etc/passwd /etc/ptmp >/dev/console
+		rm -f /etc/ptmp		# should really remove the shorter
+	else
+		(echo 'passwd file recovered from ptmp')	>/dev/console
+		mv /etc/ptmp /etc/passwd
+	fi
+elif [ -r /etc/ptmp ]
+then
+	(echo 'removing passwd lock file')			>/dev/console
+	rm -f /etc/ptmp
+fi
+chmod 666 /etc/motd
+/etc/mount -at 4.2						>/dev/console
+sh /etc/rc.local
+/usr/etc/swapon -a						>/dev/console
+				(echo preserving editor files) 	>/dev/console
+(cd /tmp; /usr/lib/ex3.7preserve -a)
+				(echo clearing /tmp) 		>/dev/console
+(cd /tmp; rm -f - *)
+				(echo -n standard daemons:)	>/dev/console
+/etc/update;			(echo -n ' update')		>/dev/console
+/etc/cron;			(echo -n ' cron')		>/dev/console
+cd /usr/spool
+if [ -f /usr/lib/lpd ]; then
+	rm -f /dev/printer /usr/spool/lpd.lock
+	/usr/lib/lpd &		(echo -n ' printer')		>/dev/console
+fi
+if [ -f /usr/adm/acct ]; then
+	/usr/etc/accton /usr/adm/acct;(echo -n ' accounting')	>/dev/console
+fi
+if [ -d /usr/spool/uucp ]; then
+	cd /usr/spool/uucp
+	>LCK.0
+	>LOG.0
+	rm -f LCK.*
+	chmod +w LOG.*
+	rm -f LOG.0
+	if [ -d /usr/lib/uucp ]; then
+		/usr/lib/uucp/uucico -r1 & (echo -n ' uucp')	>/dev/console
+	fi
+fi
+				(echo '.')			>/dev/console
+
+cd /
+(echo -n starting network:)					>/dev/console
+if [ -f /etc/inetd ]; then
+	/etc/inetd & (echo -n ' inet')				>/dev/console
+# rwhod (currently) is a real performance pig for systems with limited memory.
+#	/usr/etc/in.rwhod & (echo -n ' rwhod')			>/dev/console
+fi
+if [ -f /dev/ttyp0 ]; then
+	/etc/chown root /dev/tty[pq]*
+	chmod 666 /dev/tty[pq]*
+fi
+				(echo '.')			>/dev/console
+/etc/dmesg - >>/usr/adm/messages
+				date				>/dev/console
+exit 0

@@ -1,0 +1,16 @@
+# !/bin/sh
+#
+#	Script to convert 3.2pilot protocols to 3.2fcs protocols
+#
+#       @(#)  pilotprotocols_3.2protocols 1.1 86/09/25 
+#
+#       Copyright (c) 1986 by Sun Microsystems, Inc.
+#
+
+ed $1 <<NEW
+/SMI/
+s/1.5/1.1/
+s/86\/01\/02/86\/07\/07/
+w
+q
+NEW

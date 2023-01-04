@@ -1,0 +1,8 @@
+0 0 * * * calendar -
+15 0 * * * /usr/etc/sa -s >/dev/null
+7 2 * * * /usr/etc/fpa/fparel
+15 3 * * * find / -name .nfs\* -mtime +7 -exec rm -f {} \; -o -fstype nfs -prune
+15 4 * * * find /usr/preserve/ -mtime +7 -a -exec rm -f {} \;
+0,15,30,45 * * * * /usr/lib/atrun
+0,30 * * * * /etc/dmesg - >>/usr/adm/messages
+5 4 * * * su daemon </usr/adm/newsyslog

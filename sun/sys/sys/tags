@@ -1,0 +1,658 @@
+ADDDOMAIN	uipc_domain.c	/^#define	ADDDOMAIN(x)	{ \\$/
+ALIGNMORE	heap_kmem.c	/^#define	ALIGNMORE(addr)	(ALIGN - ((int)(addr) & AL/
+BUMPTIME	kern_clock.c	/^#define BUMPTIME(t, usec) { \\$/
+HASH	kern_synch.c	/^#define HASH(x)	(( (int) x >> 5) & (SQSIZE-1))$/
+INS_HASH	vfs_dnlc.c	/^#define	INS_HASH(ncp,nch)	insque(ncp, nch)$/
+INS_LRU	vfs_dnlc.c	/^#define	INS_LRU(ncp1,ncp2)	insque2((struct ncache /
+Minit_main	init_main.c	/^main(firstaddr)$/
+NC_HASH	vfs_dnlc.c	/^#define	NC_HASH(namep, namlen, vp)	\\$/
+NULL_HASH	vfs_dnlc.c	/^#define	NULL_HASH(ncp)		(ncp)->hash_next = (ncp)->/
+PHYSOFF	sys_process.c	/^#define	PHYSOFF(p, o) \\$/
+RM_HASH	vfs_dnlc.c	/^#define	RM_HASH(ncp)		remque(ncp)$/
+RM_LRU	vfs_dnlc.c	/^#define	RM_LRU(ncp)		remque2((struct ncache *) ncp/
+Xp	vm_pt.c	/^#define	Xp(a)	t = p->a; p->a = q->a; q->a = t;$/
+Xpp	vm_pt.c	/^#define	Xpp(a)	tp = p->a; p->a = q->a; q->a = tp;$/
+Xu	vm_pt.c	/^#define	Xu(a)	t = up->u_pcb.a; up->u_pcb.a = uq ->/
+Xup	vm_pt.c	/^#define	Xup(a)	tp = up->u_pcb.a; up->u_pcb.a = uq /
+accept	uipc_syscalls.c	/^accept()$/
+access	vfs_syscalls.c	/^access(uap)$/
+acct	kern_acct.c	/^acct()$/
+adjtime	kern_time.c	/^adjtime()$/
+assfail	subr_prf.c	/^assfail(a, f, l)$/
+b_to_q	tty_subr.c	/^b_to_q(cp, cc, q)$/
+baddr	vfs_bio.c	/^baddr(vp, blkno, size)$/
+bawrite	vfs_bio.c	/^bawrite(bp)$/
+bcmp	subr_xxx.c	/^bcmp(s1, s2, len)$/
+bdwrite	vfs_bio.c	/^bdwrite(bp)$/
+bflush	vfs_bio.c	/^bflush(vp)$/
+bhinit	init_main.c	/^bhinit()$/
+bind	uipc_syscalls.c	/^bind()$/
+binit	init_main.c	/^binit()$/
+binval	vfs_bio.c	/^binval(vp)$/
+binvalfree	vfs_bio.c	/^binvalfree(vp)$/
+biodone	vfs_bio.c	/^biodone(bp)$/
+biowait	vfs_bio.c	/^biowait(bp)$/
+bkclose	tty_bk.c	/^bkclose(tp)$/
+bkinput	tty_bk.c	/^bkinput(c, tp)$/
+bkioctl	tty_bk.c	/^bkioctl(tp, cmd, data, flag)$/
+bkopen	tty_bk.c	/^bkopen(dev, tp)$/
+bkread	tty_bk.c	/^bkread(tp, uio)$/
+blkflush	vfs_bio.c	/^blkflush(vp, blkno, size)$/
+bread	vfs_bio.c	/^bread(vp, blkno, size)$/
+breada	vfs_bio.c	/^breada(vp, blkno, size, rablkno, rabsize)$/
+brealloc	vfs_bio.c	/^brealloc(bp, size)$/
+brelse	vfs_bio.c	/^brelse(bp)$/
+brelvp	vfs_bio.c	/^brelvp(bp)$/
+bsetvp	vfs_bio.c	/^bsetvp(bp, vp)$/
+bswinit	init_main.c	/^bswinit()$/
+btoq	ipc_msg.c	/^#define	btoq(X)	((X + msginfo.msgssz - 1) \/ msginf/
+buffree	uipc_mbuf.c	/^buffree(arg)$/
+bumptime	kern_clock.c	/^bumptime(tp, usec)$/
+bwrite	vfs_bio.c	/^bwrite(bp)$/
+catq	tty_subr.c	/^catq(from, to)$/
+chdir	vfs_syscalls.c	/^chdir(uap)$/
+chdirec	vfs_syscalls.c	/^chdirec(dirnamep, vpp)$/
+check_need_to_free	heap_kmem.c	/^check_need_to_free()$/
+chmod	vfs_syscalls.c	/^chmod(uap)$/
+chown	vfs_syscalls.c	/^chown(uap)$/
+chroot	vfs_syscalls.c	/^chroot(uap)$/
+cinit	init_main.c	/^cinit()$/
+cleanup	vm_page.c	/^cleanup()$/
+close	kern_descrip.c	/^close()$/
+closef	kern_descrip.c	/^closef(fp)$/
+clrnd	kern_exec.c	/^size_t pgthresh = clrnd(btoc(PGTHRESH));$/
+compat	init_sysent.c	/^#define	compat(n, name)	n, o\/**\/name$/
+compress	kern_acct.c	/^compress(t)$/
+connect	uipc_syscalls.c	/^connect()$/
+copen	vfs_syscalls.c	/^copen(pnamep, filemode, createmode)$/
+core	kern_sig.c	/^core()$/
+crcopy	kern_prot.c	/^crcopy(cr)$/
+crdup	kern_prot.c	/^crdup(cr)$/
+creat	vfs_syscalls.c	/^creat(uap)$/
+crfree	kern_prot.c	/^crfree(cr)$/
+crget	kern_prot.c	/^crget()$/
+cstatfs	vfs.c	/^cstatfs(vfsp, ubuf)$/
+delete	heap_kmem.c	/^delete(p)$/
+demote	heap_kmem.c	/^demote(p)$/
+distpte	vm_pt.c	/^distpte(xp, tp, dpte)$/
+dnlc_enter	vfs_dnlc.c	/^dnlc_enter(dp, name, vp, cred)$/
+dnlc_init	vfs_dnlc.c	/^dnlc_init()$/
+dnlc_lookup	vfs_dnlc.c	/^dnlc_lookup(dp, name, cred)$/
+dnlc_purge	vfs_dnlc.c	/^dnlc_purge()$/
+dnlc_purge1	vfs_dnlc.c	/^dnlc_purge1()$/
+dnlc_purge_vp	vfs_dnlc.c	/^dnlc_purge_vp(vp)$/
+dnlc_remove	vfs_dnlc.c	/^dnlc_remove(dp, name)$/
+dnlc_rm	vfs_dnlc.c	/^dnlc_rm(ncp)$/
+dnlc_search	vfs_dnlc.c	/^dnlc_search(dp, name, namlen, hash, cred)$/
+domaininit	uipc_domain.c	/^domaininit()$/
+donice	kern_resource.c	/^donice(p, n)$/
+dounmount	vfs.c	/^dounmount(vfsp)$/
+dpageout	vm_page.c	/^dpageout(p, dp, n)$/
+dup	kern_descrip.c	/^dup()$/
+dup2	kern_descrip.c	/^dup2()$/
+dupit	kern_descrip.c	/^dupit(fd, fp, flags)$/
+entergroup	kern_prot.c	/^entergroup(gid)$/
+errsys	subr_xxx.c	/^errsys()$/
+execv	kern_exec.c	/^execv()$/
+execve	kern_exec.c	/^execve()$/
+exit	kern_exit.c	/^exit(rv)$/
+expand	vm_proc.c	/^expand(change, region)$/
+falloc	kern_descrip.c	/^falloc()$/
+favored	vm_sched.c	/^#define	favored(p)	((p)->p_flag & SFAVORD)$/
+fchmod	vfs_syscalls.c	/^fchmod(uap)$/
+fchown	vfs_syscalls.c	/^fchown(uap)$/
+fcntl	kern_descrip.c	/^fcntl()$/
+fdsetattr	vfs_syscalls.c	/^fdsetattr(fd, vap)$/
+ffs	subr_xxx.c	/^ffs(mask)$/
+fgetown	kern_descrip.c	/^fgetown(fp, valuep)$/
+fioctl	kern_descrip.c	/^fioctl(fp, cmd, value)$/
+flock	kern_descrip.c	/^flock()$/
+fodkluster	vm_page.c	/^fodkluster(p, v0, pte0, pkl, vp, pbn)$/
+forceclose	vfs_syscalls.c	/^forceclose(dev)$/
+fork	kern_fork.c	/^fork()$/
+fork1	kern_fork.c	/^fork1(isvfork)$/
+freehdr	heap_kmem.c	/^freehdr(p)$/
+fset	kern_descrip.c	/^fset(fp, bit, value)$/
+fsetown	kern_descrip.c	/^fsetown(fp, value)$/
+fstat	kern_descrip.c	/^fstat()$/
+fstatfs	vfs.c	/^fstatfs(uap)$/
+fsync	vfs_syscalls.c	/^fsync(uap)$/
+ftruncate	vfs_syscalls.c	/^ftruncate(uap)$/
+gatherstats	kern_clock.c	/^gatherstats(pc, ps)$/
+getblk	vfs_bio.c	/^getblk(vp, blkno, size)$/
+getc	tty_subr.c	/^getc(p)$/
+getdirentries	vfs_syscalls.c	/^getdirentries(uap)$/
+getdomainname	kern_xxx.c	/^getdomainname()$/
+getdopt	kern_descrip.c	/^getdopt()$/
+getdtablesize	kern_descrip.c	/^getdtablesize()$/
+geteblk	vfs_bio.c	/^geteblk(size)$/
+geterror	vfs_bio.c	/^geterror(bp)$/
+getf	kern_descrip.c	/^getf(f)$/
+getfreehdr	heap_kmem.c	/^getfreehdr()$/
+getgid	kern_prot.c	/^getgid()$/
+getgroups	kern_prot.c	/^getgroups()$/
+gethostid	kern_xxx.c	/^gethostid()$/
+gethostname	kern_xxx.c	/^gethostname()$/
+getitimer	kern_time.c	/^getitimer()$/
+getnewbuf	vfs_bio.c	/^getnewbuf()$/
+getpages	heap_kmem.c	/^getpages(npages)$/
+getpagesize	kern_mman.c	/^getpagesize()$/
+getpeername	uipc_syscalls.c	/^getpeername()$/
+getpgrp	kern_prot.c	/^getpgrp()$/
+getpid	kern_prot.c	/^getpid()$/
+getpriority	kern_resource.c	/^getpriority()$/
+getrlimit	kern_resource.c	/^getrlimit()$/
+getrusage	kern_resource.c	/^getrusage()$/
+getsock	uipc_syscalls.c	/^getsock(fdes)$/
+getsockname	uipc_syscalls.c	/^getsockname()$/
+getsockopt	uipc_syscalls.c	/^getsockopt()$/
+getsymlink	vfs_lookup.c	/^getsymlink(vp, pnp)$/
+gettimeofday	kern_time.c	/^gettimeofday()$/
+getuid	kern_prot.c	/^getuid()$/
+getvfs	vfs.c	/^getvfs(fsid)$/
+getvnodefp	vfs_syscalls.c	/^getvnodefp(fd, fpp)$/
+getvtimes	kern_xxx.c	/^getvtimes(aru, avt)$/
+getw	tty_subr.c	/^getw(p)$/
+getxfile	kern_exec.c	/^getxfile(vp, nargc, uid, gid, pn)$/
+groupmember	kern_prot.c	/^groupmember(gid)$/
+grow	kern_mman.c	/^grow(sp)$/
+gsignal	kern_sig.c	/^gsignal(pgrp, sig)$/
+hardclock	kern_clock.c	/^hardclock(pc, ps)$/
+harderr	subr_prf.c	/^harderr(bp, cp)$/
+hzto	kern_clock.c	/^hzto(tv)$/
+imax	subr_xxx.c	/^imax(a, b)$/
+imin	subr_xxx.c	/^imin(a, b)$/
+incore	vfs_bio.c	/^incore(vp, blkno)$/
+inferior	kern_proc.c	/^inferior(p)$/
+insert	heap_kmem.c	/^insert(p, len, tree)$/
+insque2	vfs_dnlc.c	/^insque2(ncp2, ncp1)$/
+ioctl	sys_generic.c	/^ioctl()$/
+ipcaccess	ipc_subr.c	/^ipcaccess(p, mode)$/
+ipcget	ipc_subr.c	/^ipcget(key, flag, base, cnt, size, status)$/
+issig	kern_sig.c	/^issig()$/
+itimerdecr	kern_time.c	/^itimerdecr(itp, usec)$/
+itimerfix	kern_time.c	/^itimerfix(tv)$/
+kill	kern_sig.c	/^kill()$/
+killpg	kern_sig.c	/^killpg()$/
+killpg1	kern_sig.c	/^killpg1(signo, pgrp, all)$/
+klok	vm_page.c	/^klok(pte, rw)$/
+kluster	vm_page.c	/^kluster(p, v, pte0, rw, pkl, klsize, bn0)$/
+kmcopy	vm_pt.c	/^kmcopy(to, from, count)$/
+kmem_alloc	heap_kmem.c	/^kmem_alloc(nbytes)$/
+kmem_free	heap_kmem.c	/^kmem_free(ptr, nbytes)$/
+kmem_free_intr	heap_kmem.c	/^kmem_free_intr(ptr, nbytes)$/
+kmem_init	heap_kmem.c	/^kmem_init()$/
+kmstartup	subr_mcount.c	/^kmstartup()$/
+leavegroup	kern_prot.c	/^leavegroup(gid)$/
+link	vfs_syscalls.c	/^link(uap)$/
+listen	uipc_syscalls.c	/^listen()$/
+loadav	vm_sched.c	/^loadav(avg, n)$/
+lookupname	vfs_lookup.c	/^lookupname(fnamep, seg, followlink, dirvpp, compvp/
+lookuppn	vfs_lookup.c	/^lookuppn(pnp, followlink, dirvpp, compvpp)$/
+lseek	vfs_syscalls.c	/^lseek(uap)$/
+lstat	vfs_syscalls.c	/^lstat(uap)$/
+m_adj	uipc_mbuf.c	/^m_adj(mp, len)$/
+m_cappend	uipc_mbuf.c	/^m_cappend(cp, len, m)$/
+m_cat	uipc_mbuf.c	/^m_cat(m, n)$/
+m_clalloc	uipc_mbuf.c	/^m_clalloc(ncl, how)$/
+m_copy	uipc_mbuf.c	/^m_copy(m, off, len)$/
+m_cpytoc	uipc_mbuf.c	/^m_cpytoc(m, off, len, cp)$/
+m_expand	uipc_mbuf.c	/^m_expand()$/
+m_free	uipc_mbuf.c	/^m_free(m)$/
+m_freem	uipc_mbuf.c	/^m_freem(m)$/
+m_get	uipc_mbuf.c	/^m_get(canwait, type)$/
+m_getclr	uipc_mbuf.c	/^m_getclr(canwait, type)$/
+m_more	uipc_mbuf.c	/^m_more(canwait, type)$/
+m_movtoc	uipc_mbuf.c	/^m_movtoc(m, to, count)$/
+m_pgfree	uipc_mbuf.c	/^m_pgfree(addr, n)$/
+m_pullup	uipc_mbuf.c	/^m_pullup(m0, len)$/
+m_tally	uipc_mbuf.c	/^m_tally(m, op, cc, mbcnt)$/
+madvise	kern_mman.c	/^madvise()$/
+max	heap_kmem.c	/^#define	max(a, b)	((a) < (b)? (b): (a))$/
+mbinit	uipc_mbuf.c	/^mbinit()$/
+mcldup	uipc_mbuf.c	/^mcldup(m, n, off)$/
+mclget	uipc_mbuf.c	/^mclget(m)$/
+mclgetx	uipc_mbuf.c	/^mclgetx(fun, arg, addr, len, wait)$/
+mclput	uipc_mbuf.c	/^mclput(m)$/
+mcount	subr_mcount.c	/^mcount()$/
+memall	vm_mem.c	/^memall(pte, size, p, type)$/
+memfree	vm_mem.c	/^memfree(pte, size, detach)$/
+memialloc	vm_mem.c	/^memialloc(first, last)$/
+meminit	vm_mem.c	/^meminit(first, last)$/
+mfind	vm_mem.c	/^mfind(vp, bn)$/
+mhash	vm_mem.c	/^mhash(c, vp, bn)$/
+min	subr_xxx.c	/^min(a, b)$/
+mincore	kern_mman.c	/^mincore()$/
+minphys	vm_swp.c	/^minphys(bp)$/
+mkdir	vfs_syscalls.c	/^mkdir(uap)$/
+mknod	vfs_syscalls.c	/^mknod(uap)$/
+mlock	vm_mem.c	/^mlock(pf)$/
+morecore	heap_kmem.c	/^morecore(nbytes)$/
+mount	vfs.c	/^mount(uap)$/
+mprotect	kern_mman.c	/^mprotect()$/
+mpurge	vm_mem.c	/^mpurge(vp)$/
+mpurgevfs	vm_mem.c	/^mpurgevfs(vfsp)$/
+mremap	kern_mman.c	/^mremap()$/
+msgconv	ipc_msg.c	/^msgconv(id)$/
+msgctl	ipc_msg.c	/^msgctl()$/
+msgfree	ipc_msg.c	/^msgfree(qp, pmp, mp)$/
+msgget	ipc_msg.c	/^msgget()$/
+msginit	ipc_msg.c	/^msginit()$/
+msgrcv	ipc_msg.c	/^msgrcv()$/
+msgsnd	ipc_msg.c	/^msgsnd()$/
+msgsys	ipc_msg.c	/^msgsys()$/
+mtoclx	uipc_mbuf.c	/^#define	mtoclx(x) (((int)x - (int)mbutl) \/ MCLBYTE/
+munhash	vm_mem.c	/^munhash(vp, bn)$/
+munlink	vm_mem.c	/^munlink(pf)$/
+munlock	vm_mem.c	/^munlock(pf)$/
+munmap	kern_mman.c	/^munmap()$/
+munmapfd	kern_mman.c	/^munmapfd(fd)$/
+mwait	vm_mem.c	/^mwait(pf)$/
+mweight	heap_kmem.c	/^#define	mweight(x) ((x) == NIL ? 0 : \\$/
+namesetattr	vfs_syscalls.c	/^namesetattr(fnamep, followlink, vap)$/
+ndflush	tty_subr.c	/^ndflush(q, cc)$/
+ndqb	tty_subr.c	/^ndqb(q, flag)$/
+newproc	kern_fork.c	/^newproc(isvfork)$/
+nextblk	heap_kmem.c	/^#define	nextblk(p, size) ((Dblk) ((char *) (p) + (/
+nextc	tty_subr.c	/^nextc(p, cp)$/
+nodev	subr_xxx.c	/^nodev()$/
+nulldev	subr_xxx.c	/^nulldev()$/
+nullioctl	tty_conf.c	/^nullioctl(tp, cmd, data, flags)$/
+nullsys	subr_xxx.c	/^nullsys()$/
+nz	vm_sched.c	/^#define	nz(x)	(x != 0 ? x : 1)$/
+oalarm	kern_xxx.c	/^oalarm()$/
+obreak	kern_mman.c	/^obreak()$/
+ofstat	vfs_xxx.c	/^ofstat()$/
+oftime	kern_xxx.c	/^oftime()$/
+onice	kern_xxx.c	/^onice()$/
+opause	kern_xxx.c	/^opause()$/
+open	vfs_syscalls.c	/^open(uap)$/
+osetgid	kern_xxx.c	/^osetgid()$/
+osetpgrp	kern_xxx.c	/^osetpgrp()$/
+osetuid	kern_xxx.c	/^osetuid()$/
+ossig	kern_xxx.c	/^ossig()$/
+ostat	vfs_xxx.c	/^ostat()$/
+ostat1	vfs_xxx.c	/^ostat1(vp, ub)$/
+ostime	kern_xxx.c	/^ostime()$/
+otime	kern_xxx.c	/^otime()$/
+otimes	kern_xxx.c	/^otimes()$/
+outime	vfs_xxx.c	/^outime()$/
+ovadvise	kern_mman.c	/^ovadvise()$/
+ovlimit	kern_xxx.c	/^ovlimit()$/
+ovtimes	kern_xxx.c	/^ovtimes()$/
+owait	kern_xxx.c	/^owait()$/
+pagein	vm_page.c	/^pagein(virtaddr, dlyu)$/
+pageout	vm_page.c	/^pageout()$/
+panic	subr_prf.c	/^panic(s)$/
+pfctlinput	uipc_domain.c	/^pfctlinput(cmd, arg)$/
+pffasttimo	uipc_domain.c	/^pffasttimo()$/
+pffindproto	uipc_domain.c	/^pffindproto(family, protocol)$/
+pffindtype	uipc_domain.c	/^pffindtype(family, type)$/
+pfind	kern_proc.c	/^pfind(pid)$/
+pfslowtimo	uipc_domain.c	/^pfslowtimo()$/
+pgtrace	vm_page.c	/^#define	pgtrace(e)	trace(e,v,u.u_procp->p_pid)$/
+physio	vm_swp.c	/^physio(strat, bp, dev, rw, mincnt, uio)$/
+piconnect	uipc_pipe.c	/^piconnect(wso, rso)$/
+pipe	uipc_syscalls.c	/^pipe()$/
+pn_alloc	vfs_pathname.c	/^pn_alloc(pnp)$/
+pn_combine	vfs_pathname.c	/^pn_combine(pnp, sympnp)$/
+pn_free	vfs_pathname.c	/^pn_free(pnp)$/
+pn_get	vfs_pathname.c	/^pn_get(str, seg, pnp)$/
+pn_getchar	vfs_pathname.c	/^pn_getchar(pnp)$/
+pn_getcomponent	vfs_pathname.c	/^pn_getcomponent(pnp, component)$/
+pn_set	vfs_pathname.c	/^pn_set(pnp, path)$/
+pn_skipslash	vfs_pathname.c	/^pn_skipslash(pnp)$/
+prf	subr_prf.c	/^prf(fmt, adx, touser)$/
+printf	subr_prf.c	/^printf(fmt, x1)$/
+printn	subr_prf.c	/^printn(n, b, touser)$/
+procdup	vm_proc.c	/^procdup(p, isvfork)$/
+procxmt	sys_process.c	/^procxmt()$/
+profil	kern_clock.c	/^profil()$/
+prtmsgbuf	subr_prf.c	/^prtmsgbuf()$/
+prtree	heap_kmem.c	/^prtree(p, cp)$/
+prvattr	vfs_vnode.c	/^prvattr(vap)$/
+prvnode	vfs_vnode.c	/^prvnode(vp)$/
+psig	kern_sig.c	/^psig()$/
+psignal	kern_sig.c	/^psignal(p, sig)$/
+ptcclose	tty_pty.c	/^ptcclose(dev)$/
+ptcopen	tty_pty.c	/^ptcopen(dev, flag)$/
+ptcread	tty_pty.c	/^ptcread(dev, uio)$/
+ptcselect	tty_pty.c	/^ptcselect(dev, rw)$/
+ptcwakeup	tty_pty.c	/^ptcwakeup(tp, flag)$/
+ptcwrite	tty_pty.c	/^ptcwrite(dev, uio)$/
+ptetov	vm_subr.c	/^ptetov(p, pte)$/
+ptexpand	vm_pt.c	/^ptexpand(change, ods, oss)$/
+ptrace	sys_process.c	/^ptrace()$/
+ptsclose	tty_pty.c	/^ptsclose(dev)$/
+ptsopen	tty_pty.c	/^ptsopen(dev, flag)$/
+ptsread	tty_pty.c	/^ptsread(dev, uio)$/
+ptsstart	tty_pty.c	/^ptsstart(tp)$/
+ptsstop	tty_pty.c	/^ptsstop(tp, flush)$/
+ptswrite	tty_pty.c	/^ptswrite(dev, uio)$/
+ptyioctl	tty_pty.c	/^ptyioctl(dev, cmd, data, flag)$/
+putc	tty_subr.c	/^putc(c, p)$/
+putchar	subr_prf.c	/^putchar(c, touser)$/
+putw	tty_subr.c	/^putw(c, p)$/
+q_to_b	tty_subr.c	/^q_to_b(q, cp, cc)$/
+read	sys_generic.c	/^read()$/
+readlink	vfs_syscalls.c	/^readlink(uap)$/
+readv	sys_generic.c	/^readv()$/
+realitexpire	kern_time.c	/^realitexpire(p)$/
+reboot	kern_xxx.c	/^reboot()$/
+recv	uipc_syscalls.c	/^recv()$/
+recvfrom	uipc_syscalls.c	/^recvfrom()$/
+recvit	uipc_syscalls.c	/^recvit(s, mp, flags, namelenp, rightslenp)$/
+recvmsg	uipc_syscalls.c	/^recvmsg()$/
+remque2	vfs_dnlc.c	/^remque2(ncp)$/
+rename	vfs_syscalls.c	/^rename(uap)$/
+rewhence	kern_descrip.c	/^rewhence(ld, fp, newwhence)$/
+rexit	kern_exit.c	/^rexit()$/
+rmalloc	subr_rmap.c	/^rmalloc(mp, size)$/
+rmdir	vfs_syscalls.c	/^rmdir(uap)$/
+rmfree	subr_rmap.c	/^rmfree(mp, size, addr)$/
+rmget	subr_rmap.c	/^rmget(mp, size, addr)$/
+rminit	subr_rmap.c	/^rminit(mp, size, addr, name, mapsize)$/
+roundrobin	kern_synch.c	/^roundrobin()$/
+rqinit	kern_synch.c	/^rqinit()$/
+ruadd	kern_resource.c	/^ruadd(ru, ru2)$/
+runchild	sys_process.c	/^runchild(p)$/
+rwuio	sys_generic.c	/^rwuio(uio, rw)$/
+sbappend	uipc_socket2.c	/^sbappend(sb, m)$/
+sbappendaddr	uipc_socket2.c	/^sbappendaddr(sb, asa, m0, rights0, rightsflag)$/
+sbdrop	uipc_socket2.c	/^sbdrop(sb, len)$/
+sbflush	uipc_socket2.c	/^sbflush(sb)$/
+sbrelease	uipc_socket2.c	/^sbrelease(sb)$/
+sbreserve	uipc_socket2.c	/^sbreserve(sb, cc)$/
+sbrk	kern_mman.c	/^sbrk()$/
+sbselqueue	uipc_socket2.c	/^sbselqueue(sb)$/
+sbwait	uipc_socket2.c	/^sbwait(sb)$/
+sbwakeup	uipc_socket2.c	/^sbwakeup(sb)$/
+scale60	kern_xxx.c	/^scale60(tvp)$/
+scanc	tty.c	/^scanc(size, cp, table, mask)$/
+sched	vm_sched.c	/^sched()$/
+schedcpu	kern_synch.c	/^schedcpu()$/
+schedpaging	vm_sched.c	/^schedpaging()$/
+select	sys_generic.c	/^select()$/
+selscan	sys_generic.c	/^selscan(ibits, obits)$/
+seltrue	sys_generic.c	/^seltrue(dev, flag)$/
+selwakeup	sys_generic.c	/^selwakeup(p, coll)$/
+semaoe	ipc_sem.c	/^semaoe(val, id, num)$/
+semconv	ipc_sem.c	/^semconv(s)$/
+semctl	ipc_sem.c	/^semctl()$/
+semexit	ipc_sem.c	/^semexit()$/
+semget	ipc_sem.c	/^semget()$/
+seminit	ipc_sem.c	/^seminit()$/
+semop	ipc_sem.c	/^semop()$/
+semsys	ipc_sem.c	/^semsys()$/
+semundo	ipc_sem.c	/^semundo(op, n, id, sp)$/
+semunrm	ipc_sem.c	/^semunrm(id, low, high)$/
+send	uipc_syscalls.c	/^send()$/
+sendit	uipc_syscalls.c	/^sendit(s, mp, flags)$/
+sendmsg	uipc_syscalls.c	/^sendmsg()$/
+sendto	uipc_syscalls.c	/^sendto()$/
+setdomainname	kern_xxx.c	/^setdomainname()$/
+setdopt	kern_descrip.c	/^setdopt()$/
+setgroups	kern_prot.c	/^setgroups()$/
+sethostname	kern_xxx.c	/^sethostname()$/
+setitimer	kern_time.c	/^setitimer()$/
+setpgrp	kern_prot.c	/^setpgrp()$/
+setpri	kern_synch.c	/^setpri(pp)$/
+setpriority	kern_resource.c	/^setpriority()$/
+setregid	kern_prot.c	/^setregid()$/
+setreuid	kern_prot.c	/^setreuid()$/
+setrlimit	kern_resource.c	/^setrlimit()$/
+setrun	kern_synch.c	/^setrun(p)$/
+setsigvec	kern_sig.c	/^setsigvec(sig, sv)$/
+setsockopt	uipc_syscalls.c	/^setsockopt()$/
+setthetime	kern_time.c	/^setthetime(tv)$/
+settimeofday	kern_time.c	/^settimeofday()$/
+setupclock	vm_sched.c	/^setupclock()$/
+shmalignment	ipc_shm.c	/^shmalignment()$/
+shmat	ipc_shm.c	/^shmat()$/
+shmconv	ipc_shm.c	/^shmconv(s)$/
+shmctl	ipc_shm.c	/^shmctl()$/
+shmdt	ipc_shm.c	/^shmdt()$/
+shmexec	ipc_shm.c	/^shmexec()$/
+shmexit	ipc_shm.c	/^shmexit()$/
+shmfork	ipc_shm.c	/^shmfork(cp, pp)$/
+shmfree	ipc_shm.c	/^shmfree(sp)$/
+shmget	ipc_shm.c	/^shmget()$/
+shmsys	ipc_shm.c	/^shmsys()$/
+shmunmap	ipc_shm.c	/^shmunmap(sp, addr)$/
+shutdown	uipc_syscalls.c	/^shutdown()$/
+sigblock	kern_sig.c	/^sigblock()$/
+sigmask	tty_pty.c	/^#define sigmask(m)	(1 << ((m)-1))$/
+sigpause	kern_sig.c	/^sigpause()$/
+sigsetmask	kern_sig.c	/^sigsetmask()$/
+sigstack	kern_sig.c	/^sigstack()$/
+sigvec	kern_sig.c	/^sigvec()$/
+sizeof	init_sysent.c	/^int	nsysent = sizeof (sysent) \/ sizeof (sysent[0])/
+skpc	subr_xxx.c	/^skpc(c, len, cp)$/
+sleep	kern_synch.c	/^sleep(chan, pri)$/
+smmap	kern_mman.c	/^smmap()$/
+soabort	uipc_socket.c	/^soabort(so)$/
+soaccept	uipc_socket.c	/^soaccept(so, nam)$/
+sobind	uipc_socket.c	/^sobind(so, nam)$/
+socantrcvmore	uipc_socket2.c	/^socantrcvmore(so)$/
+socantsendmore	uipc_socket2.c	/^socantsendmore(so)$/
+sockargs	uipc_syscalls.c	/^sockargs(aname, name, namelen)$/
+socket	uipc_syscalls.c	/^socket()$/
+socketpair	uipc_syscalls.c	/^socketpair()$/
+soclose	uipc_socket.c	/^soclose(so)$/
+soconnect	uipc_socket.c	/^soconnect(so, nam)$/
+soconnect2	uipc_socket.c	/^soconnect2(so1, so2)$/
+socreate	uipc_socket.c	/^socreate(dom, aso, type, proto)$/
+sodisconnect	uipc_socket.c	/^sodisconnect(so, nam)$/
+sofree	uipc_socket.c	/^sofree(so)$/
+softcall	kern_softint.c	/^softcall(func, arg)$/
+softclock	kern_clock.c	/^softclock(ps)$/
+softint	kern_softint.c	/^softint()$/
+sogetopt	uipc_socket.c	/^sogetopt(so, level, optname, m)$/
+sohasoutofband	uipc_socket.c	/^sohasoutofband(so)$/
+soisconnected	uipc_socket2.c	/^soisconnected(so)$/
+soisconnecting	uipc_socket2.c	/^soisconnecting(so)$/
+soisdisconnected	uipc_socket2.c	/^soisdisconnected(so)$/
+soisdisconnecting	uipc_socket2.c	/^soisdisconnecting(so)$/
+solisten	uipc_socket.c	/^solisten(so, backlog)$/
+sonewconn	uipc_socket2.c	/^sonewconn(head)$/
+soo_close	sys_socket.c	/^soo_close(fp)$/
+soo_ioctl	sys_socket.c	/^soo_ioctl(fp, cmd, data)$/
+soo_rw	sys_socket.c	/^soo_rw(fp, rw, uio)$/
+soo_select	sys_socket.c	/^soo_select(fp, which)$/
+soo_stat	sys_socket.c	/^soo_stat(so, ub)$/
+soqinsque	uipc_socket2.c	/^soqinsque(head, so, q)$/
+soqremque	uipc_socket2.c	/^soqremque(so, q)$/
+soreceive	uipc_socket.c	/^soreceive(so, aname, uio, flags, rightsp)$/
+soreserve	uipc_socket2.c	/^soreserve(so, sndcc, rcvcc)$/
+sorflush	uipc_socket.c	/^sorflush(so)$/
+sosend	uipc_socket.c	/^sosend(so, nam, uio, flags, rights)$/
+sosetopt	uipc_socket.c	/^sosetopt(so, level, optname, m)$/
+soshutdown	uipc_socket.c	/^soshutdown(so, how)$/
+sowakeup	uipc_socket2.c	/^sowakeup(so, sb)$/
+spgrp	kern_proc.c	/^spgrp(top, npgrp)$/
+sstk	kern_mman.c	/^sstk()$/
+stat	vfs_syscalls.c	/^stat(uap)$/
+stat1	vfs_syscalls.c	/^stat1(uap0, follow)$/
+statfs	vfs.c	/^statfs(uap)$/
+stop	kern_sig.c	/^stop(p)$/
+strcmp	subr_xxx.c	/^strcmp(s1, s2)$/
+strcpy	subr_xxx.c	/^strcpy(s1, s2)$/
+strlen	subr_xxx.c	/^strlen(s)$/
+strncmp	subr_xxx.c	/^strncmp(s1, s2, n)$/
+strncpy	subr_xxx.c	/^strncpy(s1, s2, n)$/
+suser	kern_prot.c	/^suser()$/
+swap	vm_swp.c	/^swap(p, dblkno, addr, nbytes, rdflg, flag, vp, pfc/
+swapin	vm_swap.c	/^swapin(p)$/
+swapon	vm_sw.c	/^swapon()$/
+swapout	vm_swap.c	/^swapout(p, ds, ss)$/
+swappable	vm_sched.c	/^#define	swappable(p) \\$/
+swappable_soon	vm_sched.c	/^#define	swappable_soon(p) \\$/
+swdone	vm_swp.c	/^swdone(bp)$/
+swdspt	vm_swap.c	/^swdspt(p, utl, rdwri)$/
+swfree	vm_sw.c	/^swfree(index)$/
+swkill	vm_swp.c	/^swkill(p, rout)$/
+swpexpand	vm_drum.c	/^swpexpand(ds, ss, dmp, smp)$/
+swpt	vm_swap.c	/^swpt(rdwri, p, doff, a, n)$/
+swread	vm_sw.c	/^swread(dev, uio)$/
+swstrategy	vm_sw.c	/^swstrategy(bp)$/
+swwrite	vm_sw.c	/^swwrite(dev, uio)$/
+syioctl	tty_tty.c	/^syioctl(dev, cmd, addr, flag)$/
+symlink	vfs_syscalls.c	/^symlink(uap)$/
+sync	vfs.c	/^sync()$/
+syopen	tty_tty.c	/^syopen(dev, flag)$/
+syread	tty_tty.c	/^syread(dev, uio)$/
+sysacct	kern_acct.c	/^sysacct(uap)$/
+syselect	tty_tty.c	/^syselect(dev, flag)$/
+sywrite	tty_tty.c	/^sywrite(dev, uio)$/
+tablefull	subr_prf.c	/^tablefull(tab)$/
+tbclose	tty_tb.c	/^tbclose(tp)$/
+tbdecode	tty_tb.c	/^tbdecode(cp, tbpos)$/
+tbinput	tty_tb.c	/^tbinput(c, tp)$/
+tbioctl	tty_tb.c	/^tbioctl(tp, cmd, data, flag)$/
+tbndecode	tty_tb.c	/^tbndecode(cp, tbpos)$/
+tbopen	tty_tb.c	/^tbopen(dev, tp)$/
+tbread	tty_tb.c	/^tbread(tp, uio)$/
+timeout	kern_clock.c	/^timeout(fun, arg, t)$/
+timevaladd	kern_time.c	/^timevaladd(t1, t2)$/
+timevalfix	kern_time.c	/^timevalfix(t1)$/
+timevalsub	kern_time.c	/^timevalsub(t1, t2)$/
+trace1	vm_mon.c	/^trace1(args)$/
+truncate	vfs_syscalls.c	/^truncate(uap)$/
+ttbreakc	tty.c	/^ttbreakc(c, tp)$/
+ttioctl	tty.c	/^ttioctl(tp, com, data, flag)$/
+ttnread	tty.c	/^ttnread(tp)$/
+ttread	tty.c	/^ttread(tp, uio)$/
+ttrstrt	tty.c	/^ttrstrt(tp)$/
+ttselect	tty.c	/^ttselect(dev, rw)$/
+ttstart	tty.c	/^ttstart(tp)$/
+ttwakeup	tty.c	/^ttwakeup(tp)$/
+ttwrite	tty.c	/^ttwrite(tp, uio)$/
+ttyblock	tty.c	/^ttyblock(tp)$/
+ttychars	tty.c	/^ttychars(tp)$/
+ttyclose	tty.c	/^ttyclose(tp)$/
+ttyecho	tty.c	/^ttyecho(c, tp)$/
+ttyflush	tty.c	/^ttyflush(tp, rw)$/
+ttyinput	tty.c	/^ttyinput(c, tp)$/
+ttyopen	tty.c	/^ttyopen(dev, tp)$/
+ttyout	tty.c	/^ttyout(cp, tp)$/
+ttyoutput	tty.c	/^ttyoutput(c, tp)$/
+ttypend	tty.c	/^ttypend(tp)$/
+ttyretype	tty.c	/^ttyretype(tp)$/
+ttyrub	tty.c	/^ttyrub(c, tp)$/
+ttyrubo	tty.c	/^ttyrubo(tp, cnt)$/
+ttywait	tty.c	/^ttywait(tp)$/
+ttywflush	tty.c	/^ttywflush(tp)$/
+uaccess	vm_subr.c	/^uaccess(p, map, uarea)$/
+ufalloc	kern_descrip.c	/^ufalloc(i)$/
+ufavail	kern_descrip.c	/^ufavail()$/
+uiomove	kern_subr.c	/^uiomove(cp, n, rw, uio)$/
+uipc_usrreq	uipc_usrreq.c	/^uipc_usrreq(so, req, m, nam, rights)$/
+umask	vfs_syscalls.c	/^umask(uap)$/
+uniqtime	kern_clock.c	/^uniqtime(tv)$/
+unlink	vfs_syscalls.c	/^unlink(uap)$/
+unmount	vfs.c	/^unmount(uap)$/
+unp_abort	uipc_usrreq.c	/^unp_abort(unp)$/
+unp_attach	uipc_usrreq.c	/^unp_attach(so)$/
+unp_bind	uipc_usrreq.c	/^unp_bind(unp, nam)$/
+unp_connect	uipc_usrreq.c	/^unp_connect(so, nam)$/
+unp_connect2	uipc_usrreq.c	/^unp_connect2(so, sonam, so2)$/
+unp_detach	uipc_usrreq.c	/^unp_detach(unp)$/
+unp_discard	uipc_usrreq.c	/^unp_discard(fp)$/
+unp_disconnect	uipc_usrreq.c	/^unp_disconnect(unp)$/
+unp_drain	uipc_usrreq.c	/^unp_drain()$/
+unp_drop	uipc_usrreq.c	/^unp_drop(unp, errno)$/
+unp_externalize	uipc_usrreq.c	/^unp_externalize(rights)$/
+unp_gc	uipc_usrreq.c	/^unp_gc()$/
+unp_internalize	uipc_usrreq.c	/^unp_internalize(rights)$/
+unp_mark	uipc_usrreq.c	/^unp_mark(fp)$/
+unp_scan	uipc_usrreq.c	/^unp_scan(m, op)$/
+unp_usrclosed	uipc_usrreq.c	/^unp_usrclosed(unp)$/
+unputc	tty_subr.c	/^unputc(p)$/
+unselect	sys_generic.c	/^unselect(p)$/
+unsleep	kern_synch.c	/^unsleep(p)$/
+untimeout	kern_clock.c	/^untimeout(fun, arg)$/
+uprintf	subr_prf.c	/^uprintf(fmt, x1)$/
+ureadc	kern_subr.c	/^ureadc(c, uio)$/
+ustat	vfs_xxx.c	/^ustat()$/
+utimes	vfs_syscalls.c	/^utimes(uap)$/
+uwritec	kern_subr.c	/^uwritec(uio)$/
+vafsidtovfs	vfs.c	/^vafsidtovfs(vafsid, vfspp)$/
+vattr_null	vfs_vnode.c	/^vattr_null(vap)$/
+vfork	kern_fork.c	/^vfork()$/
+vfs_add	vfs.c	/^vfs_add(coveredvp, vfsp, mflag)$/
+vfs_lock	vfs.c	/^vfs_lock(vfsp)$/
+vfs_mountroot	vfs.c	/^vfs_mountroot()$/
+vfs_remove	vfs.c	/^vfs_remove(vfsp)$/
+vfs_unlock	vfs.c	/^vfs_unlock(vfsp)$/
+vgetpt	vm_pt.c	/^vgetpt(p, pmemall)$/
+vgetswu	vm_pt.c	/^vgetswu(p, utl)$/
+vgetu	vm_pt.c	/^vgetu(p, palloc, map, newu, oldu)$/
+vgetvm	vm_proc.c	/^vgetvm(ts, ds, ss)$/
+vhangup	vfs_syscalls.c	/^vhangup()$/
+vinifod	vm_subr.c	/^vinifod(pte, fileno, vp, bfirst, count)$/
+vinitpt	vm_pt.c	/^vinitpt(p)$/
+vmaccess	vm_subr.c	/^vmaccess(ppte0, vaddr, size0)$/
+vmdup	vm_proc.c	/^vmdup(p, pte, v, count, type)$/
+vmemall	vm_mem.c	/^vmemall(pte, size, p, type)$/
+vmemfree	vm_mem.c	/^vmemfree(pte, count)$/
+vmfltmon	vm_mon.c	/^vmfltmon(hist, atime, amin, res, nmax)$/
+vmmeter	vm_sched.c	/^vmmeter()$/
+vmsizmon	vm_mon.c	/^vmsizmon()$/
+vmtotal	vm_sched.c	/^vmtotal()$/
+vn_close	vfs_vnode.c	/^vn_close(vp, flag)$/
+vn_create	vfs_vnode.c	/^vn_create(pnamep, seg, vap, excl, mode, vpp)$/
+vn_link	vfs_vnode.c	/^vn_link(from_p, to_p, seg)$/
+vn_open	vfs_vnode.c	/^vn_open(pnamep, seg, filemode, createmode, vpp)$/
+vn_rdwr	vfs_vnode.c	/^vn_rdwr(rw, vp, base, len, offset, seg, ioflag, ar/
+vn_rele	vfs_vnode.c	/^vn_rele(vp)$/
+vn_remove	vfs_vnode.c	/^vn_remove(fnamep, seg, dirflag)$/
+vn_rename	vfs_vnode.c	/^vn_rename(from_p, to_p, seg)$/
+vno_bsd_lock	vfs_io.c	/^vno_bsd_lock(fp, cmd)$/
+vno_bsd_unlock	vfs_io.c	/^vno_bsd_unlock(fp, kind)$/
+vno_close	vfs_io.c	/^vno_close(fp)$/
+vno_ioctl	vfs_io.c	/^vno_ioctl(fp, com, data)$/
+vno_lockrelease	vfs_io.c	/^vno_lockrelease(fp)$/
+vno_rw	vfs_io.c	/^vno_rw(fp, rw, uiop)$/
+vno_select	vfs_io.c	/^vno_select(fp, flag)$/
+vno_stat	vfs_io.c	/^vno_stat(vp, sb)$/
+vpasspt	vm_pt.c	/^vpasspt(p, q, up, uq, umap)$/
+vpassvm	vm_proc.c	/^vpassvm(p, q, up, uq, umap)$/
+vrelpt	vm_pt.c	/^vrelpt(p)$/
+vrelswu	vm_pt.c	/^vrelswu(p, utl)$/
+vrelu	vm_pt.c	/^vrelu(p, swapu)$/
+vrelvm	vm_proc.c	/^vrelvm()$/
+vschunk	vm_drum.c	/^vschunk(p, base, size, type, dmp)$/
+vsexpand	vm_drum.c	/^vsexpand(vssize, dmp, canshrink)$/
+vslock	vm_mem.c	/^vslock(base, count)$/
+vsswap	vm_drum.c	/^vsswap(p, pte, type, vsbase, vscount, dmp)$/
+vsswapfree	vm_drum.c	/^vsswapfree(vsbase, blk, swbase)$/
+vstodb	vm_drum.c	/^vstodb(vsbase, vssize, dmp, dbp, rev)$/
+vsunlock	vm_mem.c	/^vsunlock(base, count, rw)$/
+vsxalloc	vm_drum.c	/^vsxalloc(xp)$/
+vsxfree	vm_drum.c	/^vsxfree(xp, ts)$/
+vtod	vm_drum.c	/^vtod(p, v, dmap, smap)$/
+vtopte	vm_subr.c	/^vtopte(p, v)$/
+vusize	vm_pt.c	/^vusize(p, utl)$/
+wait	kern_exit.c	/^wait()$/
+wait1	kern_exit.c	/^wait1(options, ru)$/
+wakeup	kern_synch.c	/^wakeup(chan)$/
+wakeup_one	kern_synch.c	/^wakeup_one(chan)$/
+weight	heap_kmem.c	/^#define	weight(x)	((x) == NIL? 0: (x->size))$/
+wmemall	vm_mem.c	/^wmemall(pmemall, n)$/
+wmemfree	vm_mem.c	/^wmemfree(va, n)$/
+write	sys_generic.c	/^write()$/
+writev	sys_generic.c	/^writev()$/
+xalloc	vm_text.c	/^xalloc(vp, pagi)$/
+xccdec	vm_text.c	/^xccdec(xp, p)$/
+xfree	vm_text.c	/^xfree()$/
+xinval	vm_text.c	/^xinval(vp)$/
+xlink	vm_text.c	/^xlink(p)$/
+xlock	vm_text.c	/^xlock(xp)$/
+xrele	vm_text.c	/^xrele(vp)$/
+xrepl	vm_text.c	/^xrepl(p, q)$/
+xumount	vm_text.c	/^xumount(vfsp)$/
+xunlink	vm_text.c	/^xunlink(p)$/
+xunlock	vm_text.c	/^xunlock(xp)$/
+xuntext	vm_text.c	/^xuntext(xp)$/
+xwait	vm_text.c	/^xwait(xp)$/
+zmemall	vm_mem.c	/^zmemall(pmemall, n)$/

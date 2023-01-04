@@ -1,0 +1,291 @@
+#! /bin/csh -f
+#
+#       @(#)devtop 1.1 9/25/86 Copyright 1985 Sun Micro
+#
+#	script to find devices we want to test,
+#	and to (optionally) ask operator to approve list.
+#
+
+onintr finish
+set path=($path $SYSDIAG_DIRECTORY)
+set mode
+set test_args
+set shoebox
+if ($?SHOEBOX_TEST) set shoebox = "shoebox "
+
+if ($?RUN_ON_ERROR) then
+  if ($RUN_ON_ERROR == enabled) then
+     set run_on_error
+  endif
+endif
+foreach arg ($argv)
+  if ($arg == auto || $arg == select || $arg == verify) then
+    set mode = $arg
+  else if ($arg == test) then
+    set testing
+  else if ($arg == cf) then
+    set make_core_file
+  else
+    set test_args = ($test_args $arg)
+  endif
+  if ($arg == d) set debug
+  if ($arg == re) set run_on_error
+end
+ 
+if ($mode == '') then
+  if ($?SYSDIAG_MODE) then
+    set mode = $SYSDIAG_MODE
+  endif
+endif
+
+echo 'devtop: '$shoebox''$mode' mode.'
+#
+
+echo "devtop: Probing for devices ..."
+
+set devs= (none)
+
+if ($?SHOEBOX_TEST) then
+#				probe for shoebox sd's (scsi disks)
+  foreach i (1 2 3 4 5 6 7)
+	if (-e /dev/rsd${i}c) then
+		set devs=($devs "sd${i}c") 
+	endif
+  end
+else
+#				probe for xd's (xylogics)
+  foreach i (0 1 2 3)
+	if (-e /dev/rxd${i}c) then
+		set devs=($devs "xd${i}c") 
+	endif
+  end
+#				probe for xy's (xylogics)
+  foreach i (0 1 2 3)
+	if (-e /dev/rxy${i}c) then
+		set devs=($devs "xy${i}c") 
+	endif
+  end
+#				probe for sd's (scsi disks)
+  foreach i (0 1 2 3)
+	if (-e /dev/rsd${i}c) then
+		set devs=($devs "sd${i}c") 
+	endif
+  end
+#				probe for ethernet networks
+  reply sd v
+  set nets = $status
+
+  if ($SUN_MANUFACTURING == yes) then
+    set temp=`df | grep '/$'`
+    set root=$temp[1]
+    if (($root =~ *sd*) || ($root =~ *xy*) || ($root =~ *xd*)) then
+      if ($nets > 0) set devs=($devs "enet0") 
+    endif
+  else
+    if ($nets > 0) set devs=($devs "enet0")
+  endif
+  if ($nets > 1) set devs=($devs "enet1")
+  if ($nets > 2) set devs=($devs "enet2")
+  if ($nets > 3) set devs=($devs "enet3")
+
+# 				probe for any intervention tests (if enabled)
+  if ($INTERVENTION_TESTS == enabled) then
+     #				probe for mt (1/2 in. tapes)
+     if (-e /dev/rmt0) then
+	  if (-e /dev/rmt8) then
+	     set devs=($devs "mt0") 
+	  else 
+	     echo devtop: '"/dev/rmt0"' found but no '"/dev/rmt8"' found.
+	     if ($mode != verify) then
+	        if ($TERM == sun) then
+		   exec /bin/csh
+	        else exit(1)
+	        endif
+	     endif
+	  endif
+     endif
+   #				probe for mt (1/2 in. tapes)
+     if (-e /dev/rmt1) then
+	if (-e /dev/rmt9) then
+	   set devs=($devs "mt1") 
+	else 
+	   echo devtop: '"/dev/rmt1"' found but no '"/dev/rmt9"' found.
+	   if ($mode != verify) then
+	      if ($TERM == sun) then
+		 exec /bin/csh
+	      else exit(1)
+	      endif
+	   endif
+	endif
+     endif
+   #				test for serial port tests
+     if ($?SERIAL_PORTS_1) then
+	   set devs=($devs "sp")
+     endif
+   #				test for data communications processor tests
+     if ($?DCP_PORTS_1) then
+	   set devs=($devs "dcp")
+     endif
+  endif
+
+#				probe for color board  
+  if (-e /dev/cgtwo0 || -e /dev/cgthree0 || -e /dev/cgfour0) then
+     set devs=($devs "color") 
+  endif
+
+#				prompt for manufacturing serial port tests
+  if ($SERIAL_PORT_BOARD != no) then
+     @ i = 1
+     while ($i <= $SERIAL_PORT_BOARD)
+       eval set n = `echo '$'SERIAL_FIXTURE_$i`
+       @ b = $i - 1
+       eval set devs = `echo \($devs "sp'$b'-$n"\)`
+       @ i ++
+     end
+  endif
+
+#				probe for sun 3 FPA or MC68881
+  if (-e $SYSDIAG_DIRECTORY/softfp) then
+    softfp sd v
+    set return = $status
+    if ($return == 21) then
+       set devs=($devs "MC68881")
+       set devs=($devs "FPA")
+       set devs=($devs "softfp")
+    else if ($return == 22) then
+       set devs=($devs "MC68881")
+       set devs=($devs "softfp")
+    else if ($return == 23) then
+       set devs=($devs "softfp")
+    else if ($return == 7) then
+             if ($mode != verify) then
+                if ($TERM == sun) then
+                   exec /bin/csh
+                else exit(1)
+                endif
+             endif
+    endif
+  else
+    echo "devtop: 'softfp' not found."
+  endif
+
+#		prompt for manufacturing graphics processer and buffer tests
+  if ($GRAPHICS_BUFFER == yes) then
+       set devs=($devs "gp&b")
+      else
+      if ($GRAPHICS_PROCESSOR == yes) then
+       set devs=($devs "gp")
+      endif
+  endif
+
+#				test for mulitbus/0 or VME bus/1
+  skyprobe type
+  set sky_type = $status
+
+  if ($sky_type == 0) then
+				# probe for sky's (floating point) mbio 2000
+    skyprobe 3 2000 >& /dev/null
+    if ($status == 0) set link_sky_ucode
+
+				# probe for sky's (floating point) vmeio 8800
+  else
+     if (-e /dev/vme16 == 0) then
+        /etc/mknod /dev/vme16 c 3 5
+        /bin/chmod 600 /dev/vme16
+     endif
+     skyprobe 4 8800 >& /dev/null
+     if ($status == 0) set link_sky_ucode
+  endif
+
+  if ($?link_sky_ucode) then
+    if (-e sky.ucode == 0) then
+      if (-e /etc/sky.ucode) then
+        ln -s /etc/sky.ucode
+      else 
+        if (-e /usr/lib/sky.ucode) then
+          ln -s /usr/lib/sky.ucode
+        else 
+          echo devtop: A sky board was found, but '"/etc/sky.ucode"' or '"/usr/lib/sky.ucode"' was not found.
+          if ($mode != verify) then
+            if ($TERM == sun) then
+              exec /bin/csh
+            else exit(1)
+            endif
+          else set no_sky
+	  endif
+        endif
+      endif
+    endif
+    if (!($?no_sky)) set devs=($devs "sky") 
+  endif
+
+endif  # if ($?SHOEBOX_TEST) 
+
+#				probe for test file
+if (-e test) then
+	set devs=($devs "test") 
+endif
+
+if ($#devs != 1) then
+   echo devtop: Devices found - $devs[2-$#devs]
+endif
+
+if ($mode == verify) then
+  if ($#devs == 1) then
+     echo devtop: No devices found, no tests to run.
+  endif
+  exit
+else
+
+  set devs=($devs[2-$#devs])
+
+  @ n=1
+  set usedev="k"
+  while($n <= $#devs)
+	if ($mode == select) then
+                set r
+                while ("$r" != y && "$r" != n)
+		  echo -n "devtop: Test "$devs[$n]" ? "
+                  set k = $<
+		  set r = ($k)
+                end 
+                if ($r == y) then
+			set usedev=($usedev $devs[$n])
+		endif
+	else
+			set usedev=($usedev $devs[$n])
+	endif
+	@ n++
+  end
+
+  if ($#usedev == 1) then
+        echo devtop: No devices found, no tests to run.
+	if ($TERM == sun) then 
+          exec /bin/csh
+	else exit(1)
+        endif
+  else
+	set usedev=($usedev[2-$#usedev])
+	foreach dev ($usedev)
+	   if ($dev =~ *mt*) then
+		echo devtop: Rewinding $dev ".. "
+		set rew=`mt -f /dev/r$dev rew |& cat`
+		while ($#rew != 0)
+		  echo -n "devtop: Correct $dev problem then press return: "
+		  set rew=$<
+		  set rew=`mt -f /dev/r$dev rew |& cat`
+		end
+		echo devtop: $dev rewind complete.
+	   endif
+	end
+	if ($TERM == sun) then
+	     dev $usedev $test_args  		# if not sun, dev in background
+	     exit
+	else 
+	     exec dev $usedev $test_args & 
+	endif
+  endif
+endif
+
+finish:
+if($TERM == sun) exec /bin/csh

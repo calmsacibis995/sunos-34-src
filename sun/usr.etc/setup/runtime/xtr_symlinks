@@ -1,0 +1,30 @@
+#! /bin/sh
+#
+# @(#)xtr_symlinks 1.1 86/09/25 SMI; from UCB X.X XX/XX/XX
+#
+if [ $# != 1 ]; then
+	echo Usage: $0 archname
+	exit 1
+fi
+set -x
+arch=$1
+cd /setup.root
+
+#
+# Make links between the usual names and the architecture-specific
+# directories
+#
+ln -s pub.$arch pub
+ln -s pub.$arch/bin bin
+ln -s usr.$arch usr
+ln -s private.$arch private
+ln -s pub.$arch/lib lib
+
+#
+# Must copy boot, vmunix and stand from pub back to the root so the server
+# can use them too.
+#
+cd pub
+cp boot ..
+cp vmunix ..
+cp -r stand ..

@@ -1,0 +1,8 @@
+wheel:*:0:
+daemon:*:1:
+kmem:*:2:
+bin:*:3:
+news:*:6:
+staff:*:10:
+other:*:20:
++:

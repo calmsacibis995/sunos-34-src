@@ -1,0 +1,225 @@
+.\" @(#) usrtemplate.msun 1.1 9/25/86
+.\" 
+.\" USER'S DOCUMENT Template for the Diagnostic Department. 
+.\" 
+.\" Comment lines begin with .\" and are ignored by the formaters.
+.\" 
+.\" Instruction lines begin with .\" I: and may require input. 
+.\" 
+.\" ******************** beginning of Title Page ***********************
+.LP
+.B
+.ps 14
+.nf
+S U N  Microsystems
+.sp 16
+.ce 100
+.ps 20
+.\"
+.\" I: The Major Title of the document is to replace "Major Title" 
+.\" I: below.  If the Major Title requires two lines, (1) follow the 
+.\" I: first line of the title with a line containing ".sp 2" and (2) 
+.\" I: another line containing the second line of the title.
+.\"
+Major Title
+.sp 3
+.ps 20
+User's Document
+.sp 14
+.ps 14
+.\"
+.\" I: The author's name is to replace "Author" below.  If there are
+.\" I: multiple authors, for each additional author, (1) add a line 
+.\" I: containing ".sp 1" (2) followed by a line containing the 
+.\" I: author's name.  Be aware that if there are many authors, the 
+.\" I: title page may become the title pageS.  Therefore, the title 
+.\" I: page may need to be reformatted.
+.\"
+Author
+.sp 2
+\*(DY
+.sp 2
+.\"
+.\" I: The appropriate revision letter replaces "A" below.
+.\"
+Revision A
+.ce 0
+.fi
+.\" *********************** end of Title Page **************************
+.\" 
+.\" 
+.\" ******************** beginning of document *************************
+.R
+.bp 1
+.ps 12
+.\"
+.\" I: The Major Title of the document is to replace "Major Title" in 
+.\" I: the two lines below.
+.\"
+.EH 'S U N  Microsystems''Major Title'
+.OH 'S U N  Microsystems''Major Title'
+.\" 
+.\" I: The appropriate revision letter replaces "A" in the two lines 
+.\" I: below.
+.\" 
+.EF '\*(DY'Revision A'page \\\\n(PN'
+.OF '\*(DY'Revision A'page \\\\n(PN'
+.P1
+.H 1 "Preface"
+.PP
+.\" 
+.\" I: A brief description of the contents of the document replaces
+.\" I: "Preface" below.  The Preface can take on the form of a 
+.\" I: restatement and/or clarification of the title of the document.
+.\" I: For example:
+.\"         The User's Document associated with the Sun-2/120' Video
+.\"     Board Diagnostic is presented.
+.\"
+Preface
+.H 2 "Purpose"
+.PP
+.\" 
+.\" I: The purpose of the document replaces "Purpose" below.  What 
+.\" I: knowledge will the reader gain by reading this document?
+.\" I: For example:
+.\"         It is the intention of this document to inform the reader
+.\"    how to use the Sun-2/120' Video Board Diagnostic.
+.\"
+Purpose
+.H 2 "Audience"
+.PP
+.\" 
+.\" I: The audience replaces "Audience" below.  Who should read this 
+.\" I: document and why should they read it?  What prior knowledge, 
+.\" I: if any, is the reader assumed to have?
+.\" I: For example:
+.\"         Members of any of the following five departments may find 
+.\"    this document of interest for various reasons: (1) Design 
+.\"    Engineering, (2) Manufacturing, (3) Field Service, (4) 
+.\"    Diagnostics and (5) Documentation.  
+.\"         Using the Sun-2/120' Video Board Diagnostic, the Design 
+.\"    Engineer(s) of the Sun-2/120' Video Board will be able to confirm
+.\"    the correctness of their design.  Manufacturing and Field Service
+.\"    personnel will use the Sun-2/120' Video Board Diagnostic for 
+.\"    testing and/or trouble shooting purposes.  Member(s) of the 
+.\"    Diagnostic department will review the design of the Sun-2/120' 
+.\"    Video Board Diagnostic based on this document.  Finally, 
+.\"    Documentation will use this document as a basis for developing 
+.\"    the User's Guide which will be shipped with the product itself.
+.\"         At a minimum, the reader is assumed to have some 
+.\"    understanding of the function of the Sun-2/120' Video Board.  An
+.\"    excellent preface to this document is "Theory of Operation 
+.\"    Manual for the Sun-2/120' Video Board". 
+.\"
+Audience
+.H 1 "Revision History"
+.LP
+.\"
+.\" I: The appropriate date (MDY form) replaces "Month Day, Year" below.
+.\" I: If this is the first release of the document, replace 
+.\" I: "Month Day, Year" below with \*(DY and the date will 
+.\" I: automatically be added.  "Initial release of this document" can 
+.\" I: be replaced if so desired.
+.\"
+Revision A     Month Day, Year     Initial release of this document.
+.\"
+.\" I: For each additional revision, (1) add a line containing ".LP".
+.\" I: Then, (2) add a line containing "Revision x     MD,Y     Comment"
+.\" I: where "x" is replaced by the appropriate revision letter 
+.\" I: (B,C,D,...), "MD,Y" is replaced by the appropriate date and
+.\" I: "Comment" is replaced by a brief comment indicating what changes
+.\" I: were made in the revision.
+.\" I: SUGGESTION: Put the entries in alphabetical order by revision.
+.\" I: For example:
+.\"    .LP
+.\"    Revision B     November 9, 1984     Reorganized the document.
+.\"
+.H 1 "Glossary"
+.\"
+.\" I: For each term, (1) add a line containing ".LP".  Then (2)
+.\" I: add a line containing "term  -  definition of term" where "term"
+.\" I: is replaced by the appropriate to-be-defined term and 
+.\" I: "definition of term" is replaced by the definition of the term. 
+.\" I: SUGGESTION: Put the terms in alphabetical order.
+.\" I: For example:
+.\"    .LP
+.\"    FRU  -  Field Replaceable Unit.
+.\"
+.H 1 "Introduction"
+.PP
+.\"
+.\" I: The Introduction section is to replace "Introduction" below.
+.\" I: The Introduction will introduce the "tool" that this User's 
+.\" I: Document is being written for.  That is, state the name of the 
+.\" I: "tool" and briefly state what its function will be.  This is also 
+.\" I: the appropriate place to state the history of the project itself 
+.\" I: if you should desire.  Each paragraph is to be preceded by a line
+.\" I:  containing ".PP".
+.\"
+Introduction
+.H 1 "Requirements"
+.PP
+.H 2 "Hardware Requirements"
+.PP
+.H 2 "Software Requirements"
+.PP
+.H 2 "Firmware Requirements"
+.PP
+.H 1 "General Information"
+.PP
+.H 2 "Hardware-Related Information"
+.PP
+.H 2 "Software-Related Information"
+.PP
+.H 1 "Operating Instructions"
+.PP
+.H 2 "Loading And Starting"
+.PP
+.H 2 "User Interface"
+.PP
+.H 3 "Command Line"
+.PP
+.H 3 "Modes"
+.PP
+.H 3 "Paramaters"
+.PP
+.H 3 "Tools"
+.PP
+.H 3 "Test"
+.PP
+.H 3 "Sequencing"
+.PP
+.H 3 "Defaults"
+.PP
+.H 1 "Error Handling"
+.PP
+.H 2 "Message Interpretation"
+.PP
+.H 2 "Failure Analyses"
+.PP
+.H 2 "Field Replaceable Units"
+.PP
+.H 1 "Recommended Test Procedure"
+.PP
+.H 1 "Future Considerations"
+.H 1 "Summary"
+.PP
+.\"
+.\" I: A brief Summary of the document is to replace "Summary" below.
+.\"
+Summary
+.H 1 "References"
+.\"
+.\" I: For each reference, (1) add a line containing ".LP".  Then (2)
+.\" I: add a line containing "title, Revision x, MD,Y, author." where
+.\" I: "title" is replaced by the title of the referenced document,
+.\" I: "x" is replaced by the appropriate revision of the document,
+.\" I: "MD,Y" is replaced by the date when the document was released and
+.\" I: "author" is replaced by the author of the document (if known).
+.\" I: SUGGESTION: Put the entries in alphabetical order by title.
+.\" I: For example:
+.\"    .LP
+.\"    Theory of Operation Manual for the Sun-2/120' Video Board, 
+.\"    Revision A, September 26, 1984.
+.\"
+.\" ********************** end of document *****************************

@@ -1,0 +1,1998 @@
+#! /bin/csh -f
+#
+#       @(#)sysdiag 1.1 9/25/86 Copyright 1985 Sun Micro
+#
+#
+stty -tostop
+set sd_dir = `pwd`
+set ttys_dir = /etc
+set path=($path /etc /usr/etc /usr/local /usr/bin /usr/suntool $sd_dir)
+setenv SHELL /bin/csh  
+setenv SYSDIAG_DIRECTORY $sd_dir
+setenv SUN_MANUFACTURING no 
+setenv VMEM_WAIT_TIME 0
+setenv GRAPHICS_PROCESSOR no
+setenv GRAPHICS_BUFFER no
+setenv SERIAL_PORT_BOARD no
+setenv SERIAL_FIXTURE_1 14
+setenv SERIAL_FIXTURE_2 14
+setenv SERIAL_FIXTURE_3 14
+setenv SERIAL_FIXTURE_4 14
+setenv INTERVENTION_TESTS disabled 
+setenv TAPE_TEST short 
+setenv TAPE_HEADS 4
+setenv SD_LOAD_TEST no
+setenv EMULEX_CONTROLLER no
+setenv QIC_24 no
+setenv RUN_ON_ERROR disabled
+
+if (-e /dev/pc0 || -e /dev/pc1 || -e /dev/pc2 || -e /dev/pc3) then
+  setenv IPC yes
+else
+  setenv IPC no
+endif
+
+if (-e /dev/cgtwo0 || -e /dev/cgthree0 || -e /dev/cgfour0) then
+   setenv COLOR_MONITOR yes
+endif
+
+set gp
+set sp_1
+set sp_2
+set sp_3
+set sp_4
+set tty_devs
+set manuf_tty_devs
+set manuf_tty_devs_1
+set manuf_tty_devs_2
+set manuf_tty_devs_3
+set manuf_tty_devs_4
+set manuf = 'disabled'
+set vmem_wait
+set ports_selected = none 
+set serial_ports_list
+set dcp_ports_selected = none 
+set dcp_ports_list
+set dcp_installed = no
+set ipc_ports_selected = none 
+set ipc_ports_list
+set ipc_disks_selected = none 
+set ipc_disks_list
+set tape_option
+set tape_controller
+set f_file
+set dcp_loaded = (no no no no)
+set dcp_a_ports_attach = (no no no no)
+set dcp_b_ports_attach = (no no no no)
+set dcp_c_ports_attach = (no no no no)
+set dcp_d_ports_attach = (no no no no)
+if (-e /usr/sunlink/dcp/dcpload) set dcp_installed = yes
+set o_command_argv = no
+set logging_pass_msgs
+set clean_heads 
+set tape_sleep
+set shoebox
+
+set k
+set cin
+set sc1
+set sc2
+set sc3
+set sc4
+set term_is = $TERM 
+if ($?WINDOW_PARENT) setenv TERM vt100
+set testing
+set running_tests = yes
+set extra_options = no
+set op
+set current_command
+
+alias input_msg 'echo " "; echo -n '"  "'"$log_dir2"'" "'"$current_command"'""'"$testing"'":"'" "'" "'; set kk = $<; set k = ($kk); continue'
+
+alias continue_msg 'echo -n "'Press return to continue. '"; set kin = $<; continue'
+alias tty_end_msg 'echo " "; echo "**********************************************************"; echo "*       sysdiag: When  ready  to  end  testing           *"; echo "*                enter '"'endt'"' and press return.          *"; echo "**********************************************************"; echo " "'
+alias f_msg 'echo " "; echo -n '"  "'"$log_dir2"'" "'"$f_command"'":"'" "'" "'; set kk = $<; continue'
+alias bad_fn_msg 'echo " "; echo The selected option name is invalid, select another.'
+alias usr_reply 'set kk = $<; set r = ($kk)'
+alias bad_term_msg 'echo " "; echo The terminal entry is invalid.'
+alias verify_msg 'echo -n " Verify devices found, enter y if correct, n if not, press return. "'
+alias correct_msg 'echo -n " Correct problems, restart System Diagnostics.(press return to continue) "; set r = $<; continue'
+alias time_msg 'echo " "; echo The current date and time is: `date`'
+alias reset_log 'echo -n " Reset log files? Enter y for yes, n for no, press return. "; usr_reply'
+alias remove_core 'echo -n " Remove core files? Enter y for yes, n for no, press return. "; usr_reply'
+alias via ' set save_term = $TERM; setenv TERM $term_is; vi \!*; setenv TERM $save_term'
+alias auto_x 'echo -n "Enter a selection from above for automatic execution on login: "; usr_reply'
+
+set log_dir1 = /usr2
+set log_dir2 = `hostname`
+setenv SYSDIAG_HOST $log_dir2
+set log_dir3 = sysdiag.log
+set log_dir = /usr2/$log_dir2/sysdiag.log
+setenv SD_LOG_DIRECTORY $log_dir
+
+alias start_msg 'echo \!* version started. `date` >> '$SD_LOG_DIRECTORY'/logtimes; if ($extra_options == yes) options sd >> {$SD_LOG_DIRECTORY}/logtimes'
+alias stop_msg 'echo \!* version stopped. `date` >> '$SD_LOG_DIRECTORY'/logtimes'
+
+if (!(-e $SD_LOG_DIRECTORY)) then
+  if (!(-e $log_dir1)) then
+      mkdir $log_dir1
+      if (!(-e $log_dir1)) then
+        echo -n 'sysdiag: Super user must make '$log_dir1' directory. Enter return to continue. '
+	set kk = $<
+        exit
+      endif
+      chmod 777 $log_dir1
+  endif
+  cd $log_dir1
+  if (!(-e $log_dir2)) then
+    mkdir $log_dir2 
+    chmod 777 $log_dir2
+  endif
+  cd $log_dir2
+  if (!(-e $log_dir3)) then
+    mkdir $log_dir3 
+    chmod 777 $log_dir3
+  endif
+endif
+
+cd $SD_LOG_DIRECTORY
+
+if ($sd_dir == /usr/nemesis/fjones/src/sysdiag) then
+  set k = extra
+  set ttys_dir = $sd_dir
+  set current_command = ' ( extra )'
+endif
+
+if ($argv == "") then
+   set af = auto_start
+else
+   set af = $argv
+endif
+
+if (-e $af) then
+  set k = (o $af)
+  if (-e $SD_LOG_DIRECTORY/core) then
+    set corename = `nextlog core`
+    mv $SD_LOG_DIRECTORY/core $corename
+    echo ' '
+    echo sysdiag: Saved previous core file to "'$corename'". `date` | tee -a $SD_LOG_DIRECTORY/logtimes
+  endif
+else
+  if (-e $SD_LOG_DIRECTORY/core || -e $SD_LOG_DIRECTORY/core.1) then
+    echo ' '
+    set r
+    while ("$r" != r && "$r" != s)
+      echo  -n 'sysdiag: Previous core files are present, enter r to remove, s to save, press return. '
+      usr_reply
+    end
+    if ("$r" == s && -e $SD_LOG_DIRECTORY/core) then
+      set corename = `nextlog core`
+      echo sysdiag: Saved previous core file to "'$corename'". `date` | tee -a $SD_LOG_DIRECTORY/logtimes
+      mv $SD_LOG_DIRECTORY/core $corename
+      sleep 4
+    else if ("$r" == r) then
+      rm -f $SD_LOG_DIRECTORY/core*
+    endif
+  endif
+endif
+
+onintr interrupt_end
+
+if (-e /dev/sky) then
+   mv -i /dev/sky /dev/sky-sd
+endif
+
+if (-e $ttys_dir/ttys-sd) then
+  mv $ttys_dir/ttys-sd $ttys_dir/ttys
+  chmod 644 $ttys_dir/ttys
+  if ($ttys_dir != $sd_dir) kill -1 1
+endif
+
+while ($op != q)
+  if ("$k" == '') then
+    clear
+    echo " "
+    echo " " 
+    echo " " 
+    echo " " 
+    echo " " 
+    echo " " 
+    echo "  SYSTEM DIAGNOSTICS                                   sun microsystems"
+    echo " "
+    echo '                                                           Version 2.20'
+    echo '  SELECTIONS:'
+    echo '  ---------------------------------------------------------------------'
+    echo '  1 - Automatic mode of System Diagnostics.'
+    echo '  2 - Verify mode of System Diagnostics.'
+    echo '  3 - Select mode of System Diagnostics.' 
+    echo ' '
+    echo '  o - options for System Diagnostics.'
+#    echo '  h - help information for System Diagnostics.'
+    echo '  s - set date and time.'
+    echo '  d - display System Diagnostic log files.'
+    echo '  r - reset System Diagnostic log files.'
+    echo '  c - change System Diagnostics console type: ('$TERM')'
+    echo '  p - change System Diagnostics password.'
+    echo " "
+    echo '  q - quit System Diagnostics.'
+    echo " "
+    if ($extra_options == yes) then
+       echo $logging_pass_msgs're = '$RUN_ON_ERROR','$clean_heads''$tape_sleep' lt = '$SD_LOAD_TEST', ipc = '$IPC
+       echo 'c1 = '$sc1', c2 = '$sc2', c3 = '$sc3', c4 = '$sc4
+       echo " "
+       echo -n '  '$log_dir2''$current_command''$testing': '
+    else 
+       echo " "
+       echo " "
+       echo -n '  Enter selection and press return: '
+    endif
+
+    set kk = $<
+    set k = ($kk)
+    if ("$k" == '') continue
+  endif
+
+  if ("$k" == q) break
+  if ("$k" == Q) break
+  set running_tests = yes
+
+  set fin = ($k)
+  set k
+
+  if ($fin[1] =~ sc[1234] && $extra_options == yes) then
+    if ($fin[1] == sc1) set sc1 = ($cin)
+    if ($fin[1] == sc2) set sc2 = ($cin)
+    if ($fin[1] == sc3) set sc3 = ($cin)
+    if ($fin[1] == sc4) set sc4 = ($cin)
+    continue
+  endif
+
+  if ($fin[1] =~ c[1234] && $extra_options == yes) then
+    if ($fin[1] == c1) set cin = ($sc1)
+    if ($fin[1] == c2) set cin = ($sc2)
+    if ($fin[1] == c3) set cin = ($sc3)
+    if ($fin[1] == c4) set cin = ($sc4)
+    echo $cin
+  else if ($fin[1] != R || $extra_options == no) then
+    set cin = ($fin)
+  endif
+
+  if ($extra_options == yes) set current_command = " ( $cin )"
+
+  if ($#cin > 1) then
+    set op = ($cin[1])
+    set file = ($cin[2-$#cin])
+  else 
+    set op = $cin
+    set file
+  endif
+
+  switch ($op)
+
+  case ccm:
+  case clear_c*:
+    if ($?COLOR_MONITOR) clear_colormap
+    continue
+
+  case d:
+    set nonomatch
+    echo ' '
+    more $SD_LOG_DIRECTORY/log*
+    echo ' '
+    set r
+    while ("$r" != y && "$r" != n)
+      reset_log
+    end   
+    if ($r == y) then
+      rm -f $SD_LOG_DIRECTORY/log*
+    endif
+    if (-e $SD_LOG_DIRECTORY/core || -e $SD_LOG_DIRECTORY/core.1) then
+      set r
+      while ("$r" != y && "$r" != n)
+        remove_core
+      end   
+      if ($r == y) then
+        rm -f $SD_LOG_DIRECTORY/core*
+      endif
+    endif
+    unset nonomatch
+    continue
+
+  case r:
+    set nonomatch
+    rm -f $SD_LOG_DIRECTORY/log*
+    if (-e $SD_LOG_DIRECTORY/core || -e $SD_LOG_DIRECTORY/core.1) then
+      echo ' '
+      set r
+      while ("$r" != y && "$r" != n)
+        remove_core
+      end   
+      if ($r == y) then
+        rm -f $SD_LOG_DIRECTORY/core*
+      endif
+    endif
+    unset nonomatch
+    continue
+  
+  case s:
+    time_msg
+    echo ' '
+    echo -n '  Enter yymmddHHMM and press return '
+    echo `date $<` ' '
+    echo ' '
+    echo -n '  Verify date and time, press return to continue. '
+    set kin = $<
+    continue
+
+  case c:
+    set name_selected = no
+    if ($#cin == 2) then
+      set name_selected = yes
+    else if ($#cin > 2) then
+	   bad_term_msg
+         endif
+    endif
+    while (1)
+      while ($name_selected == no)
+        echo ' '
+        set r
+        while ("$r" == '')
+         echo -n 'Enter the console terminal type or n for no change: '
+         usr_reply
+        end
+        if ("$r" == n) then
+          break; break
+        endif
+        set file = ($r)
+        if ($#file == 1) then
+          set name_selected = yes
+        else
+          bad_term_msg
+        endif
+      end
+      sed "/console/s/^.* /$file /" /etc/ttytype > /tmp/tmp.$$
+      mv /tmp/tmp.$$ /etc/ttytype
+      if ($status == 0) then
+        echo ' '
+        echo Console is set to "'$file'", relogin as sysdiag.
+        echo ' '
+        chmod 644 /etc/ttytype
+        goto interrupt_end
+      else
+        echo ' '
+        echo -n 'Console was not set to "'$file'". Press return to continue: '
+	set kin = $<
+	break
+      endif
+    end
+    continue
+
+  case p:
+    echo ' '
+    passwd
+    continue
+
+  case options:
+    options
+    echo -n '  Press return to continue: '
+    set kin = $<
+    continue
+
+  case o:
+   set sop
+   set ok
+   if ($#cin > 1) then 
+     set ok = ($cin)
+   endif
+   while ($sop != q)
+    if ("$ok" == '') then
+      clear
+echo ' '
+echo ' '
+echo ' '
+echo ' '
+echo ' SYSTEM DIAGNOSTIC OPTIONS'
+echo ' ------------------------------------------------------------------------'
+echo ' i - intervention tests ('$INTERVENTION_TESTS')'
+if ($INTERVENTION_TESTS == enabled) then
+  echo ' t - 1/4 inch tape drive options ('$TAPE_TEST' test, '$TAPE_HEADS' tracks'$tape_option''$tape_controller')'
+  echo ' s - serial port test options, loop port(s) tty: ('$ports_selected')'
+  if ($dcp_installed == yes || $extra_options == yes) echo ' d - data communications processor test options, loop port(s) dcp: ('$dcp_ports_selected')'
+  if ($IPC == yes || $extra_options == yes) echo ' p - IPC test options, disk drive(s) ('$ipc_disks_selected'), loop port(s) ('$ipc_ports_selected')'
+endif
+echo ' m - manufacturing tests ('$manuf''$shoebox''$gp''$sp_1''$sp_2''$sp_3''$sp_4''$vmem_wait')'
+if ($manuf == enabled) then
+  echo ' r - run on error ('$RUN_ON_ERROR')'
+endif
+echo ' '
+echo ' f - file (save) current options.'
+echo ' o - use (restore) options previously filed.'
+echo ' h - help information for options.'
+echo ' q - quit option menu and return to the selection menu.'
+echo ' Q - Quit System Diagnostics.'
+echo ' '
+echo ' '
+echo -n ' Enter selection and press return: '
+
+      set kk = $<
+      set ok = ($kk)
+
+      if ("$ok" == '') continue
+      if ("$ok" == Q) goto interrupt_end
+      if ("$ok" == q) then
+         break; continue;
+      endif
+    endif
+    set kin = ($ok)
+    set ok
+
+    if ($#kin > 1) then
+       set sop = ($kin[1])
+       set file = ($kin[2-$#kin])
+    else 
+      set sop = $kin
+      set file
+    endif
+
+    unset user_error
+
+    switch ($sop)
+
+    case r:
+      if ("$RUN_ON_ERROR" == disabled) then
+        setenv RUN_ON_ERROR enabled
+      else
+        setenv RUN_ON_ERROR disabled
+      endif
+      continue
+      
+    case h:
+      pushd $sd_dir > /dev/null
+      sysdiag.help o $file
+      if ($status) goto interrupt_end 
+      popd > /dev/null
+      continue
+
+    case o:
+       set name_selected = no
+       if ($#kin == 2) then
+         set name_selected = yes
+       else if ($#kin > 2) then
+              bad_fn_msg
+            endif
+       endif
+       while (1)
+	 while ($name_selected == no)
+	   echo ' '
+	   set r
+	   while ("$r" == '')
+	    echo -n 'Enter the name of the saved options to use or n for none: '
+	    usr_reply
+           end
+	   if ("$r" == n) then
+	     break; break
+           endif
+           set file = ($r)
+           if ($#file == 1) then
+             set name_selected = yes
+           else
+             bad_fn_msg
+           endif
+	 end
+         if (!(-e $file) || $file == test || $file == tape.test || $file == n) then
+	   bad_fn_msg
+	   set name_selected = no
+         else
+           if ("$ports_selected" != none) then
+             foreach i ($serial_ports_list)
+               unsetenv $i
+             end
+           endif
+           if ("$dcp_ports_selected" != none) then
+             foreach i ($dcp_ports_list)
+               unsetenv $i
+             end
+           endif
+           if ("$ipc_disks_selected" != none) then
+             foreach i ($ipc_disks_list)
+               unsetenv $i
+             end
+           endif
+           if ("$ipc_ports_selected" != none) then
+             foreach i ($ipc_ports_list)
+               unsetenv $i
+             end
+           endif
+	   source $file
+	   unsetenv NO_CLEAN_HEADS
+	   unsetenv NO_TAPE_SLEEP
+	   unsetenv SHOEBOX_TEST
+	   if ($clean_heads != "") setenv NO_CLEAN_HEADS yes
+	   if ($tape_sleep != "") setenv NO_TAPE_SLEEP yes
+	   if ($shoebox != "") setenv SHOEBOX_TEST yes
+	   set manuf_tty_devs = ($manuf_tty_devs_1 $manuf_tty_devs_2 $manuf_tty_devs_3 $manuf_tty_devs_4)
+	   if ("$tty_devs" != '' || "$manuf_tty_devs_1" != '') then
+	      if (!(-e $ttys_dir/ttys-sd)) then
+		cp $ttys_dir/ttys $ttys_dir/ttys-sd
+	      endif
+	      mv -f $ttys_dir/ttys $ttys_dir/ttys.sd.temp
+	      set tty_ds = ($manuf_tty_devs $tty_devs)
+              sed $tty_ds $ttys_dir/ttys.sd.temp > $ttys_dir/ttys 
+              if ($ttys_dir != $sd_dir) kill -1 1 
+	      unset tty_ds
+           endif
+           if ("$dcp_ports_selected" != none) then
+	      set return = 0
+	      foreach dcp_file (load mon.image attach layer)
+	         if (!(-e /usr/sunlink/dcp/dcp$dcp_file)) then
+	           echo ' '
+	           echo sysdiag: \'/usr/sunlink/dcp/dcp$dcp_file\'  not found, cannot 
+	           echo '         initialize the data communications processor.'
+	           set return = no_file
+	           break
+	         endif
+	      end
+	      if ($return == 0) then
+	         echo ' '
+	         set echo_init_msg = yes
+	         foreach i ($dcp_ports_selected)
+	           if ($i =~ a*) then
+	              set dcp_board = a
+	              set dcp_load_index = 1
+	              set port_attached = ($dcp_a_ports_attach)
+	           else if ($i =~ b*) then
+	              set dcp_board = b
+	              set dcp_load_index = 2
+	              set port_attached = ($dcp_b_ports_attach)
+	           else if ($i =~ c*) then
+	              set dcp_board = c
+	              set dcp_load_index = 3
+	              set port_attached = ($dcp_c_ports_attach)
+	           else if ($i =~ d*) then
+	              set dcp_board = d
+	              set dcp_load_index = 4
+	              set port_attached = ($dcp_d_ports_attach)
+	           endif
+	           if ($i =~ *0) then
+	              set dcp_port = 0
+	           else if ($i =~ *1) then 
+	              set dcp_port = 1
+	           else if ($i =~ *2) then 
+	              set dcp_port = 2
+	           else if ($i =~ *3) then 
+	              set dcp_port = 3
+	           endif
+	           @ attach_index = $dcp_port + 1
+	           if ($extra_options == yes) then
+	             echo sysdiag: Initializing the data communications processor, $i.
+	           else
+	              if ($echo_init_msg == yes) then
+	                 echo sysdiag: Initializing the data communications processor.
+	                 set echo_init_msg = no
+	              endif
+	           endif
+	           if ($dcp_loaded[$dcp_load_index] == no) then
+	              if ($extra_options == yes) then
+	                 echo sysdiag: Loading dcp board $dcp_board.
+	              endif
+	             /usr/sunlink/dcp/dcpload -b $dcp_board /usr/sunlink/dcp/dcpmon.image
+	             set return = $status
+	           endif
+	           if ($return == 0) then
+	              set dcp_loaded[$dcp_load_index] = yes
+	              if ($port_attached[$attach_index] == no) then
+		         if ($extra_options == yes) then
+	                    echo sysdiag: Attaching dcp $i.
+	                 endif
+	                 /usr/sunlink/dcp/dcpattach /dev/dcp$i >& /dev/null
+#			 /usr/sunlink/dcp/dcpattach /dev/dcp$i
+	                 set return = $status
+	                 if ($return == 0) then
+		            if ($extra_options == yes) then
+	                       echo sysdiag: Loading dcp layer for $dcp_board$dcp_port
+	                    endif
+	                    /usr/sunlink/dcp/dcplayer dcp$i zss$dcp_port
+	                    set return = $status
+		            if ($return == 0) then
+		               set port_attached[$attach_index] = yes
+		               if ($dcp_board == a) set dcp_a_ports_attach = ($port_attached)
+		               if ($dcp_board == b) set dcp_b_ports_attach = ($port_attached)
+		               if ($dcp_board == c) set dcp_c_ports_attach = ($port_attached)
+		               if ($dcp_board == d) set dcp_d_ports_attach = ($port_attached)
+	                    endif
+		         endif
+	              endif
+	           endif
+	           if ($return != 0) break
+ 	         end
+	      endif
+	      if ($return != 0) then
+	         if ($return != no_file) then
+	           echo ' '
+	           echo sysdiag: The data communications processor initalization failed for $i.
+                 endif
+	         echo ' '
+                 echo -n '  Press return to continue. '
+                 set kin = $<
+                 foreach i ($dcp_ports_list)
+                   unsetenv $i
+                 end
+	         set dcp_ports_list
+                 set dcp_ports_selected = none
+	      endif
+           endif
+# if ($extra_options == yes)  then
+#   set >! o$file
+#   printenv >> o$file
+# endif
+	   break
+         endif
+       end
+       if ($?auto_start_cmd) then
+	 if ($extra_options == yes && "$auto_start_cmd" == extra) then
+	   set k
+	 else
+           set k = ($auto_start_cmd)
+	 endif
+	 unset auto_start_cmd
+	 set sop = q
+       endif
+       continue
+
+    case f:
+       set name_selected = no
+       if ($#kin == 2) then
+	 set name_selected = yes
+       else if ($#kin > 2) then
+	      bad_fn_msg
+	    endif
+       endif
+       while (1)
+	 while ($name_selected == no)
+	    echo ' '
+	    set r
+	    while ("$r" == '')
+	      echo -n 'Enter a name for the saved options or n for none: '
+	      usr_reply
+	    end
+	    if ("$r" == n) then
+	      break; break; continue
+            endif
+	    set file = ($r)
+	    if ($#file == 1) then
+	      set name_selected = yes
+	    else 
+	      bad_fn_msg
+	    endif
+	 end
+         if (-e $file || $file == test || $file == tape.test || $file == n) then
+	   if ($file == test || $file == tape.test || $file == n) then
+	     echo ' '
+             echo 'The selected name is already in use, select another.'
+	     set name_selected = no
+	   else
+	     echo ' '
+	     set r
+	     echo 'The selected name is already in use.'
+	     while ("$r" != r && "$r" != n && "$r" != d)
+	       echo -n 'Enter r to reuse, n for no, d to delete, press return: '
+	       usr_reply
+	     end
+	     if ($r == n) then
+	       set name_selected = no 
+	     else if ($r == d) then
+	       rm -f $file
+               break; continue
+	     else break
+	     endif
+	   endif
+         else break
+	 endif
+       end
+
+       if ($file == auto_start || $extra_options == yes) then
+	 echo ' '
+	 echo ' 1 for Automatic mode of System Diagnostics.'
+	 echo ' 2 for Verify mode of System Diagnostics.'
+	 echo ' 3 for Select mode of System Diagnostics.'
+	 echo ' n for none'
+	 echo ' '
+	 set r
+	 if ($extra_options == no) then
+	   while ("$r" !~ [123] && "$r" != n)
+	     auto_x
+	   end
+	 else 
+	   while ("$r" == "")
+	     auto_x
+	   end
+	 endif
+	 if ("$r" != n) then
+           echo set auto_start_cmd = \($r\) >! $file
+           echo setenv INTERVENTION_TESTS $INTERVENTION_TESTS >> $file
+	 else
+           echo setenv INTERVENTION_TESTS $INTERVENTION_TESTS >! $file
+	 endif
+	     echo ' '
+	     set r
+	     while ("$r" != y && "$r" != n)
+	       echo -n 'Clear the log files and core files? Enter y for yes, n for no, press return: '
+	       usr_reply
+	     end
+	     if ($r == y) then
+	       echo set nonomatch >> $file
+	       echo 'rm -f $SD_LOG_DIRECTORY/log*' >> $file
+	       echo 'rm -f $SD_LOG_DIRECTORY/core*' >> $file
+	       echo unset nonomatch >> $file
+	     endif
+       else
+         echo setenv INTERVENTION_TESTS $INTERVENTION_TESTS >! $file
+       endif
+
+       echo setenv TAPE_TEST $TAPE_TEST >> $file
+       echo setenv TAPE_HEADS $TAPE_HEADS >> $file
+       echo set clean_heads = \"$clean_heads\" >> $file
+       echo set tape_sleep = \"$tape_sleep\" >> $file
+       echo setenv EMULEX_CONTROLLER $EMULEX_CONTROLLER >> $file
+       echo set tape_controller = \($tape_controller\) >> $file
+       echo setenv QIC_24 $QIC_24 >> $file
+       echo set tape_option = \($tape_option\)>> $file
+       echo set ports_selected = \($ports_selected\) >> $file
+       echo set serial_ports_list = \($serial_ports_list\) >> $file
+       foreach i ($serial_ports_list)
+	 eval echo setenv "$i" ""`echo '$'$i`"" >> $file
+       end
+       echo set tty_devs = \($tty_devs\) >> $file
+       echo set dcp_ports_selected = \($dcp_ports_selected\) >> $file
+       echo set dcp_ports_list = \($dcp_ports_list\) >> $file
+       foreach i ($dcp_ports_list)
+	 eval echo setenv "$i" ""`echo '$'$i`"" >> $file
+       end
+       echo set ipc_disks_selected = \($ipc_disks_selected\) >> $file
+       echo set ipc_disks_list = \($ipc_disks_list\) >> $file
+       foreach i ($ipc_disks_list)
+	 eval echo setenv "$i" ""`echo '$'$i`"" >> $file
+       end
+       echo set ipc_ports_selected = \($ipc_ports_selected\) >> $file
+       echo set ipc_ports_list = \($ipc_ports_list\) >> $file
+       foreach i ($ipc_ports_list)
+	 eval echo setenv "$i" ""`echo '$'$i`"" >> $file
+       end
+       echo setenv SUN_MANUFACTURING $SUN_MANUFACTURING >> $file
+       echo set manuf = $manuf >> $file
+       echo setenv RUN_ON_ERROR $RUN_ON_ERROR >> $file
+       echo set vmem_wait = \"$vmem_wait\" >> $file
+       echo set shoebox = \"$shoebox\" >> $file
+       echo setenv VMEM_WAIT_TIME $VMEM_WAIT_TIME >> $file
+       echo setenv GRAPHICS_PROCESSOR $GRAPHICS_PROCESSOR >> $file
+       echo setenv GRAPHICS_BUFFER $GRAPHICS_BUFFER >> $file
+       echo set gp = \"$gp\" >> $file
+       echo setenv SERIAL_PORT_BOARD $SERIAL_PORT_BOARD >> $file
+       echo setenv SERIAL_FIXTURE_1 $SERIAL_FIXTURE_1 >> $file
+       echo setenv SERIAL_FIXTURE_2 $SERIAL_FIXTURE_2 >> $file
+       echo setenv SERIAL_FIXTURE_3 $SERIAL_FIXTURE_3 >> $file
+       echo setenv SERIAL_FIXTURE_4 $SERIAL_FIXTURE_4 >> $file
+       echo set sp_1 = \"$sp_1\" >> $file
+       echo set sp_2 = \"$sp_2\" >> $file
+       echo set sp_3 = \"$sp_3\" >> $file
+       echo set sp_4 = \"$sp_4\" >> $file
+       echo set manuf_tty_devs_1 = \($manuf_tty_devs_1\) >> $file
+       echo set manuf_tty_devs_2 = \($manuf_tty_devs_2\) >> $file
+       echo set manuf_tty_devs_3 = \($manuf_tty_devs_3\) >> $file
+       echo set manuf_tty_devs_4 = \($manuf_tty_devs_4\) >> $file
+       chmod 777 $file
+# if ($extra_options == yes)  then
+#   set >! f$file
+#   printenv >> f$file
+# endif
+       continue
+		
+    case i:
+      set r
+      echo ' '
+      while ("$r" != y && "$r" != n)
+        echo -n 'Allow intervention tests? y for yes/n for no, press return: '
+        usr_reply
+      end
+      if ($r == y) then
+        setenv INTERVENTION_TESTS enabled 
+        echo ' '
+        echo '***********************************************'
+        echo '*   If testing tape drives, clean  the tape   *' 
+        echo '*   drive  read/write  heads  and install a   *'
+        echo '*   scratch tape in each drive to be tested.  *'
+        echo '***********************************************'
+        echo ' '
+        echo -n '  Press return to continue. '
+        set kin = $<
+      else
+        setenv INTERVENTION_TESTS disabled 
+	if ("$ports_selected" != none) then
+          foreach i ($serial_ports_list)
+            unsetenv $i
+          end
+          set serial_ports_list
+          set ports_selected = none
+	endif	
+        set tty_devs
+	if ("$dcp_ports_selected" != none) then
+          foreach i ($dcp_ports_list)
+            unsetenv $i
+          end
+          set dcp_ports_list
+          set dcp_ports_selected = none
+	endif	
+          if ("$ipc_disks_selected" != none) then
+            foreach i ($ipc_disks_list)
+              unsetenv $i
+            end
+            set ipc_disks_list
+            set ipc_disks_selected = none
+          endif
+          if ("$ipc_ports_selected" != none) then
+            foreach i ($ipc_ports_list)
+              unsetenv $i
+            end
+            set ipc_ports_list
+            set ipc_ports_selected = none
+          endif
+      endif
+      continue
+
+    case m:
+      setenv SUN_MANUFACTURING no 
+      setenv VMEM_WAIT_TIME 0
+      setenv GRAPHICS_PROCESSOR no
+      setenv GRAPHICS_BUFFER no
+      setenv SERIAL_PORT_BOARD no
+      unsetenv SHOEBOX_TEST
+      set shoebox
+      set gp
+      set sp_1
+      set sp_2
+      set sp_3
+      set sp_4
+      set manuf_tty_devs
+      set manuf_tty_devs_1
+      set manuf_tty_devs_2
+      set manuf_tty_devs_3
+      set manuf_tty_devs_4
+      set manuf = 'disabled'
+      set vmem_wait
+      set r
+      echo ' '
+      while ("$r" != y && "$r" != n)
+        echo -n 'Allow special manufacturing tests? y for yes/n for no, press return: '
+        usr_reply
+      end
+      if ($r == n) then
+	 setenv RUN_ON_ERROR disabled
+	 continue
+      else
+         setenv SUN_MANUFACTURING yes 
+         set manuf = 'enabled'
+         set r
+         echo ' '
+         while ("$r" != 0 && "$r" != 30 && "$r" != 60 && "$r" != 90)
+           echo -n 'Vmem wait time (in minutes). Enter 0, 30, 60, or 90, press return: '
+           usr_reply
+         end
+         setenv VMEM_WAIT_TIME $r
+	 set vmem_wait = ("  vmem wait= "$VMEM_WAIT_TIME"")
+         set r
+         echo ' '
+         while ("$r" != y && "$r" != n)
+           echo -n 'Shoebox testing? y for yes/n for no, press return: '
+           usr_reply
+         end
+	 if ($r == y) then
+           setenv SHOEBOX_TEST yes
+	   set shoebox = ' sb'
+	 endif
+         set r
+         echo ' '
+         while ("$r" != y && "$r" != n)
+           echo -n 'Graphics processor? y for yes/n for no, press return: '
+           usr_reply
+         end
+         if ($r == y) then
+           setenv GRAPHICS_PROCESSOR yes
+	   set gp = ' gp'
+           set r
+           while ("$r" != y && "$r" != n)
+             echo -n 'Graphics buffer? y for yes/n for no, press return: '
+             usr_reply
+           end
+           if ($r == y) then
+	     setenv GRAPHICS_BUFFER yes
+	     set gp = ' gp&b'
+           endif
+         endif
+         set r
+         echo ' '
+         while ("$r" !~ [1-4] && "$r" != n)
+           echo -n 'Serial port board(s)? Enter number [1-4] or n for none, press return: '
+           usr_reply
+         end
+         if ($r != n) then
+           if (!(-e $ttys_dir/ttys-sd)) then
+	     cp $ttys_dir/ttys $ttys_dir/ttys-sd
+           endif
+           mv -f $ttys_dir/ttys $ttys_dir/ttys.sd.temp
+	   setenv SERIAL_PORT_BOARD $r
+	   @ sp_board = 1
+	   while ($sp_board <= $SERIAL_PORT_BOARD)
+	     @ sp_b = $sp_board - 1
+             set r
+             while ("$r" != 8 && "$r" != 14 && "$r" != 16)
+               echo -n 'Board '$sp_b' ports to test? Enter 8, 14 or 16, press return: '
+               usr_reply
+             end
+	     eval set manuf_tty_devs_$sp_board = `echo \('$'manuf_tty_devs_$sp_board -e s/12tty"$sp_b"0/02tty"$sp_b"0/ -e s/12tty"$sp_b"1/02tty"$sp_b"1/ -e s/12tty"$sp_b"2/02tty"$sp_b"2/ -e s/12tty"$sp_b"3/02tty"$sp_b"3/ -e s/12tty"$sp_b"4/02tty"$sp_b"4/ -e s/12tty"$sp_b"5/02tty"$sp_b"5/ -e s/12tty"$sp_b"6/02tty"$sp_b"6/ -e s/12tty"$sp_b"7/02tty"$sp_b"7/\)`
+             if ($r == 14) then
+               setenv SERIAL_FIXTURE_$sp_board 14
+	       set sp_$sp_board = ' sp'$sp_b'-14'
+	       eval set manuf_tty_devs_$sp_board = `echo \('$'manuf_tty_devs_$sp_board -e s/12tty"$sp_b"8/02tty"$sp_b"8/ -e s/12tty"$sp_b"9/02tty"$sp_b"9/ -e s/12tty"$sp_b"a/02tty"$sp_b"a/ -e s/12tty"$sp_b"b/02tty"$sp_b"b/ -e s/12tty"$sp_b"c/02tty"$sp_b"c/ -e s/12tty"$sp_b"d/02tty"$sp_b"d/\)`
+             else if ($r == 16) then
+               setenv SERIAL_FIXTURE_$sp_board 16
+	       set sp_$sp_board = ' sp'$sp_b'-16'
+	       eval set manuf_tty_devs_$sp_board = `echo \('$'manuf_tty_devs_$sp_board -e s/12tty"$sp_b"8/02tty"$sp_b"8/ -e s/12tty"$sp_b"9/02tty"$sp_b"9/ -e s/12tty"$sp_b"a/02tty"$sp_b"a/ -e s/12tty"$sp_b"b/02tty"$sp_b"b/ -e s/12tty"$sp_b"c/02tty"$sp_b"c/ -e s/12tty"$sp_b"d/02tty"$sp_b"d/ -e s/12tty"$sp_b"e/02tty"$sp_b"e/ -e s/12tty"$sp_b"f/02tty"$sp_b"f/\)`
+             else
+               setenv SERIAL_FIXTURE_$sp_board 8
+	       set sp_$sp_board = ' sp'$sp_b'-8'
+             endif
+	     @ sp_board ++
+	   end
+           if ("$ports_selected" != none) then
+             echo ' '
+             echo '**********************************************************'
+	     echo '*            ----------- WARNING -----------             *'
+	     echo '* A possible  conflict exists between  the manufacturing *'
+	     echo '* serial  port test just  selected and the  serial ports *'
+	     echo '* selected  earlier. Verify that the selection made does *'
+	     echo '* not conflict with the serial  port test selections. If *'
+	     echo '* there  are conflicts  and they  are not corrected, the *'
+	     echo '* serial port  test  will  report  errors and  terminate.*'
+             echo '**********************************************************'
+	   endif
+             echo ' '
+             echo '**************************************************'
+             echo '*   Install the appropriate serial  port board   *' 
+             echo '*   loopback test device before starting tests.  *'
+             echo '**************************************************'
+             echo ' '
+             echo -n '  Press return to continue. '
+	     set manuf_tty_devs = ($manuf_tty_devs_1 $manuf_tty_devs_2 $manuf_tty_devs_3 $manuf_tty_devs_4)
+             sed $manuf_tty_devs $ttys_dir/ttys.sd.temp > $ttys_dir/ttys 
+             if ($ttys_dir != $sd_dir) kill -1 1 
+             set kin = $<
+         endif 
+      endif       # manufacturing tests = yes
+      continue
+ 
+    case s:
+    if ($INTERVENTION_TESTS == enabled)  then 
+      if ("$ports_selected" != none) then
+        foreach i ($serial_ports_list)
+          unsetenv $i
+        end
+        set serial_ports_list
+        set ports_selected = none
+      endif
+      set tty_devs
+      echo ' '
+      echo -n 'Select serial ports to test, press return: '
+      set r = $<
+      if ("$r" == '') then
+	 set ports_selected = none
+	 continue
+      else
+	@ n=1
+	foreach i ($r)
+	  if (($i !~ [a-b]) && ($i !~ [0-3]) && ($i !~ [0-3][0-9]) && ($i !~ [0-3][a-f]) && ($i != none) && ($i !~ [a-b]-*) && ($i !~ [0-3]-*) && ($i !~ [0-3][0-9]-*) && ($i !~ [0-3][a-f]-*)) then
+	      set user_error
+	      break
+	  else 
+	     if ($i =~ *-*) then
+	        if (($i !~ *-[a-b]) && ($i !~ *-[0-3]) && ($i !~ *-[0-3][0-9]) && ($i !~ *-[0-3][a-f])) then
+		  set user_error
+	          break
+                endif    
+	     endif 
+             if ("$r" != none) then
+	        setenv SERIAL_PORTS_$n $i
+	        set serial_ports_list = ($serial_ports_list "SERIAL_PORTS_${n}")
+             endif
+	     @ n++
+          endif
+	end
+	if (!($?user_error)) then
+	  set ports_selected = ($r)
+        else
+	  echo ' '
+          echo Incorrect serial port specified!
+          echo ' '
+          echo -n '  Press return to continue. '
+          set kin = $<
+          foreach i ($serial_ports_list)
+           unsetenv $i
+          end
+	  set serial_ports_list
+          set ports_selected = none
+	  continue
+        endif 
+      endif
+      if ("$ports_selected" != none) then
+        if (!(-e $ttys_dir/ttys-sd)) then
+	  cp $ttys_dir/ttys $ttys_dir/ttys-sd
+        endif
+        mv -f $ttys_dir/ttys $ttys_dir/ttys.sd.temp
+	if ($SERIAL_PORT_BOARD != no) then
+          echo ' '
+          echo '**********************************************************'
+	  echo '*            ----------- WARNING -----------             *'
+	  echo '* A possible  conflict  exists between  the serial ports *'
+	  echo '* just  selected and the manufacturing serial  port test *' 
+	  echo '* selected  earlier.  Verify that the selections made do *'
+	  echo '* not conflict with the manufacturing  serial port test. *'
+	  echo '* If there are conflicts and they are not corrected, the *'
+	  echo '* serial port  test  will report errors  and  terminate. *'
+          echo '**********************************************************'
+	endif
+        echo ' '
+        echo '******************************************************'
+        echo '*   Install the appropriate test fixture(s) on the   *' 
+        echo '*   selected serial port(s) before starting tests.   *'
+        echo '******************************************************'
+        echo ' '
+        echo -n '  Press return to continue. '
+        set tty_devs
+        foreach i ($ports_selected)
+          if ($i !~ *-*) then
+	    if ($i !~ [0-3]) then
+              set tty_devs = ($tty_devs -e s/12tty$i/02tty$i/)
+	    else
+	      set tty_devs = ($tty_devs -e s/12ttys$i/02ttys$i/)
+	    endif
+          else
+            set ii = `echo $i | awk -f- '{print $1, $2}'`
+	    if ($ii[1] !~ [0-3]) then
+	      set tty_devs = ($tty_devs -e s/12tty$ii[1]/02tty$ii[1]/)
+	    else
+	      set tty_devs = ($tty_devs -e s/12ttys$ii[1]/02ttys$ii[1]/)
+	    endif
+	    if ($ii[2] !~ [0-3]) then
+	      set tty_devs = ($tty_devs -e s/12tty$ii[2]/02tty$ii[2]/)
+	    else
+	      set tty_devs = ($tty_devs -e s/12ttys$ii[2]/02ttys$ii[2]/)
+	    endif
+          endif
+        end 
+        sed $tty_devs $ttys_dir/ttys.sd.temp > $ttys_dir/ttys 
+	if ($ttys_dir != $sd_dir) kill -1 1
+        set kin = $<
+      endif
+    endif
+    continue
+  
+    case d:
+    if (($dcp_installed == yes || $extra_options == yes) && ($INTERVENTION_TESTS == enabled))  then 
+      if ("$dcp_ports_selected" != none) then
+        foreach i ($dcp_ports_list)
+          unsetenv $i
+        end
+        set dcp_ports_list
+        set dcp_ports_selected = none
+      endif
+      echo ' '
+      echo -n 'Select data communications ports to test, press return: '
+      set r = $<
+      if ("$r" == '') then
+	 set dcp_ports_selected = none
+	 continue
+      else
+	@ n=1
+	foreach i ($r)
+	  if (($i !~ [a-d][0-3]) && ($i != none)) then
+	      set user_error
+	      break
+	  else 
+             if ("$r" != none) then
+	        setenv DCP_PORTS_$n $i
+	        set dcp_ports_list = ($dcp_ports_list "DCP_PORTS_${n}")
+             endif
+	     @ n++
+          endif
+	end
+	if (!($?user_error)) then
+	  set dcp_ports_selected = ($r)
+        else
+	  echo ' '
+          echo Incorrect communications port specified!
+          echo ' '
+          echo -n '  Press return to continue. '
+          set kin = $<
+          foreach i ($dcp_ports_list)
+           unsetenv $i
+          end
+	  set dcp_ports_list
+          set dcp_ports_selected = none
+	  continue
+        endif 
+      endif
+      if ("$dcp_ports_selected" != none) then
+        echo ' '
+        echo '***************************************************************'
+        echo '*   Install the appropriate test fixture(s) on the selected   *'
+        echo '*   data  communications  port(s)  before  starting  tests.   *'
+        echo '***************************************************************'
+        echo ' '
+        echo -n '  Press return to continue. '
+        set kin = $<
+	foreach dcp_file (load mon.image attach layer)
+	   if (!(-e /usr/sunlink/dcp/dcp$dcp_file)) then
+	     echo ' '
+	     echo sysdiag: \'/usr/sunlink/dcp/dcp$dcp_file\'  not found, cannot 
+	     echo '         initialize the data communications processor.'
+	     echo ' '
+             echo -n '  Press return to continue. '
+             set kin = $<
+             foreach i ($dcp_ports_list)
+              unsetenv $i
+             end
+             set dcp_ports_selected = none
+	     set dcp_ports_list
+	     break; continue
+	   endif
+	end
+	echo ' '
+	set echo_init_msg = yes
+	set return = 0
+	foreach i ($dcp_ports_selected)
+	  if ($i =~ a*) then
+	     set dcp_board = a
+	     set dcp_load_index = 1
+	     set port_attached = ($dcp_a_ports_attach)
+	  endif
+	  if ($i =~ b*) then
+	     set dcp_board = b
+	     set dcp_load_index = 2
+	     set port_attached = ($dcp_b_ports_attach)
+	  endif
+	  if ($i =~ c*) then
+	     set dcp_board = c
+	     set dcp_load_index = 3
+	     set port_attached = ($dcp_c_ports_attach)
+	  endif
+	  if ($i =~ d*) then
+	     set dcp_board = d
+	     set dcp_load_index = 4
+	     set port_attached = ($dcp_d_ports_attach)
+	  endif
+	  if ($i =~ *0) then
+	     set dcp_port = 0
+	     set attach_index = 1
+	  endif
+	  if ($i =~ *1) then 
+	     set dcp_port = 1
+	     set attach_index = 2
+	  endif
+	  if ($i =~ *2) then 
+	     set dcp_port = 2
+	     set attach_index = 3
+	  endif
+	  if ($i =~ *3) then 
+	     set dcp_port = 3
+	     set attach_index = 4
+	  endif
+	  if ($extra_options == yes) then
+	     echo sysdiag: Initializing the data communications processor, $i.
+	  else
+	     if ($echo_init_msg == yes) then
+	        echo sysdiag: Initializing the data communications processor.
+	        set echo_init_msg = no
+	     endif
+	  endif
+	  if ($dcp_loaded[$dcp_load_index] == no) then
+	     if ($extra_options == yes) then
+	        echo sysdiag: Loading dcp board $dcp_board.
+	     endif
+	    /usr/sunlink/dcp/dcpload -b $dcp_board /usr/sunlink/dcp/dcpmon.image
+	    set return = $status
+	  endif
+	  if ($return == 0) then
+	     set dcp_loaded[$dcp_load_index] = yes
+	     if ($port_attached[$attach_index] == no) then
+		if ($extra_options == yes) then
+	           echo sysdiag: Attaching dcp $i.
+	        endif
+	        /usr/sunlink/dcp/dcpattach /dev/dcp$i >& /dev/null
+#	        /usr/sunlink/dcp/dcpattach /dev/dcp$i
+	        set return = $status
+	        if ($return == 0) then
+		   if ($extra_options == yes) then
+	              echo sysdiag: Loading dcp layer for $dcp_board$dcp_port
+	           endif
+	           /usr/sunlink/dcp/dcplayer dcp$i zss$dcp_port
+	           set return = $status
+		   if ($return == 0) then
+		      set port_attached[$attach_index] = yes
+		      if ($dcp_board == a) set dcp_a_ports_attach = ($port_attached)
+		      if ($dcp_board == b) set dcp_b_ports_attach = ($port_attached)
+		      if ($dcp_board == c) set dcp_c_ports_attach = ($port_attached)
+		      if ($dcp_board == d) set dcp_d_ports_attach = ($port_attached)
+	           endif
+		endif
+	     endif
+	  endif
+	  if ($return != 0) break
+ 	end
+	if ($return != 0) then
+	   echo ' '
+	   echo sysdiag: The data communications processor initalization failed for $i.
+	   echo ' '
+           echo -n '  Press return to continue. '
+           set kin = $<
+           foreach i ($dcp_ports_list)
+             unsetenv $i
+           end
+	   set dcp_ports_list
+           set dcp_ports_selected = none
+	endif
+      endif
+    endif
+    continue
+  
+    case t:
+    if ($INTERVENTION_TESTS == enabled) then 
+      setenv TAPE_TEST short
+      setenv QIC_24 no
+      setenv EMULEX_CONTROLLER no
+      set tape_option
+      set tape_controller
+      set r
+      echo ' '
+      while ("$r" != y && "$r" != n)
+        echo -n 'Long 1/4 inch tape test? y for yes/n for no, press return: '
+        usr_reply
+      end
+      if ($r == y) setenv TAPE_TEST long
+      set r
+      while ("$r" != 4 && "$r" != 9)
+        echo -n '1/4 inch tape drive tracks =? Enter 4 or 9, press return: '
+        usr_reply
+      end
+      if ($r == 9) then
+        setenv TAPE_HEADS 9
+        set r
+        while ("$r" != y && "$r" != n)
+          echo -n 'Test "QIC-24"? y for yes/n for no, press return: '
+          usr_reply
+        end
+        if ($r == y) then
+	  setenv QIC_24 yes
+          set tape_option = ', QIC-24'
+        endif
+        set r
+        while ("$r" != y && "$r" != n)
+          echo -n 'Is the tape controller an Emulex? y for yes/n for no, press return: '
+          usr_reply
+        end
+        if ($r == y) then
+	  setenv EMULEX_CONTROLLER yes
+          set tape_controller = (', Emulex ctlr')
+        endif
+      else setenv TAPE_HEADS 4
+      endif
+    endif
+    continue
+
+    case p:
+    if (($IPC == yes || $extra_options == yes) && ($INTERVENTION_TESTS == enabled))  then
+      if ("$ipc_ports_selected" != none) then
+        foreach i ($ipc_ports_list)
+          unsetenv $i
+        end
+        set ipc_ports_list
+        set ipc_ports_selected = none
+      endif
+      if ("$ipc_disks_selected" != none) then
+        foreach i ($ipc_disks_list)
+          unsetenv $i
+        end
+        set ipc_disks_list
+        set ipc_disks_selected = none
+      endif
+      echo ' '
+      echo -n 'Select IPC disk drives to test, press return: '
+      set r = $<
+      if ("$r" != '' && "$r" != none) then
+        foreach i ($r)
+          if ($i !~ d[0-3]) then
+            set user_error
+            break
+	  else
+	    setenv IPC_DISK_$i $i
+	    set ipc_disks_list = ($ipc_disks_list "IPC_DISK_${i}")
+          endif
+        end
+        if ($?user_error) then
+          echo ' '
+          echo Incorrect IPC disk specified!
+          echo ' '
+          echo -n '  Press return to continue. '
+          set kin = $<
+          foreach i ($ipc_disks_list)
+           unsetenv $i
+          end
+          set ipc_disks_list
+          set ipc_disks_selected = none
+          continue
+        else
+          set ipc_disks_selected = ($r)
+          echo ' '
+          echo '***********************************************'
+          echo '*   Install test  disk(s) in  the  selected   *'
+	  echo '*   IPC disk drive(s) before starting tests.  *'
+          echo '***********************************************'
+        endif   
+      endif   
+
+      echo ' '
+      echo -n 'Select IPC parallel ports to test, press return: '
+      set r = $<
+      if ("$r" == '' || "$r" == none) continue
+      foreach i ($r)
+        if ($i !~ pp[0-3]) then
+          set user_error
+          break
+        else
+          setenv IPC_PPORT_$i $i
+          set ipc_ports_list = ($ipc_ports_list "IPC_PPORT_${i}")
+        endif
+      end
+      if ($?user_error) then
+        echo ' '
+        echo Incorrect IPC parallel port specified!
+        echo ' '
+        echo -n '  Press return to continue. '
+        set kin = $<
+        foreach i ($ipc_ports_list)
+         unsetenv $i
+        end
+        set ipc_ports_list
+        set ipc_ports_selected = none
+        continue
+      else
+        set ipc_ports_selected = ($r)
+        echo ' '
+        echo '***********************************************************'
+        echo '*   Install parallel port loopback  test plug(s) on the   *' 
+        echo '*   selected IPC parallel port(s) before starting tests.  *'
+        echo '***********************************************************'
+        echo ' '
+        echo -n '  Press return to continue. '
+	set kin = $<
+      endif   
+
+    endif
+    continue
+
+    endsw
+
+    if ($extra_options == no) then
+      continue
+    else
+      switch ($sop)
+        case mh:
+          via $sd_dir/sysdiag.help
+          continue
+
+        case pe:
+            printenv
+	    continue_msg
+
+        case set:
+            set | more
+	    continue_msg
+
+        case x:
+            if ($#kin > 1) then
+              pushd $sd_dir
+              $file
+              popd
+            endif
+            continue_msg
+
+        case lst:
+            ls -la | more
+            continue_msg
+
+        case etf:
+            via $file
+            continue
+ 
+        case rtf:
+            if ($#kin > 1) then
+              rm -f $file
+	    else
+	      rm -i *
+            endif
+            continue
+      endsw
+    endif
+   end
+  continue
+
+  case extra:
+     if ($extra_options == no) then
+       stty erase ^H
+       set extra_options = yes
+       set current_command = " ( $cin )"
+       setenv LOG_PASS_MSG yes
+       set logging_pass_msgs = "lpm, "
+     else 
+       set extra_options = no
+       set current_command
+       unsetenv LOG_PASS_MSG
+       set logging_pass_msgs
+     endif
+     continue
+
+  case [1-3]:
+    if ($TERM == sun) then
+	if ($IPC == yes) then
+	  set sun_tools = .suntools-ipc
+	else
+	  set sun_tools = .suntools
+	endif
+	if ($op == 1 || $op == 3) then 
+	  start_msg Window
+	  if ($op == 1) then
+	    setenv SYSDIAG_MODE auto
+	  else
+	    setenv SYSDIAG_MODE select
+	  endif
+	  if ($testing == '') then
+	     suntools -s $sd_dir/$sun_tools
+	  else echo suntools -s $sd_dir/$sun_tools $SYSDIAG_MODE
+	  endif
+        else if ($op == 2) then
+	  time_msg
+	  ipctop verify
+          disktop verify
+	  devtop verify
+	  tapetop verify
+	  memtop verify
+	  set r
+	  while ("$r" != y && "$r" !=  n)
+	    verify_msg
+	    usr_reply
+	  end
+	  if ($r == n) then 
+	    correct_msg
+	  endif
+	  start_msg Window
+	  setenv SYSDIAG_MODE auto
+	  if ($testing == '') then
+	      suntools -s $sd_dir/$sun_tools
+	  else echo suntools -s $sd_dir/$sun_tools $SYSDIAG_MODE
+	  endif
+        endif
+	stop_msg Window
+	unsetenv SYSDIAG_MODE
+    else 
+      rm -f $SD_LOG_DIRECTORY/disktop_selected
+      if ($op == 1) then
+	  tty_end_msg
+	  start_msg Terminal
+	  if ($testing == '') then
+	    ipctop auto &
+	    disktop auto &
+	    devtop auto
+	    tapetop auto &
+	    sleep 10
+	    memtop auto &
+          else
+	    echo 'ipctop auto &'
+	    echo 'disktop auto &'
+	    echo 'devtop auto'
+	    echo 'tapetop auto &'
+	    echo 'memtop auto &'
+          endif
+      else if ($op == 2) then
+	       time_msg
+	       ipctop verify
+	       disktop verify 
+               devtop verify 
+               tapetop verify 
+               memtop verify 
+	       set r
+	       while ("$r" != y && "$r" != n)
+	         verify_msg
+		 usr_reply
+	       end   
+	       if ($r == n) then
+	         correct_msg
+               endif
+	       tty_end_msg
+	       start_msg Terminal
+	       if ($testing == '') then
+		 ipctop auto &
+		 disktop auto &
+		 devtop auto
+		 tapetop auto &
+		 sleep 10
+                 memtop auto &
+               else
+		 echo 'ipctop auto &'
+	         echo 'disktop auto &'
+	         echo 'devtop auto'
+	         echo 'tapetop auto &'
+	         echo 'memtop auto &'
+               endif
+      else if ($op == 3) then  
+		    start_msg Terminal
+		    set running_tests = no
+		    ipctop select 
+		    set ipc_status = $status
+
+		    disktop select 
+		    set disktop_status = $status
+
+		    memtop select 
+		    set memtop_status = $status
+
+		    tapetop select
+		    set tapetop_status = $status
+
+		    if ($testing == '') then
+		      devtop select
+		      if ($status == 0) set running_tests = yes
+		    else echo 'devtop select &' 
+		    endif
+
+		    if ($ipc_status == 1) then
+		      set running_tests = yes
+		      if ($testing == '') then
+		        ipctop auto &
+		      else echo 'ipctop auto &'
+		      endif
+                    endif
+		        
+		    if ($disktop_status == 1) then
+		      set running_tests = yes
+		      if ($testing == '') then
+		        disktop auto &
+		      else echo 'disktop auto &'
+		      endif
+                    endif
+		        
+	     	    if ($tapetop_status == 1) then
+		      set running_tests = yes
+		      if ($testing == '') then
+	                tapetop auto &
+		      else echo 'tapetop auto &'
+		      endif
+                    endif
+		        
+	     	    if ($memtop_status == 1) then
+	       	      set running_tests = yes
+		      if ($testing == '') then
+	         	memtop pmem &
+		      else echo 'memtop pmem &'
+		      endif
+                    else if ($memtop_status == 2) then
+		      set running_tests = yes
+		      if ($testing == '') then
+		        memtop vmem &
+		      else echo 'memtop vmem &'
+		      endif
+                    else if ($memtop_status == 3) then
+		      set running_tests = yes
+		      if ($testing == '') then
+	  	        memtop auto &
+		      else echo 'memtop auto &'
+		      endif
+                    endif
+      endif
+      if ($running_tests == yes) then 
+	if ($op == 3) then
+	  tty_end_msg
+        endif
+        if ($testing == '') then
+          echo ' '
+	  /bin/csh
+          echo ' '
+        else
+   	  echo '/bin/csh'
+          stop_msg Terminal
+ 	endif
+      else
+        echo sysdiag: No tests selected. >> $SD_LOG_DIRECTORY/logtimes
+	stop_msg Terminal
+      endif
+    endif
+    echo ' '
+    more $SD_LOG_DIRECTORY/log*
+    echo ' '
+    set r
+    while ("$r" != y && "$r" != n)
+      reset_log
+    end   
+    if ($r == y) then
+      rm -f $SD_LOG_DIRECTORY/log*
+    endif
+    if (-e $SD_LOG_DIRECTORY/core || -e $SD_LOG_DIRECTORY/core.1) then
+      set r
+      while ("$r" != y && "$r" != n)
+        remove_core
+      end   
+      if ($r == y) then
+        rm -f $SD_LOG_DIRECTORY/core*
+      endif
+    endif
+    continue
+  endsw
+
+  if ($extra_options == no) then
+    continue
+  else
+    switch ($op)
+
+    case pe: 
+      printenv
+      input_msg
+
+    case cs:
+      pushd $sd_dir
+      /bin/csh
+      popd
+      continue
+
+    case ts:
+      /bin/csh
+      continue
+
+    case rcf:
+      rm -f core*
+      input_msg
+ 
+    case lst:
+      ls -la | more
+      input_msg
+
+    case etf:
+      via $file
+      continue
+ 
+    case rtf:
+      if ($#cin > 1) then
+        rm -f $file
+      else
+	rm -i *
+      endif
+      input_msg
+
+    case e:
+      pushd $sd_dir
+      via $file
+      popd
+      continue
+
+    case m:
+      via $sd_dir/$0
+      continue
+
+    case it:
+      ipctop select $file 
+      if ($status == 1) ipctop $file
+      input_msg
+
+    case dt:
+      devtop select $file
+      input_msg
+
+    case dst:
+      disktop select $file
+      if ($status == 1) disktop $file
+      input_msg
+
+    case mt:
+      memtop select $file
+      set memtop_status = $status
+      if ($memtop_status == 1) then
+        memtop pmem $file
+      else if ($memtop_status == 2) then
+        memtop vmem $file
+      else if ($memtop_status == 3) then
+        memtop auto $file
+      endif
+      input_msg
+
+    case tt:
+      tapetop select $file
+      input_msg
+
+    case rt:
+      date
+      mt -f /dev/rst0 retension
+      date
+      input_msg
+
+    case ps:
+      ps ax | more
+      input_msg
+
+    case l:
+      ls -la $sd_dir | more
+      input_msg
+
+    case ntc:
+      if (!($?NO_CLEAN_HEADS)) then
+        setenv NO_CLEAN_HEADS yes
+        set clean_heads = " ntc,"
+      else
+        unsetenv NO_CLEAN_HEADS
+	set clean_heads
+      endif
+      input_msg
+ 
+    case nts:
+      if (!($?NO_TAPE_SLEEP)) then
+        setenv NO_TAPE_SLEEP yes
+        set tape_sleep = " nts,"
+      else
+        unsetenv NO_TAPE_SLEEP
+	set tape_sleep
+      endif
+      input_msg
+ 
+    case lpm:
+      if (!($?LOG_PASS_MSG)) then
+        setenv LOG_PASS_MSG yes
+        set logging_pass_msgs = "lpm, "
+      else
+        unsetenv LOG_PASS_MSG
+	set logging_pass_msgs
+      endif
+      input_msg
+ 
+    case ipc:
+      if ("$IPC" == no) then
+        setenv IPC yes
+      else
+        setenv IPC no
+      endif
+      input_msg
+ 
+    case lt:
+      if ("$SD_LOAD_TEST" == no) then
+        setenv SD_LOAD_TEST yes
+      else
+        setenv SD_LOAD_TEST no
+      endif
+      input_msg
+ 
+    case re:
+      if ("$RUN_ON_ERROR" == disabled) then
+        setenv RUN_ON_ERROR enabled
+      else
+        setenv RUN_ON_ERROR disabled
+      endif
+      input_msg
+      
+    case test:
+      if ("$testing" != '') then
+        set testing
+        unsetenv TEST_SCRIPT
+      else
+        set testing = ' testing'
+        setenv TEST_SCRIPT yes
+      endif
+      input_msg
+ 
+    case term:
+      if ($#cin > 1) then
+	setenv TERM $file
+	if ($file != sun) stty -tostop
+      else 
+	echo TERM = $TERM
+        input_msg
+      endif
+      continue
+ 
+    case tf:
+      set rm_file = test
+    case ttf:
+      if ($op == ttf) set rm_file = tape.test
+      set r = $file
+      while ("$r" != y && "$r" != n)
+        echo ' '
+        echo  -n ' y/n test file: '
+        usr_reply
+      end
+      if ($r == y) then
+          cp /dev/null  $SD_LOG_DIRECTORY/$rm_file
+      else rm -f $SD_LOG_DIRECTORY/$rm_file
+      endif
+      input_msg
+
+    case x:
+     if ($#cin > 1) then
+       pushd $sd_dir
+       $file
+       popd
+     endif
+     input_msg
+
+    case mh:
+      via $sd_dir/sysdiag.help
+      continue
+
+    case h:
+      pushd $sd_dir > /dev/null
+      sysdiag.help $file
+      if ($status) goto interrupt_end
+      popd > /dev/null
+      continue
+
+    case f:
+      set fop
+      set f_command
+      set kk
+
+      while ($fop != q)
+       if ("$kk" == '') then
+         echo ' '
+         echo 'a)adm/messages   l)ist       la)st      c)lear files'
+	 echo 'mr)make root     t)ar tape   lt)ape     xt)ract tape'
+	 echo -n $log_dir2''$f_command': '
+	 set kk = $<
+       endif
+
+       set fk = ($kk)
+       set kk
+       if ("$fk" == '') continue
+       if ("$fk" == q) break
+       if ("$fk" == Q) goto interrupt_end
+
+       set fin = ($fk)
+       if ($fin[1] != r) then
+         set kinf = ($fin)
+       endif
+ 
+       set f_command = " ( $kinf )"
+
+       if ($#kinf > 1) then
+         set fop = ($kinf[1])
+         if ($#kinf == 2) then
+            set f_file = ($kinf[2])
+         else set f_file = ($kinf[2-$#kinf])
+         endif
+       else
+          set fop = $kinf
+	  set f_file
+       endif
+
+       switch ($fop)
+
+         case a:
+           via /usr/adm/messages
+           continue
+
+         case la:
+           echo ' '
+           last | more
+           f_msg
+
+         case l:
+           echo ' '
+	   df
+           echo ' '
+           echo -n '/usr/adm - '
+           ls -l /usr/adm
+           echo ' '
+           echo -n '/usr/crash - '
+           ls -l /usr/crash
+	   disktop list
+           f_msg
+ 
+         case mr:
+           pushd $sd_dir
+           if ($#kinf > 1) then
+             chmod 777 $f_file
+             /etc/chown root $f_file
+	   else
+             chmod 777 *
+             chmod 777 .*
+             /etc/chown root *
+             /etc/chown root .*
+           endif
+           popd
+           f_msg
+
+         case x:
+           if ($#kinf > 1) then
+             pushd $sd_dir
+             $f_file
+             popd
+           endif
+           f_msg
+
+         case t:
+           pushd $sd_dir
+           chmod 777 *
+           chmod 777 .*
+           /etc/chown root *
+           /etc/chown root .*
+           if ($#kinf > 1) then
+	     tar cvf /dev/rst0 $f_file
+	   else
+	     tar cvf /dev/rst0 .
+	   endif
+           popd
+           f_msg
+
+         case lt:
+	   tar tvf /dev/rst0
+           f_msg
+
+         case xt:
+	   pushd $sd_dir
+	   tar xvf /dev/rst0
+	   exit
+
+         case c:
+	   foreach i (/usr/adm /usr/crash /tmp /usr/tmp)
+             set r
+             echo ' '
+             while ("$r" != y && "$r" != n)
+               echo -n ' Clear "'$i'" files? Enter y for yes, n for no, press return. '
+               usr_reply
+             end 
+             if ($r == y) then
+               if ($i == /usr/adm) then
+                 cp /dev/null /usr/adm/acct
+                 cp /dev/null /usr/adm/aculog
+                 cp /dev/null /usr/adm/lastlog
+                 cp /dev/null /usr/adm/messages
+                 cp /dev/null /usr/adm/msgbuf
+                 cp /dev/null /usr/adm/newsyslog
+                 cp /dev/null /usr/adm/savacct
+                 cp /dev/null /usr/adm/shutdownlog
+                 cp /dev/null /usr/adm/usracct
+                 cp /dev/null /usr/adm/wtmp
+               else
+                 set nonomatch
+                 rm -i $i/*
+                 unset nonomatch
+	       endif
+             endif
+	   end
+	   disktop clean
+           echo ' '
+	   df
+           f_msg
+       endsw
+      end 
+    endsw
+  endif  # end of extra options
+end
+
+interrupt_end:
+
+  if (-e $ttys_dir/ttys-sd) then
+    mv $ttys_dir/ttys-sd $ttys_dir/ttys
+    chmod 644 $ttys_dir/ttys
+    if ($ttys_dir != $sd_dir) kill -1 1
+  endif
+
+  if (-e $ttys_dir/ttys.sd.temp) then
+    rm $ttys_dir/ttys.sd.temp
+  endif
+
+  if (-e /dev/sky-sd) then
+      mv -i /dev/sky-sd /dev/sky
+  endif
+endif

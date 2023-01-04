@@ -1,0 +1,103 @@
+#! /bin/sh
+#
+# @(#) ext_usrsysopt 1.1 86/09/25
+#
+# ext_usrsysopt archtype tapedev server
+#
+PATH=/bin:/usr/bin:/etc:/usr/etc:/usr/ucb:/usr/etc/upgrade
+
+cmdname=$0
+archtype=$1
+TAPE=$2
+SERVER=$3
+
+USAGE="usage: ${CMDNAME} archtype {ar|st|mt|xt} tapedev server"
+OPTLIST="Networking Debugging Suntools_users Suntools_programmers \
+         Suntools_source Text_processing Setup Stand_diag Fortran Usr_diag \
+         Graphics Pascal Profiled Uucp System_V Man Demo Games Vtroff"
+if [ "$TAPE" = "ar" -o "$TAPE" = "st" ]; then
+        Networking="2,3"
+        Debugging="2,4"
+        Suntools_users="3,2"
+        Suntools_programmers="3,3"
+        Suntools_source="3,4"
+        Text_processing="3,5"
+        Setup="3,6"
+        Stand_diag="3,7"
+        Fortran="3,8"
+        Usr_diag="3,9"
+        Graphics="3,10"
+        Pascal="3,11"
+        Profiled="3,12"
+        Uucp="3,13"
+        System_V="4,2"
+        Man="4,3"
+        Demo="4,4"
+	Games="4,5"
+        Vtroff="4,6"
+        BS=126
+elif [ "$TAPE" = "mt" -o "$TAPE" = "xt" ]; then
+        Networking="1,10"
+        Debugging="1,11"
+        Suntools_users="2,2"
+        Suntools_programmers="2,3"
+        Suntools_source="2,4"
+        Text_processing="2,5"
+        Setup="2,6"
+        Stand_diag="2,7"
+        Fortran="2,8"
+        Usr_diag="2,9"
+        Graphics="2,10"
+        Pascal="2,11"
+        Profiled="2,12"
+        Uucp="2,13"
+        System_V="3,2"
+        Man="3,3"
+        Demo="3,4"
+        Games="3,5"
+        Vtroff="3,6"
+        BS=20
+else 
+
+        echo
+        echo "${CMDNAME}: bad argument \"${TYPE}\"."
+        echo "${USAGE}"
+        exit 1
+fi
+
+if [ "${TAPE}" = "st" -o "${TAPE}" = "ar" ]; then
+           tape_n="2"
+           ck_arch_tape ${archtype} ${tape_n} /dev/nr${TAPE}0 ${SERVER}
+           f_skip="2"
+else
+           tape_n="1"
+	   f_skip="9"
+fi
+extract /dev/nr${TAPE}0 ${f_skip} ${BS} sys ${SERVER} 
+f_skip=`expr ${f_skip} + 3`
+extract /dev/nr${TAPE}0 ${f_skip} ${BS} usr ${SERVER}
+
+#
+# extract Optional software from release tape
+#
+for OPT in ${OPTLIST}; do
+           while : ; do
+                echo -n "Do you want to install \"${OPT}\"? [y/n]: ";
+                read answer;
+		case "${answer}" in
+		y | yes )
+                   INFO=`eval echo '$'${OPT}`
+                   newtape_n=`echo ${INFO} | awk '{FS=","; print $1}'`
+                   newf_skip=`echo ${INFO} | awk '{FS=","; print $2}'`
+                   if [ "${newtape_n}" != "${tape_n}" ]; then
+		      ck_arch_tape ${archtype} ${newtape_n} /dev/nr${TAPE}0 ${SERVER}
+                   fi
+		   extract /dev/nr${TAPE}0 ${newf_skip} ${BS} ${OPT} ${SERVER}
+                   tape_n="${newtape_n}"
+		   break ;;
+		n | no )
+		   break
+		   ;;
+		esac
+           done
+done

@@ -1,0 +1,163 @@
+krpc/klm_lockmgr.c	standard
+krpc/klm_kprot.c	standard
+net/af.c		standard
+net/if.c		standard
+net/nit.c		optional NIT
+net/raw_cb.c		standard
+net/raw_usrreq.c	standard
+net/route.c		standard
+netdecnet/nsp_input.c	optional decnet
+netdecnet/nsp_output.c	optional decnet
+netdecnet/nsp_subr.c	optional decnet
+netdecnet/nsp_usrreq.c	optional decnet
+netdecnet/tp_input.c	optional decnet
+netdecnet/tp_output.c	optional decnet
+netdecnet/tp_usrreq.c	optional decnet
+netimp/if_imp.c		optional imp INET
+netimp/if_imphost.c	optional imp INET
+netimp/raw_imp.c	optional imp INET
+netinet/if_ether.c	optional ether INET
+netinet/if_loop.c	optional loop INET
+netinet/in.c		optional INET
+netinet/in_pcb.c	optional INET
+netinet/in_proto.c	optional INET
+netinet/ip_icmp.c	optional INET
+netinet/ip_input.c	optional INET
+netinet/ip_output.c	optional INET
+netinet/raw_ip.c	optional INET
+netinet/tcp_debug.c	optional INET
+netinet/tcp_input.c	optional INET
+netinet/tcp_output.c	optional INET
+netinet/tcp_subr.c	optional INET
+netinet/tcp_timer.c	optional INET
+netinet/tcp_usrreq.c	optional INET
+netinet/udp_usrreq.c	optional INET
+netpup/pup.c		optional PUP
+netpup/pup_proto.c	optional PUP
+netpup/raw_pup.c	optional PUP
+nfs/dbx_nfs.c		optional dbx NFS symbolic-info
+nfs/nfs_server.c	optional NFS
+nfs/nfs_subr.c		optional NFS
+nfs/nfs_vfsops.c	optional NFS
+nfs/nfs_vnodeops.c	optional NFS
+nfs/nfs_xdr.c		optional NFS
+pcfs/dbx_pcfs.c		optional dbx PCFS symbolic-info
+pcfs/pc_alloc.c		optional PCFS
+pcfs/pc_dir.c		optional PCFS
+pcfs/pc_node.c		optional PCFS
+pcfs/pc_subr.c		optional PCFS
+pcfs/pc_vfsops.c	optional PCFS
+pcfs/pc_vnodeops.c	optional PCFS
+rpc/auth_kern.c		standard
+rpc/authunix_prot.c	standard
+rpc/clnt_kudp.c		standard
+rpc/clnt_perror.c	standard
+rpc/dbx_rpc.c		optional dbx NFS symbolic-info
+rpc/kudp_fastsend.c	standard
+rpc/pmap_kgetport.c	standard
+rpc/pmap_prot.c		standard
+rpc/rpc_prot.c		standard
+rpc/rpc_callmsg.c	optional NFS
+rpc/subr_kudp.c		standard
+rpc/svc.c		optional NFS
+rpc/svc_auth.c		optional NFS
+rpc/svc_auth_unix.c	optional NFS
+rpc/svc_kudp.c		optional NFS
+rpc/xdr.c		standard
+rpc/xdr_array.c		standard
+rpc/xdr_mbuf.c		standard
+rpc/xdr_mem.c		standard
+specfs/bdev_vnodeops.c	standard
+specfs/fifo_vnodeops.c	standard
+specfs/spec_subr.c	standard
+specfs/spec_vnodeops.c	standard
+sys/dbx_sys.c		optional dbx symbolic-info
+sys/heap_kmem.c		standard
+sys/init_dbx.c		standard symbolic-info
+sys/init_main.c		standard
+sys/init_sysent.c	standard
+sys/ipc_subr.c		optional IPCMESSAGE
+sys/ipc_subr.c		optional IPCSEMAPHORE
+sys/ipc_subr.c		optional IPCSHMEM
+sys/ipc_msg.c		optional IPCMESSAGE
+sys/ipc_sem.c		optional IPCSEMAPHORE
+sys/ipc_shm.c		optional IPCSHMEM
+sys/kern_acct.c		optional SYSACCT
+sys/kern_clock.c	standard
+sys/kern_descrip.c	standard
+sys/kern_exec.c		standard
+sys/kern_exit.c		standard
+sys/kern_fork.c		standard
+sys/kern_mman.c		standard
+sys/kern_proc.c		standard
+sys/kern_prot.c		standard
+sys/kern_resource.c	standard
+sys/kern_sig.c		standard
+sys/kern_softint.c	standard
+sys/kern_subr.c		standard
+sys/kern_synch.c	standard
+sys/kern_time.c		standard
+sys/kern_xxx.c		standard
+sys/str_buf.c		optional STREAMS
+sys/str_clone.c		optional clone STREAMS
+sys/str_conf.c		optional STREAMS
+sys/str_io.c		optional STREAMS
+sys/str_sp.c		optional sp STREAMS
+sys/subr_mcount.c	optional profiling-routine
+sys/subr_prf.c		standard
+sys/subr_rmap.c		standard
+sys/subr_xxx.c		standard
+sys/sys_generic.c	standard
+sys/sys_process.c	standard
+sys/sys_socket.c	standard
+sys/tty.c		standard
+sys/tty_bk.c		optional bk
+sys/tty_conf.c		standard
+sys/tty_pty.c		optional pty
+sys/tty_subr.c		standard
+sys/tty_tb.c		optional tb
+sys/tty_tty.c		standard
+sys/uipc_domain.c	standard
+sys/uipc_mbuf.c		standard
+sys/uipc_pipe.c		standard
+sys/uipc_proto.c	standard
+sys/uipc_socket.c	standard
+sys/uipc_socket2.c	standard
+sys/uipc_syscalls.c	standard
+sys/uipc_usrreq.c	standard
+sys/vfs.c		standard
+sys/vfs_bio.c		standard
+sys/vfs_conf.c		standard
+sys/vfs_dnlc.c		standard
+sys/vfs_io.c		standard
+sys/vfs_lookup.c	standard
+sys/vfs_pathname.c	standard
+sys/vfs_syscalls.c	standard
+sys/vfs_vnode.c		standard
+sys/vfs_xxx.c		standard
+sys/vm_drum.c		standard
+sys/vm_mem.c		standard
+sys/vm_mon.c		standard
+sys/vm_page.c		standard
+sys/vm_proc.c		standard
+sys/vm_pt.c		standard
+sys/vm_sched.c		standard
+sys/vm_subr.c		standard
+sys/vm_sw.c		standard
+sys/vm_swap.c		standard
+sys/vm_swp.c		standard
+sys/vm_text.c		standard
+ufs/dbx_ufs.c		optional dbx symbolic-info
+ufs/quota.c		optional QUOTA
+ufs/quota_syscalls.c	optional QUOTA
+ufs/quota_ufs.c		optional QUOTA
+ufs/ufs_alloc.c		standard
+ufs/ufs_bmap.c		standard
+ufs/ufs_dir.c		standard
+ufs/ufs_dsort.c		standard
+ufs/ufs_efs.c		optional efs device-driver
+ufs/ufs_inode.c		standard
+ufs/ufs_subr.c		standard
+ufs/ufs_tables.c	standard
+ufs/ufs_vfsops.c	standard
+ufs/ufs_vnodeops.c	standard

@@ -1,0 +1,191 @@
+.LP
+.B
+.ps 14
+.nf
+Sun  Microsystems
+.sp 16
+.ce 100
+.ps 20
+Sun SCSI Tape Diagnostic
+.sp 3
+.ps 20
+User's Document
+.sp 14
+.ps 14
+Tony Wyant
+.sp 2
+\*(DY
+.sp 2
+Revision A
+.ce 0
+.fi
+.R
+.bp 1
+.ps 12
+.EH 'Sun Microsystems''SCSI Tape Diagnostic'
+.OH 'Sun Microsystems''SCSI Tape Diagnostic'
+.EF '\*(DY'Revision A'page \\\\n(PN'
+.OF '\*(DY'Revision A'page \\\\n(PN'
+.P1
+.H 2 "Purpose"
+.PP
+This document briefly describes the operation of the SCSI tape diagnostic .
+.H 2 "Audience"
+.PP
+End users, manufacturing, and field service personnel are are among
+the groups of people that may be interested in this diagnostic . 
+.H 1 "Revision History"
+.LP
+Revision A     20 June 1985     Initial release of this document.
+.H 1 "Glossary"
+       SCSI - Small computer systems interface .
+.H 1 "Operating Instructions"
+.PP
+.H 2 "Loading and Starting"
+.PP
+Since st.diag is a stand alone diagnostic, it must be booted from the prom
+monitor .
+This is done by the following command:
+
+      >b nn(partition info)path/st.diag
+
+where nn, partition info and path are dependent upon your particular
+configuration .
+some typical commands are:
+
+      >b sd(0,0,0)/stand/st.diag
+
+     which loads the diagnostic from /stand on SCSI disk .
+     or:
+
+     >b ie(0,0,40)/stand/st.diag
+
+     which loads the diagnostic from ethernet .
+            
+
+
+.KS
+.H 2 "User Interface"
+.PP
+The user interface consists of a single menu and a command prompt . 
+.H 3 "The Main Menu"
+.PP
+When the diagnostic starts running, it should look  like this :
+.sp 2
+.TS
+center box expand tab(|);
+l.
+.sp2
+Sun SCSI Tape Diagnostic           Version 1.13      6/12/85
+.sp 2
+.T&
+a.
+R  -\0Readback Test
+.sp 1
+F  -\0File Skipping Test
+.sp 1
+T  -\0End of Tape Test
+.sp 1
+E  -\0Erase Test
+.sp 1
+A  -\0All
+.sp 1
+X  -\0Exit
+.sp 2
+.T&
+l.
+st>
+.sp 2
+.TE
+.sp 2
+By typing the appropriate letter: R, F, T, E, A, or X, the selected action is
+performed . (The lower case letters r, f, t, e, a or x may also be used .)
+When the test is complete, the results are displayed on the screen and the
+prompt "st>" is printed. At this point the user may select another option
+or may redisplay the menu by depressing the RETURN key .
+.KE
+.KS
+.PP
+.H 3 "R  -\0Readback Test"
+.PP
+The readback test tests the ability of the drive to accurately write
+and readback data . It writes several files using different data patterns
+and sizing then reads them back to verify that they were written correctly .
+
+The data patterns sent to the tape controller are not necessarily
+the ones that get  physically written on the tape .
+The program uses the following patterns:
+
+  00000000
+  FFFFFFFF
+  55555555
+  AAAAAAAA
+  A5A5A5A5
+  F00FF00F
+  DBE6DBE6
+  CFCFCFCF
+  29292929
+
+and writes each pattern at 15, 30, 60,and 120 blocks (1 block = 512 bytes)
+per transfer .
+.H 3 " F  -\0File Skipping Test"
+.PP
+The file skipping test tests the drive's file skipping ability .
+It writes 3 files, each with unique data then skips to each one and verifies
+that the drive has correctly positioned the tape .
+The first file is one block (512 bytes) long and its data consists entirely 
+of ones .
+The second file is two blocks long and is filled with twos and the
+third file is 3 blocks long and is filled with threes . 
+.H 3 " T  -\0End of Tape Test"
+.PP
+The end of tape test is useful to diagnose problems with the head positioning
+mechanism or the end of tape sense .
+This test writes data until it reaches the end of tape,
+reads the data and then repeats this read-write operation with different data.
+The data used here is CF then 29 which causes worst case peak shift patterns
+on the Archive drive .
+This test will write to all tracks on either 4 or 9 track drives.
+On a 9 track drive the test will take a little bit more time .
+.H 3 " E  -\0Erase test"
+.PP
+The erase test is used to test the erase function of the tape drive .
+It writes a block of data on the tape, erases the tape, then attempts to
+read the data to verify the erase .
+.H 3 " A  -\0All"
+.PP
+By typing 'A' the diagnostic will run the readback test, the file skipping
+test, the end of tape test and the erase test .
+.H 3 " X  -\0Exit"
+.PP
+This will exit the diagnostic and return to the boot monitor .
+.KE
+.KS
+.H 2 "Status and Error Messages"
+.PP
+When a test is running it prints a status message of the following format: 
+
+        st: test : status 
+
+such as:
+
+        st: readback test : reading
+
+when the test completes it will  print "passed", as in the following message
+
+        st: readback test : passed .
+
+if the test fails, it will print  messages such as :
+
+        st: readback test : readback failed .
+
+        st: EOT test : write protected, write failed .
+
+.H 3 "Soft Errors"
+.PP
+The diagnostic will report soft errors, they will not cause a test to fail,
+but they are indicative of either tape or cartridge problems . If they occur,
+try running the diagnostic with another tape. If the problem persists, try
+cleaning the drive's heads . If you still get soft errors, there is probably 
+a problem with the drive .
+.KE

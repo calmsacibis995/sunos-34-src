@@ -1,0 +1,31 @@
+# !/bin/sh
+#
+#	Script to convert 3.0fcs services to 3.2fcs services
+#
+#       @(#)  3.0services_3.2services 1.1 86/09/25 
+#
+#       Copyright (c) 1986 by Sun Microsystems, Inc.
+#
+
+ed $1 <<NEW
+/SMI/
+s/85\/12\/18/86\/07\/07/
+/ftp/
+i
+ftp-data	20/tcp
+time            37/udp          timserver
+domain          53/udp
+domain          53/tcp
+.
+/hostnames/
+s/from/to/
+/tftp/
+i
+csnet-ns        105/tcp
+uucp-path       117/tcp
+untp            119/tcp         usenet
+ntp             123/tcp
+.
+w
+q
+NEW

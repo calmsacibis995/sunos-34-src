@@ -1,0 +1,66 @@
+#
+# Sun-3/260 with up to 2 Xylogics controllers and 1/2" tape
+# plus 1 or 2 SCSI disks and 1 SCSI tape
+#
+machine		"sun3"
+cpu		"SUN3_260"	# (Sun-3/260 or Sun-3/280 cpu)
+ident		"XYMT260"
+timezone	8 dst
+maxusers	4
+options		INET
+options		SYSACCT
+options		QUOTA
+options		NFS
+options		NIT
+
+config		vmunix		root on xy
+
+pseudo-device	pty
+pseudo-device	ether
+pseudo-device	loop
+pseudo-device	nd
+pseudo-device	win128
+pseudo-device	dtop4
+pseudo-device	ms3
+pseudo-device	kb3
+
+# connections for machine type 3 (SUN3_260)
+controller	virtual 3 at nexus ?
+controller	obmem 3 at nexus ?
+controller	obio 3 at nexus ?
+controller	vme16d16 3 at nexus ?
+controller	vme24d16 3 at nexus ?
+controller	vme32d16 3 at nexus ?
+controller	vme16d32 3 at nexus ?
+controller	vme24d32 3 at nexus ?
+controller	vme32d32 3 at nexus ?
+
+controller	xyc0 at vme16d16 ? csr 0xee40 priority 2 vector xyintr 0x48
+controller	xyc1 at vme16d16 ? csr 0xee48 priority 2 vector xyintr 0x49
+disk		xy0 at xyc0 drive 0
+disk		xy1 at xyc0 drive 1
+disk		xy2 at xyc1 drive 0
+disk		xy3 at xyc1 drive 1
+controller	si0 at vme24d16 ? csr 0x200000 priority 2 vector siintr 0x40
+disk		sd0 at si0 drive 0 flags 0
+disk		sd1 at si0 drive 1 flags 0
+tape		st0 at si0 drive 32 flags 1
+controller	sc0 at vme24d16 ? csr 0x200000 priority 2 vector scintr 0x40
+disk		sd0 at sc0 drive 0 flags 0
+disk		sd1 at sc0 drive 1 flags 0
+tape		st0 at sc0 drive 32 flags 1
+device		zs0 at obio ? csr 0x20000 flags 3 priority 3
+device		zs1 at obio ? csr 0x00000 flags 0x103 priority 3
+device		mti0 at vme16d16 ? csr 0x620 flags 0xffff priority 4 vector mtiintr 0x88
+device		ie0 at obio ? csr 0xc0000 priority 3
+controller	tm0 at vme16d16 ? csr 0xa0 priority 3 vector tmintr 0x60
+controller	tm1 at vme16d16 ? csr 0xa2 priority 3 vector tmintr 0x61
+tape		mt0 at tm0 drive 0 flags 1
+tape		mt1 at tm1 drive 0 flags 1
+controller	xtc0 at vme16d16 ? csr 0xee60 priority 3 vector xtintr 0x64
+controller	xtc1 at vme16d16 ? csr 0xee68 priority 3 vector xtintr 0x65
+tape		xt0 at xtc0 drive 0 flags 1
+tape		xt1 at xtc1 drive 0 flags 1
+device		cgtwo0 at vme24d16 ? csr 0x400000 priority 4 vector cgtwointr 0xa8
+device		bwtwo0 at obmem 3 csr 0xff000000 priority 4
+device		des0 at obio ? csr 0x1c0000

@@ -1,0 +1,7 @@
+The  kernel  directory contains various important files for the ROM
+Monitor.  In particular, the code entered at reset or power-up, as well
+as the initial handler for all traps and interrupts, is in trap.s; more
+reset code is in sunmon.c; and the command interpreter is in
+commands.c.  There's also a collection of subroutines here.
+
+@(#)README 1.2 84/11/21 Copyright (c) 1984 by Sun Microsystems, Inc.

@@ -1,0 +1,3024 @@
+/*LINTLIBRARY*/
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/wait.h>
+#include <sys/file.h>
+#include <sys/uio.h>
+#include <sys/ttychars.h>
+#include <sys/resource.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/param.h>
+#include <sys/dir.h>
+#include <sys/errno.h>
+#include <rpc/rpc.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <errno.h>
+#include <strings.h>
+#include <utmp.h>
+#include <pwd.h>
+#include <ctype.h>
+#include <sgtty.h>
+#include <varargs.h>
+#include <sunwindow/sun.h>
+#include <sunwindow/attr.h>
+#include <sunwindow/window_hs.h>
+#include <sunwindow/defaults.h>
+#include <sunwindow/rect.h>
+#include <sunwindow/win_enum.h>
+#include <suntool/sunview.h>
+#include <suntool/menu.h>
+#include <suntool/emptysw.h>
+#include <suntool/msgsw.h>
+#include <suntool/tool_struct.h>
+#include <suntool/teksw.h>
+#undef RESET
+#undef LF
+#include <suntool/tek.h>
+#include <suntool/panel.h>
+#include "teksw_imp.h"
+#include <suntool/selection_svc.h>
+#include <suntool/wmgr.h>
+#include <suntool/icon_load.h>
+#include <suntool/fullscreen.h>
+#include <suntool/ttysw.h>
+#include <suntool/canvas.h>
+#undef WIN_ATTR
+#undef WIN_ATTR_LIST
+#include "wmgr_policy.h"
+#undef ord
+#include "selection_impl.h"
+#undef RESET
+#undef LF
+#include "scrollbar_impl.h"
+#include "panel/panel_impl.h"
+#undef set
+#include "text/entity_view.h"
+#include "text/primal.h"
+#include "text/ev_impl.h"
+#include "text/textsw_impl.h"
+#include "text/finger_table.h"
+#include "text/ps_impl.h"
+
+#include "ttysw/ttysw_impl.h"
+#include "ttysw/ttytlsw_impl.h"
+#undef CTRL
+#undef NUL
+#include "ttysw/ttyansi.h"
+#include "ttysw/charimage.h"
+#include "ttysw/charscreen.h"
+
+#include "window/window_impl.h"
+#include "window/frame_impl.h"
+
+
+
+int msgsw_handlesigwinch(msgsw) 
+		Msgsw *msgsw; 
+		{ return msgsw_handlesigwinch(msgsw); }
+
+struct mpr_data esw_mpr_data;
+struct pixrect esw_mpr;
+struct cursor esw_cursor;
+short _esw_imagegray[16];
+struct mpr_data _esw_pixrectgray_data;
+struct pixrect _esw_pixrectgray;
+
+int esw_handlesigwinch(esw) 
+		Emptysw *esw; 
+		{ return esw_handlesigwinch(esw); }
+		
+struct timeval *_tool_setupselect(tio,windowfd,ibitsmask,obitsmask,ebitsmask,
+		timer) 
+		struct toolio *tio; int windowfd; int *ibitsmask; 
+		int *obitsmask; int *ebitsmask; struct timeval *timer; 
+		{ return _tool_setupselect(tio,windowfd,ibitsmask,
+				obitsmask,ebitsmask,timer); }
+				
+struct timeval timersubtract(time,timedelta) 
+		struct timeval time; struct timeval timedelta; 
+		{ return timersubtract(time,timedelta); }
+
+int _tool_dispathselect(data,tio,windowfd,ibits,obits,ebits,timedelta) 
+		caddr_t data; struct toolio *tio; int windowfd; int ibits; 
+		int obits; int ebits; struct timeval timedelta; 
+		{ return _tool_dispathselect(data,tio,windowfd,ibits,obits,
+				ebits,timedelta); }
+struct gfx_takeover nullgt;
+
+int gfxsw_newscreen(gt,screen) 
+		struct gfx_takeover *gt; struct screen *screen; 
+		{ return gfxsw_newscreen(gt,screen); }
+		
+int gfxsw_catchsigwinch() 
+		{ return gfxsw_catchsigwinch(); }
+		
+int gfxsw_catchsigtstp() 
+		{ return gfxsw_catchsigtstp(); }
+		
+int gfxsw_catchsigcont() 
+		{ return gfxsw_catchsigcont(); }
+		
+int signal_ifdfl(sig,catchernew) 
+		int sig; int (*catchernew)(); 
+		{ return signal_ifdfl(sig,catchernew); }
+		
+int resetsignal_todfl(sig,catchermine) 
+		int sig; int (*catchermine)(); 
+		{ return resetsignal_todfl(sig,catchermine); }
+		
+struct gfx_takeover nullgt;
+struct mpr_data blank_mpr_data;
+struct pixrect blank_mpr;
+struct gfx_takeover nullgt;
+
+struct mpr_data cached_mpr_data;
+struct pixrect cached_mpr;
+
+int pw_fullcolorinit(pw,background_cached,foreground_cached) 
+		struct pixwin *pw; struct singlecolor *background_cached; 
+		struct singlecolor *foreground_cached; 
+		{ return pw_fullcolorinit(pw,background_cached,
+			foreground_cached); }
+
+int pw_fullcolorrelease(pw,background_cached,foreground_cached) 
+		struct pixwin *pw; struct singlecolor *background_cached; 
+		struct singlecolor *foreground_cached; 
+		{ return pw_fullcolorrelease(pw,background_cached,
+			foreground_cached); }
+			
+int fullscreen_pw_getclipping(fs) 
+		struct fullscreen *fs; 
+		{ return fullscreen_pw_getclipping(fs); }
+		
+int type;
+struct mpr_data menu_mpr_data;
+struct pixrect menu_mpr;
+int _menu_putup(initx,inity) 
+		int *initx; int *inity; 
+		{ return _menu_putup(initx,inity); }
+		
+int _menu_computerect(new,initx,inity) 
+		struct rect *new; int *initx; int *inity; 
+		{ return _menu_computerect(new,initx,inity); }
+		
+int fake_RL_edge(x,y) 
+		int x; int y; 
+		{ return fake_RL_edge(x,y); }
+		
+int remove_menus() 
+		{ return remove_menus(); }
+		
+int _menu_init(menustart,initevent) 
+		struct menu *menustart; struct inputevent *initevent; 
+		{ return _menu_init(menustart,initevent); }
+		
+int get_mouse_raw() 
+		{ return get_mouse_raw(); }
+		
+int track_mouse_over_menu() 
+		{ return track_mouse_over_menu(); }
+		
+int menu_click() 
+		{ return menu_click(); }
+		
+int text_stripe(str,r,invert) 
+		char *str; struct rect *r; int invert; 
+		{ return text_stripe(str,r,invert); }
+		
+int invert_stripe(n) 
+		int n; 
+		{ return invert_stripe(n); }
+		
+int promote_menu(n) 
+		int n; 
+		{ return promote_menu(n); }
+		
+int header_separator(r) 
+		struct rect *r; 
+		{ return header_separator(r); }
+		
+struct mpr_data _tool_pixrectdtgray_data;
+struct pixrect _tool_pixrectdtgray;
+int tool_handlesigwinchstd(tool) 
+		struct tool *tool; 
+		{ return tool_handlesigwinchstd(tool); }
+		
+int _tool_addyoffsettosws(tool,yoffset) 
+		struct tool *tool; short yoffset; 
+		{ return _tool_addyoffsettosws(tool,yoffset); }
+		
+int _tool_display(tool,swstoo) 
+		struct tool *tool; bool swstoo; 
+		{ return _tool_display(tool,swstoo); }
+		
+int _tool_displayborders(tool) 
+		struct tool *tool; 
+		{ return _tool_displayborders(tool); }
+		
+int _tool_displayswborders(tool,sw) 
+		struct tool *tool; struct toolsw *sw; 
+		{ return _tool_displayswborders(tool,sw); }
+		
+int _tool_subwindowshandlesigwinch(tool) 
+		struct tool *tool; 
+		{ return _tool_subwindowshandlesigwinch(tool); }
+		
+int _tool_draw_box(pixwin,op,r,w,color) 
+		struct pixwin *pixwin; int op; struct rect *r; int w; 
+		int color; 
+		{ return _tool_draw_box(pixwin,op,r,w,color); }
+		
+int tool_selectedstd(tool,ibits,obits,ebits,timer) 
+		struct tool *tool; int *ibits; int *obits; int *ebits; 
+		struct timeval **timer; 
+		{ return tool_selectedstd(tool,ibits,obits,ebits,timer); }
+		
+short confirm_cursor_image[16];
+struct mpr_data confirm_cursor_mpr_data;
+struct pixrect confirm_cursor_mpr;
+short move_cursorimage[16];
+struct mpr_data move_mpr_data;
+struct pixrect move_mpr;
+short move_h_cursorimage[16];
+struct mpr_data move_h_mpr_data;
+struct pixrect move_h_mpr;
+short move_v_cursorimage[16];
+struct mpr_data move_v_mpr_data;
+struct pixrect move_v_mpr;
+short stretchMID_cursorimage[1];
+struct mpr_data stretchMID_mpr_data;
+struct pixrect stretchMID_mpr;
+short stretch_v_cursorimage[16];
+struct mpr_data stretch_v_mpr_data;
+struct pixrect stretch_v_mpr;
+short stretch_h_cursorimage[16];
+struct mpr_data stretch_h_mpr_data;
+struct pixrect stretch_h_mpr;
+short stretchNW_cursorimage[16];
+struct mpr_data stretchNW_mpr_data;
+struct pixrect stretchNW_mpr;
+short stretchNE_cursorimage[16];
+struct mpr_data stretchNE_mpr_data;
+struct pixrect stretchNE_mpr;
+short stretchSE_cursorimage[16];
+struct mpr_data stretchSE_mpr_data;
+struct pixrect stretchSE_mpr;
+short stretchSW_cursorimage[16];
+struct mpr_data stretchSW_mpr_data;
+struct pixrect stretchSW_mpr;
+
+struct menuitem tool_items[];
+struct menu wmgr_toolmenubody;
+
+WM_Direction wmgr_compute_grasp(r,event,is_move,is_iconic,grasp_type) 
+		Rect *r; Event *event; int is_move; int is_iconic; 
+		int grasp_type; 
+		{ return wmgr_compute_grasp(r,event,is_move,is_iconic,
+			grasp_type); }
+			
+Rect wmgr_set_bounds(w_rect,s_rect,grasp,is_move,offset,min_width,min_height)
+		Rect *w_rect; Rect *s_rect; WM_Direction grasp; int is_move;
+		struct pr_pos *offset; int min_width; int min_height; 
+		{ return wmgr_set_bounds(w_rect,s_rect,grasp,is_move,offset,
+			min_width,min_height); }
+			
+void wmgr_setlevel(window,prev,next) 
+		int window; int prev; int next; 
+		{;}
+		
+Policy_handle wmgr_get_icon_policy() 
+		{ return wmgr_get_icon_policy(); }
+		
+int wmgr_init_icon_position(root) 
+		Window_handle root; 
+		{ return wmgr_init_icon_position(root); }
+		
+int wmgr_acquire_next_icon_rect(rect) 
+		struct rect rect; 
+		{ return wmgr_acquire_next_icon_rect(rect); }
+		
+int wmgr_inquire_next_icon_rect(rect) 
+		struct rect rect; 
+		{ return wmgr_inquire_next_icon_rect(rect); }
+		
+int wmgr_set_icon_rect(rootfd,window,icon_rect) 
+		Window_handle rootfd; Window_handle window; 
+		struct rect *icon_rect; 
+		{ return wmgr_set_icon_rect(rootfd,window,icon_rect); }
+		
+void wmgr_set_icon_level(rootfd,windowfd) 
+		int rootfd; int windowfd; 
+		{;}
+		
+int wmgr_init_tool_position(root) 
+		Window_handle root; 
+		{ return wmgr_init_tool_position(root); }
+		
+int wmgr_acquire_next_tool_rect(rect) 
+		struct rect rect; 
+		{ return wmgr_acquire_next_tool_rect(rect); }
+		
+int wmgr_inquire_next_tool_rect(rect) 
+		struct rect rect; 
+		{ return wmgr_inquire_next_tool_rect(rect); }
+		
+int wmgr_set_tool_rect(root,window,candidate) 
+		Window_handle root; Window_handle window; 
+		struct rect *candidate; 
+		{ return wmgr_set_tool_rect(root,window,candidate); }
+		
+void wmgr_set_tool_level(rootfd,windowfd) 
+		Window_handle rootfd; Window_handle windowfd; 
+		{;}
+		
+struct rectlist *wmgr_findspace(rootfd,selector,ignorefd) 
+		Window_handle rootfd; int selector; Window_handle ignorefd; 
+		{ return wmgr_findspace(rootfd,selector,ignorefd); }
+		
+int wmgr_is_child_inserted(parent,child) 
+		Window_handle parent; Window_handle child; 
+		{ return wmgr_is_child_inserted(parent,child); }
+		
+int wmgr_getnormalrect(windowfd,rectp) 
+		int windowfd; struct rect *rectp; 
+		{ return wmgr_getnormalrect(windowfd,rectp); }
+		
+int wmgr_setnormalrect(windowfd,rectp) 
+		int windowfd; struct rect *rectp; 
+		{ return wmgr_setnormalrect(windowfd,rectp); }
+		
+int tool_repaint_all_later(tool) 
+		struct tool *tool; 
+		{ return tool_repaint_all_later(tool); }
+		
+struct toolsw *tool_lastsw(tool) 
+		struct tool *tool; 
+		{ return tool_lastsw(tool); }
+		
+struct toolsw *tool_addsw(tool,windowfd,name,width,height) 
+		struct tool *tool; int windowfd; char *name; 
+		short width; short height; 
+		{ return tool_addsw(tool,windowfd,name,width,height); }
+		
+int tool_destroysubwindow_inserted(tool,toolsw,inserted) 
+		struct tool *tool; struct toolsw *toolsw; int inserted; 
+		{return tool_destroysubwindow_inserted(tool,toolsw,inserted); }
+		
+int _tool_removesubwindow(tool,toolsw) 
+		struct tool *tool; struct toolsw *toolsw; 
+		{ return _tool_removesubwindow(tool,toolsw); }
+		
+struct tek tek;
+char *tek_open(tdata,straps) 
+		caddr_t tdata; int straps; 
+		{ return tek_open(tdata,straps); }
+		
+void tek_close(dp) 
+		int dp; 
+		{;}
+		
+void tek_ttyinput(dp,c) 
+		char *dp; unsigned char c; 
+		{;}
+void tek_kbdinput(dp,c) 
+		char *dp; unsigned char c; 
+		{;}
+void tek_posinput(dp,x,y) 
+		char *dp; int x; int y; 
+		{;}
+		
+struct toolsw *teksw_createtoolsubwindow(tool,name,width,height,argv) 
+		struct tool *tool; char *name; short width; short height; 
+		char **argv; 
+		{return teksw_createtoolsubwindow(tool,name,width,
+			height,argv); }
+			
+int teksw_fork(tsd,argv,inputmask,outputmask,exceptmask) 
+		struct teksubwindow *tsd; char **argv; int *inputmask; 
+		int *outputmask; int *exceptmask; 
+		{return teksw_fork(tsd,argv,inputmask,outputmask,exceptmask); }
+		
+struct teksubwindow *teksw_init(windowfd,argv) 
+		int windowfd; char **argv; 
+		{ return teksw_init(windowfd,argv); }
+		
+int teksw_done(tsd) 
+		struct teksubwindow *tsd; 
+		{ return teksw_done(tsd); }
+		
+int dflag;
+struct _iobuf *debug;
+struct mpr_data nullcur_mpr_data;
+struct pixrect nullcur_mpr;
+struct cursor nullcursor;
+struct mpr_data oldcur_mpr_data;
+struct pixrect oldcur_mpr;
+struct mpr_data hglass_cursor_mpr_data;
+struct pixrect hglass_cursor_mpr;
+
+int tek_init(tsp,argv) 
+		struct teksw *tsp; char **argv; 
+		{ return tek_init(tsp,argv); }
+		
+void tek_done(tsp) 
+		struct teksw *tsp; 
+		{;}
+		
+int teksw_selected(tsd,ibits,obits,ebits,timer) 
+		struct teksubwindow *tsd; int *ibits; int *obits; int *ebits;
+		struct timeval **timer; 
+		{ return teksw_selected(tsd,ibits,obits,ebits,timer); }
+		
+int teksw_handlesigwinch(tsd) 
+		struct teksubwindow *tsd; 
+		{ return teksw_handlesigwinch(tsd); }
+		
+void tek_move(td,x,y) 
+		char *td; int x; int y; 
+		{;}
+		
+void tek_draw(td,x,y) 
+		char *td; int x; int y; 
+		{;}
+		
+void tek_char(td,c) 
+		char *td; unsigned char c; 
+		{;}
+		
+void tek_ttyoutput(td,c) 
+		char *td; char c; 
+		{;}
+		
+void tek_displaymode(td,style,type) 
+		char *td; enum vstyle style; enum vtype type; 
+		{;}
+		
+void tek_chfont(td,f) 
+		char *td; int f; 
+		{;}
+		
+void tek_cursormode(td,cmode) 
+		char *td; 
+		enum cursormode cmode; 
+		{;}
+		
+void tek_clearscreen(td) 
+		char *td; 
+		{;}
+		
+void tek_bell(td) 
+		char *td; 
+		{;}
+		
+int tek_line(pwp,x0,y0,x1,y1,op,width,style) 
+		struct pixwin *pwp; int x0; int y0; int x1; int y1; int op; 
+		int width; int style; 
+		{ return tek_line(pwp,x0,y0,x1,y1,op,width,style); }
+		
+int tool_tried_to_get_font_from_defaults;
+
+int tool_debug_attr;
+
+int tool_card_attr(attr) 
+		int attr; 
+		{ return tool_card_attr(attr); }
+		
+int tool_free_attr(attr,v) 
+		int attr; char *v; 
+		{ return tool_free_attr(attr,v); }
+		
+char *tool_copy_attr(attr,v) 
+		int attr; char *v; 
+		{ return tool_copy_attr(attr,v); }
+		
+int tool_free_attribute_list(avlist) 
+		char **avlist; 
+		{ return tool_free_attribute_list(avlist); }
+		
+struct mpr_data _tool_mpr_data;
+struct pixrect _tool_mpr;
+int tool_tried_to_get_font_from_defaults;
+
+int tool_set_attr(tool,avlist) 
+		struct tool *tool; char **avlist;
+		{ return tool_set_attr(tool,avlist); }
+		
+int tool_resize(tool) 
+		Tool *tool; 
+		{ return tool_resize(tool); }
+		
+int tool_check_state(tool) 
+		Tool *tool; 
+		{ return tool_check_state(tool); }
+		
+Notify_value tool_death(tool,status) 
+		Tool *tool; Destroy_status status; 
+		{ return tool_death(tool,status); }
+
+struct mpr_data scrollbar_saved_client_mpr_data;
+struct pixrect scrollbar_saved_client_mpr;
+struct cursor scrollbar_client_saved_cursor;
+struct itimerval scrollbar_timer;
+int scrollbar_t_on;
+Event scrollbar_t_event;
+Scroll_motion scrollbar_t_motion;
+struct mpr_data scrollbar_button_active_mpr_data;
+struct pixrect scrollbar_button_active_mpr;
+struct cursor scrollbar_button_active_cursor;
+
+Notify_value scrollbar_event(sb,event,arg,type) 
+		scrollbar_handle sb; Event *event; char *arg; 
+		Notify_event_type type; 
+		{ return scrollbar_event(sb,event,arg,type); }
+		
+scrollbar_handle scrollbar_active_sb;
+scrollbar_handle scrollbar_head_sb;
+struct mpr_data scrollbar_v_west_active_mpr_data;
+struct pixrect scrollbar_v_west_active_mpr;
+struct cursor scrollbar_v_west_active_cursor;
+struct mpr_data scrollbar_v_east_active_mpr_data;
+struct pixrect scrollbar_v_east_active_mpr;
+struct cursor scrollbar_v_east_active_cursor;
+struct mpr_data scrollbar_h_north_active_mpr_data;
+struct pixrect scrollbar_h_north_active_mpr;
+struct cursor scrollbar_h_north_active_cursor;
+struct mpr_data scrollbar_h_south_active_mpr_data;
+struct pixrect scrollbar_h_south_active_mpr;
+struct cursor scrollbar_h_south_active_cursor;
+struct mpr_data scrollbar_scrolldown_mpr_data;
+struct pixrect scrollbar_scrolldown_mpr;
+struct cursor scrollbar_down_cursor;
+struct mpr_data scrollbar_scrollup_mpr_data;
+struct pixrect scrollbar_scrollup_mpr;
+struct cursor scrollbar_up_cursor;
+struct mpr_data scrollbar_thumbv_mpr_data;
+struct pixrect scrollbar_thumbv_mpr;
+struct cursor scrollbar_thumbv_cursor;
+struct mpr_data scrollbar_scrollleft_mpr_data;
+struct pixrect scrollbar_scrollleft_mpr;
+struct cursor scrollbar_left_cursor;
+struct mpr_data scrollbar_scrollright_mpr_data;
+struct pixrect scrollbar_scrollright_mpr;
+struct cursor scrollbar_right_cursor;
+struct mpr_data scrollbar_thumbh_mpr_data;
+struct pixrect scrollbar_thumbh_mpr;
+struct cursor scrollbar_thumbh_cursor;
+
+int scrollbar_nullproc() 
+	{ return scrollbar_nullproc(); }
+	
+Scrollbar scrollbar_create_internal(argv) 
+		caddr_t *argv; 
+		{ return scrollbar_create_internal(argv); }
+		
+struct mpr_data scrollbar_mpr_for_sb_pattern_data;
+struct pixrect scrollbar_mpr_for_sb_pattern;
+struct mpr_data scrollbar_mpr_for_grey_pattern_data;
+struct pixrect scrollbar_mpr_for_grey_pattern;
+
+int scrollbar_compute_bubble_rect(sb,result) 
+		scrollbar_handle sb; struct rect *result; 
+		{ return scrollbar_compute_bubble_rect(sb,result); }
+
+Seln_result seln_debug(va_alist) 
+		int va_alist; 
+		{ return seln_debug(va_alist); }
+		
+Seln_access seln_my_access;
+int seln_my_tcp_socket;
+int seln_transient_tcp_socket;
+int seln_my_udp_socket;
+SVCXPRT *seln_my_tcp_transport;
+SVCXPRT *seln_my_udp_transport;
+Seln_client_node clients;
+
+int seln_equal_access(first,second) 
+		Seln_access *first; Seln_access *second; 
+		{ return seln_equal_access(first,second); }
+		
+Seln_result seln_send_yield(rank,holder) 
+		Seln_rank rank; Seln_holder *holder; 
+		{ return seln_send_yield(rank,holder); }
+		
+Notify_value seln_listener(handle,fd) 
+		caddr_t handle; int fd; 
+		{ return seln_listener(handle,fd); }
+		
+void seln_do_function(transport) 
+		SVCXPRT *transport; 
+		{;}
+		
+void seln_do_reply(transport) 
+		SVCXPRT *transport; 
+		{;}
+		
+Seln_result seln_init_reply(request,reply,replier) 
+		Seln_request *request; Seln_request *reply; 
+		Seln_replier_data *replier; 
+		{ return seln_init_reply(request,reply,replier); }
+		
+Seln_result seln_get_reply_buffer(buffer) 
+		Seln_request *buffer; 
+		{ return seln_get_reply_buffer(buffer); }
+		
+int seln_equal_addrs(a,b) 
+		struct sockaddr_in *a; struct sockaddr_in *b; 
+		{ return seln_equal_addrs(a,b); }
+		
+Seln_result seln_get_tcp(prognum,dispatcher) 
+		int prognum; void (*dispatcher)(); 
+		{ return seln_get_tcp(prognum,dispatcher); }
+		
+Seln_functions_state functions;
+
+void seln_function_clear(function) 
+		Seln_function function; 
+		{;}
+		
+void seln_function_set(function) 
+		Seln_function function; 
+		{;}
+		
+int seln_function_state(function) 
+		Seln_function function; 
+		{ return seln_function_state(function); }
+		
+int seln_function_pending() 
+		{ return seln_function_pending(); }
+		
+void seln_function_reset() 
+		{;}
+		
+Seln_functions_state seln_functions_all() 
+		{ return seln_functions_all(); }
+		
+void seln_init_service(debugging) 
+		int debugging; 
+		{;}
+		
+void seln_svc_stop() 
+		{;}
+
+struct timeval seln_std_timeout;
+int seln_svc_program;
+
+int xdr_seln_access(xdrsp,argsp) 
+		XDR *xdrsp; Seln_access *argsp; 
+		{ return xdr_seln_access(xdrsp,argsp); }
+		
+int xdr_seln_file_info(xdrsp,argsp) 
+		XDR *xdrsp; Seln_file_info *argsp; 
+		{ return xdr_seln_file_info(xdrsp,argsp); }
+		
+int xdr_seln_function(xdrsp,argsp) 
+		XDR *xdrsp; Seln_function_buffer *argsp; 
+		{ return xdr_seln_function(xdrsp,argsp); }
+		
+int xdr_seln_functions_state(xdrsp,argsp) 
+		XDR *xdrsp; Seln_functions_state *argsp; 
+		{ return xdr_seln_functions_state(xdrsp,argsp); }
+		
+int xdr_seln_holder(xdrsp,argsp) 
+		XDR *xdrsp; Seln_holder *argsp; 
+		{ return xdr_seln_holder(xdrsp,argsp); }
+		
+int xdr_seln_holders_all(xdrsp,argsp) 
+		XDR *xdrsp; Seln_holders_all *argsp; 
+		{ return xdr_seln_holders_all(xdrsp,argsp); }
+		
+int xdr_seln_inform_args(xdrsp,argsp) 
+		XDR *xdrsp; Seln_inform_args *argsp; 
+		{ return xdr_seln_inform_args(xdrsp,argsp); }
+		
+int xdr_seln_reply(xdrsp,argsp) 
+		XDR *xdrsp; Seln_request *argsp; 
+		{ return xdr_seln_reply(xdrsp,argsp); }
+		
+int xdr_seln_request(xdrsp,argsp) 
+		XDR *xdrsp; Seln_request *argsp; 
+		{ return xdr_seln_request(xdrsp,argsp); }
+		
+int xdr_seln_requester(xdrsp,argsp) 
+		XDR *xdrsp; Seln_requester *argsp; 
+		{ return xdr_seln_requester(xdrsp,argsp); }
+		
+int xdr_sockaddr_in(xdrsp,argsp) 
+		XDR *xdrsp; struct sockaddr_in *argsp; 
+		{ return xdr_sockaddr_in(xdrsp,argsp); }
+
+/* Panel private routines */
+struct pixrect panel_gray25_pr;
+struct pixrect panel_check_off;
+struct pixrect panel_check_on;
+struct pixrect panel_choice_off;
+struct pixrect panel_choice_on;
+struct pixrect panel_menu_on;
+struct mpr_data panel_cycle_pr_data;
+struct pixrect panel_cycle_pr;
+struct pixrect panel_caret_pr;
+struct mpr_data panel_ghost_caret_pr_data;
+struct pixrect panel_ghost_caret_pr;
+struct mpr_data panel_button_pr_data;
+struct pixrect panel_button_pr;
+struct mpr_data panel_choose_one_pr_data;
+struct pixrect panel_choose_one_pr;
+struct mpr_data panel_choose_many_pr_data;
+struct pixrect panel_choose_many_pr;
+struct mpr_data panel_switch_pr_data;
+struct pixrect panel_switch_pr;
+struct mpr_data panel_text_pr_data;
+struct pixrect panel_text_pr;
+struct pixrect panel_gray_mpr;
+struct pixrect panel_left_arrow_pr;
+struct pixrect panel_empty_pr;
+struct mpr_data panel_shade_pr_data;
+struct pixrect panel_shade_pr;
+void (*panel_caret_on_proc)();
+void (*panel_caret_invert_proc)();
+void (*panel_seln_inform_proc)();
+void (*panel_seln_destroy_proc)();
+
+int panel_set_generic(ip,avlist) 
+		panel_item_handle ip; Attr_avlist avlist; 
+		{ return panel_set_generic(ip,avlist); }
+
+char *panel_get_generic(ip,which_attr) 
+		panel_item_handle ip; Panel_attribute which_attr; 
+		{ return panel_get_generic(ip,which_attr); }
+
+int panel_set_ops(ip,avlist) 
+		panel_item_handle ip; Attr_avlist avlist; 
+		{ return panel_set_ops(ip,avlist); }
+
+Panel_item panel_button(ip,avlist) 
+		panel_item_handle ip; Attr_avlist avlist; 
+		{ return panel_button(ip,avlist); }
+
+Panel_item panel_choice(ip,avlist) 
+		panel_item_handle ip; Attr_avlist avlist; 
+		{ return panel_choice(ip,avlist); }
+
+/* VARARGS2 */ 
+panel_handle panel_create_panel_struct(win,windowfd) 
+		caddr_t win; int windowfd; 
+		{ return panel_create_panel_struct(win,windowfd); }
+
+int panel_set_inputmask(panel) 
+		panel_handle panel; 
+		{ return panel_set_inputmask(panel); }
+Panel_item panel_line(ip,avlist) 
+		panel_item_handle ip; Attr_avlist avlist; 
+		{ return panel_line(ip,avlist); }
+
+int panel_free_menu(ip) 
+		panel_item_handle ip; 
+		{ return panel_free_menu(ip); }
+
+void panel_sync_menu_title(ip) 
+		panel_item_handle ip; 
+		{;}
+
+void panel_copy_menu_title(ip,new_title) 
+		panel_item_handle ip; panel_image_handle new_title; 
+		{;}
+
+void panel_copy_menu_choices(ip,choices,last) 
+		panel_item_handle ip; panel_image_handle choices; int last; 
+		{;}
+
+int panel_set_menu(ip,avlist) 
+		panel_item_handle ip; Attr_avlist avlist; 
+		{ return panel_set_menu(ip,avlist); }
+
+char *panel_message(ip,avlist) 
+		panel_item_handle ip; Attr_avlist avlist; 
+		{ return panel_message(ip,avlist); }
+
+Notify_value panel_destroy(panel,status) 
+		panel_handle panel; Destroy_status status; 
+		{ return panel_destroy(panel,status); }
+
+void panel_scroll(panel,sb) 
+		panel_handle panel; Scrollbar sb; 
+		{;}
+
+int panel_sb_modify(sb) 
+		Scrollbar sb; 
+		{ return panel_sb_modify(sb); }
+
+void panel_setup_scrollbar(panel,direction,have_new_scrollbar,new_scrollbar) 
+		panel_handle panel; Scrollbar_setting direction; 
+		int have_new_scrollbar; Scrollbar new_scrollbar; 
+		{;}
+
+void panel_resize_region(panel) 
+		panel_handle panel; 
+		{;}
+
+void panel_update_scrollbars(panel,r) 
+		panel_handle panel; Rect *r; 
+		{;}
+
+int panel_update_scrolling_size(client_panel) 
+		Panel client_panel;
+		{ return panel_update_scrolling_size(client_panel); }
+
+void panel_update_extent(panel,rect) 
+		panel_handle panel; Rect rect; 
+		{;}
+
+/* VARARGS2 */ 
+Notify_value panel_use_event(panel,event) 
+		panel_handle panel; Event *event; 
+		{ return panel_use_event(panel,event); }
+
+int panel_default_event(panel,event) 
+		panel_handle panel; Event *event; 
+		{ return panel_default_event(panel,event); }
+
+int panel_handle_event(client_object,event) 
+		Panel_item client_object; Event *event; 
+		{ return panel_handle_event(client_object,event); }
+
+int panel_begin_preview(client_object,event) 
+		Panel_item client_object; Event *event; 
+		{ return panel_begin_preview(client_object, event); }
+
+struct menuitem *panel_menu_display(ip,event) 
+		panel_item_handle ip; Event *event; 
+		{ return panel_menu_display(ip,event); }
+	
+Notify_value panel_notify_event(panel,event,arg,type) 
+		panel_handle panel; Event *event; Notify_arg arg; 
+		Notify_event_type type; 
+		{ return panel_notify_event(panel,event,arg,type); }
+
+/* VARARGS1 */ 
+Panel panel_begin(tool) 
+		Tool *tool; 
+		{ return panel_begin(tool); }
+
+Toolsw *panel_create_sw(tool,notifier_based,avlist) 
+		Tool *tool; int notifier_based; Attr_avlist avlist; 
+		{ return panel_create_sw(tool,notifier_based,avlist); }
+
+/* VARARGS1 */ 
+Toolsw *panel_create(tool) 
+		Tool *tool; 
+		{ return panel_create(tool); }
+
+Rect panel_enclosing_rect(r1,r2) 
+		Rect *r1; Rect *r2; 
+		{ return panel_enclosing_rect(r1,r2); }
+
+int panel_col_to_x(font,col) 
+		Pixfont *font; int col; 
+		{ return panel_col_to_x(font,col); }
+
+int panel_row_to_y(font,line) 
+		Pixfont *font; int line; 
+		{ return panel_row_to_y(font,line); }
+
+int panel_x_to_col(font,x) 
+		Pixfont *font; int x; 
+		{ return panel_x_to_col(font,x); }
+
+int panel_y_to_row(font,y) 
+		Pixfont *font; int y; 
+		{ return panel_y_to_row(font,y); }
+
+struct pr_size panel_make_image(font,dest,type_code,value,bold_desired,
+		shaded_desired) 
+		Pixfont *font; panel_image_handle dest; int type_code; 
+		caddr_t value; int bold_desired; int shaded_desired; 
+		{ return panel_make_image(font,dest,type_code,value,
+			bold_desired,shaded_desired); }
+
+int panel_free(client_object) 
+		Panel client_object; 
+		{ return panel_free(client_object); }
+
+Attr_avlist panel_make_list() 
+		{ return panel_make_list(); }
+
+void panel_resize(panel) 
+		panel_handle panel; 
+		{;}
+
+void panel_display(panel,flag) 
+		panel_handle panel;Panel_setting flag; 
+		{;}
+
+int panel_paint_item(ip,flag) 
+		panel_item_handle ip; Panel_setting flag; 
+		{ return panel_paint_item(ip,flag); }
+
+int panel_set_panel(panel,avlist) 
+		panel_handle panel; Attr_avlist avlist; 
+		{ return panel_set_panel(panel,avlist); }
+
+char *panel_get_panel(panel,attr) 
+		panel_handle panel; Panel_attribute attr; 
+		{ return panel_get_panel(panel,attr); }
+
+int panel_cancel(client_object,event) 
+		Panel_item client_object; Event *event; 
+		{ return panel_cancel(client_object,event); }
+
+void panel_seln_init(panel) 
+		panel_handle panel; 
+		{;}
+
+Seln_holder panel_seln_inquire(panel,rank) 
+		panel_handle panel; Seln_rank rank; 
+		{ return panel_seln_inquire(panel,rank); }
+
+void panel_seln_acquire(panel,ip,rank,is_null) 
+		panel_handle panel; panel_item_handle *ip; Seln_rank rank; 
+		int is_null; 
+		{;}
+
+void panel_seln_cancel(panel,rank) 
+		panel_handle panel; Seln_rank rank; 
+		{;}
+
+void panel_seln_dehilite(selection) 
+		panel_selection_handle *selection; 
+		{;}
+
+char *panel_slider(ip,avlist) 
+		panel_item_handle ip; Attr_avlist avlist; 
+		{ return panel_slider(ip,avlist); }
+
+Panel_item panel_text(ip,avlist) 
+		panel_item_handle ip; Attr_avlist avlist; 
+		{ return panel_text(ip,avlist); }
+
+Panel_setting panel_text_notify(client_item,event) 
+		Panel_item client_item; Event *event; 
+		{ return panel_text_notify(client_item,event); }
+
+void panel_seln_hilite(selection) 
+		panel_selection_handle selection; 
+		{;}
+
+panel_item_handle panel_successor(ip) 
+		panel_item_handle ip; 
+		{ return panel_successor(ip); }
+
+panel_item_handle panel_append(ip) 
+		panel_item_handle ip; 
+		{ return panel_append(ip); }
+
+int panel_find_default_xy(panel) 
+		panel_handle panel; 
+		{ return panel_find_default_xy(panel); }
+
+int panel_layout(ip,deltas) 
+		panel_item_handle ip; Rect *deltas; 
+		{ return panel_layout(ip,deltas); }
+
+int panel_paint_image(panel,image,rect) 
+		panel_handle panel; panel_image_handle image; Rect *rect; 
+		{ return panel_paint_image(panel,image,rect); }
+
+int panel_paint_pixrect(panel,pr,rect) 
+		panel_handle panel; Pixrect *pr; Rect *rect; 
+		{ return panel_paint_pixrect(panel,pr,rect); }
+
+int panel_pw_lock(panel,rect) 
+		panel_handle panel; Rect *rect; 
+		{ return panel_pw_lock(panel,rect); }
+
+int panel_draw_box(panel,op,r,x,y) 
+		panel_handle panel; int op; Rect *r; int x; int y; 
+		{ return panel_draw_box(panel,op,r,x,y); }
+
+int panel_pw_write(panel,xd,yd,width,height,op,pr,xs,ys) 
+		panel_handle panel; int xd; int yd; int width; int height; 
+		int op; Pixrect *pr; int xs; int ys; 
+		{ return panel_pw_write(panel,xd,yd,width,height,op,pr,xs,ys); }
+
+int panel_pw_writebackground(panel,xd,yd,width,height,op) 
+		panel_handle panel; int xd; int yd; int width; int height; 
+		int op; 
+		{ return panel_pw_writebackground(panel,xd,yd,width,height,op); }
+
+int panel_pw_replrop(panel,xd,yd,width,height,op,pr,xs,ys) 
+		panel_handle panel; int xd; int yd; int width; int height; 
+		int op; Pixrect pr; int xs; int ys; 
+		{ return panel_pw_replrop(panel,xd,yd,width,height,op,pr,xs,ys);}
+
+int panel_pw_vector(panel,x0,y0,x1,y1,op,value) 
+		panel_handle panel; int x0; int y0; int x1; int y1; int op; 
+		int value; 
+		{ return panel_pw_vector(panel,x0,y0,x1,y1,op,value); }
+
+int panel_pw_text(panel,x,y,op,font,s) 
+		panel_handle panel; int x; int y; int op; Pixfont *font; char *s;
+		{ return panel_pw_text(panel,x,y,op,font,s); }
+
+int panel_invert(panel,r) 
+		panel_handle panel; Rect *r; 
+		{ return panel_invert(panel,r); }
+
+int panel_shade(panel,r) 
+	panel_handle panel; Rect *r; 
+	{ return panel_shade(panel,r); }
+
+int panel_clear(panel,r) 
+		panel_handle panel; Rect *r; 
+		{ return panel_clear(panel,r); }
+
+char *panel_strsave(source) 
+		char *source; 
+		{ return panel_strsave(source); }
+
+int panel_fonthome(font) 
+		Pixfont *font; 
+		{ return panel_fonthome(font); }
+
+int panel_nullproc() 
+		{ return panel_nullproc(); }
+
+void panel_caret_on(panel,on) 
+		panel_handle panel; int on; 
+		{;}
+
+void panel_caret_invert(panel) 
+		panel_handle panel; 
+		{;}
+
+void panel_seln_inform(panel,event) 
+		panel_handle panel; Event *event; 
+		{;}
+
+void panel_seln_destroy(panel) 
+		panel_handle panel; 
+		{;}
+
+int panel_free_choices(choices,first,last) 
+		panel_image_handle choices; int first; int last; 
+		{ return panel_free_choices(choices,first,last); }
+
+/* Text routines *//* global variables */
+struct ei_ops ei_plain_text_ops;
+struct mpr_data gray17_pr_data;
+struct pixrect gray17_pr;
+struct textsw_string null_string;
+char *text_delimiter;
+char *cmd_tokens[];
+char *direction_tokens[];
+char *edit_tokens[];
+char *text_tokens[];
+int textsw_again_debug;
+struct textsw_object *textsw_head;
+char *shelf_name;
+struct mpr_data ev_caret_mpr_data;
+struct pixrect ev_caret_mpr;
+struct mpr_data ev_ghost_mpr_data;
+struct pixrect ev_ghost_mpr;
+
+/* global typedef */
+typedef struct tsfh_object {
+	Textsw_view		view;
+	Textsw_selection_handle	selection;
+	Seln_attribute		continued_attr;
+	unsigned		flags;
+	int			fill_result;
+} Tsfh_object;
+typedef Tsfh_object   *Tsfh_handle;
+
+int copy_file(from,to) 
+		char *from; char *to; 
+		{ return copy_file(from,to); }
+
+int copy_status(to,fold,from_mode) 
+		char *to; int fold; int *from_mode; 
+		{ return copy_status(to,fold,from_mode); }
+
+int copy_fd(from,to,fold) 
+		char *from; char *to; int fold; 
+		{ return copy_fd(from,to,fold); }
+
+/* VARARGS1 */ 
+int ei_set(eih) 
+		Ei_handle eih; 
+		{ return ei_set(eih); }
+
+Ev_finger_handle ev_add_finger(fingers,pos,client_data,id_handle) 
+		Ev_finger_table *fingers; Es_index  pos; opaque_t client_data;
+		Ev_mark	id_handle;
+		{ return ev_add_finger(fingers,pos,client_data,id_handle); }
+
+Ev_mark ev_init_mark(mark) 
+		Ev_mark mark; 
+		{ return ev_init_mark(mark); }
+
+Ev_finger_handle ev_find_finger(fingers,mark) 
+		Ev_finger_table *fingers; Ev_mark_object mark; 
+		{ return ev_find_finger(fingers,mark); }
+
+int ev_remove_finger(fingers,mark) 
+		Ev_finger_table *fingers; Ev_mark_object mark; 
+		{ return ev_remove_finger(fingers,mark); }
+
+Op_bdry_handle ev_add_op_bdry(op_bdry,pos,type,mark) 
+		Ev_finger_table *op_bdry; Es_index pos; unsigned type; 
+		Ev_mark mark; 
+		{ return ev_add_op_bdry(op_bdry,pos,type,mark); }
+
+Op_bdry_handle ev_find_op_bdry(op_bdry,mark) 
+		Ev_finger_table op_bdry; Ev_mark_object mark; 
+		{ return ev_find_op_bdry(op_bdry,mark); }
+
+unsigned ev_op_bdry_info_merge(op_bdry,i,next_i,prior) 
+		Ev_finger_table op_bdry; int i; int *next_i; unsigned prior; 
+		{ return ev_op_bdry_info_merge(op_bdry,i,next_i,prior); }
+
+unsigned ev_op_bdry_info(op_bdry,pos,next_i) 
+		Ev_finger_table op_bdry; Es_index pos; int *next_i; 
+		{ return ev_op_bdry_info(op_bdry,pos,next_i); }
+
+int ev_remove_op_bdry(op_bdry,pos,type,mask) 
+		Ev_finger_table *op_bdry; Es_index pos; unsigned type; 
+		unsigned mask; 
+		{ return ev_remove_op_bdry(op_bdry,pos,type,mask); }
+
+Ev_mark_object ev_add_glyph_on_line(chain,line,pr,op,offset_x,offset_y,flags) 
+		Ev_chain chain; int line; struct pixrect *pr; int op; 
+		int offset_x; int offset_y; int flags; 
+		{ return ev_add_glyph_on_line(chain,line,pr,op,offset_x,
+			offset_y,flags); }
+
+Op_bdry_handle ev_find_glyph(chain,line_start) 
+		Ev_chain chain; Es_index line_start; 
+		{ return ev_find_glyph(chain,line_start); }
+
+void ev_remove_glyph(chain,mark,flags) 
+		Ev_chain chain; Ev_mark_object mark; unsigned int flags; 
+		{;}
+
+char *textsw_get(abstract,attribute) 
+		Textsw abstract; Textsw_attribute attribute; 
+		{ return textsw_get(abstract,attribute); }
+
+/* VARARGS1 */ 
+Textsw_status textsw_set(abstract) 
+		Textsw abstract; 
+		{ return textsw_set(abstract); }
+
+void textsw_destroy(abstract) 
+		Textsw abstract; 
+		{;}
+
+Menu_item *textsw_new_menu_table(textsw) 
+		Textsw_folio textsw; 
+		{ return textsw_new_menu_table(textsw); }
+
+Menu textsw_menu_init(textsw) 
+		Textsw_folio textsw; 
+		{ return textsw_menu_init(textsw); }
+
+Menu textsw_get_unique_menu(textsw) 
+		Textsw_folio textsw; 
+		{ return textsw_get_unique_menu(textsw); }
+
+int textsw_do_menu(view,ie) 
+		Textsw_view view; Event *ie; 
+		{ return textsw_do_menu(view,ie); }
+
+int textsw_do_menu_action(cmd_menu,cmd_item) 
+		Menu cmd_menu; 	Menu_item cmd_item; 
+		{ return textsw_do_menu_action(cmd_menu,cmd_item); }
+
+int textsw_menu_prompt(view,event,locx,locy,msg) 
+		Textsw_view view; Event *event; int locx; int locy; char *msg; 
+		{ return textsw_menu_prompt(view,event,locx,locy,msg); }
+
+Textsw textsw_split_view(abstract,locx,locy) 
+		Textsw abstract; int locx; int locy; 
+		{ return textsw_split_view(abstract,locx,locy); }
+
+void textsw_destroy_split(abstract,locx,locy) 
+		Textsw abstract; int locx; int locy; 
+		{;}
+
+/* VARARGS1 */ 
+Textsw textsw_init(windowfd) 
+		int windowfd; 
+		{ return textsw_init(windowfd); }
+
+Textsw_index textsw_position_for_physical_line(abstract,physical_line) 
+		Textsw abstract; int physical_line; 
+		{ return textsw_position_for_physical_line(abstract,
+			physical_line); }
+
+Textsw_mark textsw_add_glyph_on_line(abstract,line,pr,op,offset_x,offset_y,
+		flags) 
+		Textsw abstract; int line; struct pixrect *pr; int op; 
+		int offset_x; int offset_y; int flags; 
+		{ return textsw_add_glyph_on_line(abstract,line,pr,op,offset_x,
+			offset_y,flags); }
+
+void textsw_remove_glyph(abstract,mark,flags) 
+		Textsw abstract; Textsw_mark mark; int flags; 
+		{;}
+
+void textsw_set_scroll_mark(abstract) 
+		Textsw abstract; 
+		{;}
+
+void textsw_scroll(sb) 
+		Scrollbar sb; 
+		{;}
+
+int textsw_do_edit(view,unit,direction) 
+		Textsw_view view; unsigned unit; unsigned direction; 
+		{ return textsw_do_edit(view,unit,direction); }
+
+Textsw_index textsw_replace(abstract,first,last_plus_one,buf,buf_len) 
+		Textsw abstract; Es_index first; Es_index last_plus_one; 
+		char *buf; long buf_len; 
+		{ return textsw_replace(abstract,first,last_plus_one,buf,
+			buf_len); }
+
+int textsw_abort(textsw) 
+		Textsw_folio textsw; 
+		{ return textsw_abort(textsw); }
+
+int textsw_load_file(abstract,filename,reset_views,locx,locy) 
+		Textsw abstract; char *filename; int reset_views; int locx; 
+		int locy; 
+		{ return textsw_load_file(
+			abstract,filename,reset_views,locx,locy); }
+
+int textsw_cd(textsw,locx,locy) 
+		Textsw_folio textsw; int locx; int locy; 
+		{ return textsw_cd(textsw,locx,locy); }
+
+Es_status textsw_store_to_selection(textsw,locx,locy) 
+		Textsw_folio textsw; int locx; int locy; 
+		{ return textsw_store_to_selection(textsw,locx,locy); }
+
+int textsw_has_been_modified(abstract) 
+		Textsw abstract; 
+		{ return textsw_has_been_modified(abstract); }
+
+int textsw_file_name(textsw,name) 
+		Textsw_folio textsw; char **name; 
+		{ return textsw_file_name(textsw,name); }
+
+int textsw_call_filter(view,filter_argv) 
+		Textsw_view view; char **filter_argv;
+		{ return textsw_call_filter(view,filter_argv); }
+
+int textsw_call_smart_filter(view,event,filter_argv) 
+		Textsw_view view; Event *event; char **filter_argv; 
+		{ return textsw_call_smart_filter(view,event,filter_argv); }
+
+void close_nonstd_fds() 
+		{;}
+
+int textsw_parse_rc(textsw) 
+		Textsw_folio textsw; 
+		{ return textsw_parse_rc(textsw); }
+
+int ft_add_delta(finger_table,from,delta) 
+		ft_object finger_table; int from; long delta; 
+		{ return ft_add_delta(finger_table,from,delta); }
+
+ft_object ft_create(last_plus_one,sizeof_client_data) 
+		int last_plus_one; int sizeof_client_data; 
+		{ return ft_create(last_plus_one,sizeof_client_data); }
+
+int ft_destroy(table) 
+		ft_handle table; 
+		{ return ft_destroy(table); }
+
+int ft_expand(table,by) 
+		ft_handle table; int by; 
+		{ return ft_expand(table,by); }
+
+int ft_shift_up(table,first,last_plus_one,expand_by) 
+		ft_handle table; int first; int last_plus_one; int expand_by; 
+		{ return ft_shift_up(table,first,last_plus_one,expand_by); }
+
+int ft_shift_out(table,first,last_plus_one) 
+		ft_object table; int first; int last_plus_one; 
+		{ return ft_shift_out(table,first,last_plus_one); }
+
+int ft_set(finger_table,first,last_plus_one,to,client_data) 
+		ft_object finger_table; int first; int last_plus_one; 
+		Es_index to; char *client_data; 
+		{ return ft_set(finger_table,first,last_plus_one,to,client_data); }
+
+int ft_set_esi_span(finger_table,first,last_plus_one,to,client_data) 
+		ft_object finger_table; Es_index first; Es_index last_plus_one;
+		Es_index to; char *client_data; 
+		{ return ft_set_esi_span(finger_table,first,last_plus_one,to,
+			client_data); }
+
+int ft_bounding_index(finger_table,pos) 
+		Ft_table finger_table; Es_index pos; 
+		{ return ft_bounding_index(finger_table,pos); }
+
+int ft_index_for_position(finger_table,pos) 
+		ft_object finger_table; Es_index pos; 
+		{ return ft_index_for_position(finger_table,pos); }
+
+Es_index ft_position_for_index(finger_table,index) 
+		ft_object finger_table; int index; 
+		{ return ft_position_for_index(finger_table,index); }
+
+/* VARARGS1 */ 
+int textsw_begin_find(view) 
+		Textsw_view view; 
+		{ return textsw_begin_find(view); }
+
+int textsw_end_find(view,x,y) 
+		Textsw_view view; int x; int y; 
+		{ return textsw_end_find(view,x,y); }
+
+void textsw_find_selection_and_normalize(view,x,y,options) 
+		Textsw_view view; int x; int y; unsigned long options; 
+		{;}
+
+int textsw_find_pattern(textsw,first,last_plus_one,buf,buf_len,flags) 
+		Textsw_folio textsw; Es_index *first; Es_index *last_plus_one; 
+		char *buf; unsigned buf_len; unsigned flags; 
+		{ return textsw_find_pattern(textsw,first,last_plus_one,buf,
+			buf_len,flags); }
+
+int textsw_find_pattern_and_normalize(view,x,y,first,last_plus_one,buf,
+	buf_len,flags) 
+		Textsw_view view; int x; int y; Es_index *first; 
+		Es_index *last_plus_one; char *buf; unsigned buf_len; 
+		unsigned flags; 
+		{ return textsw_find_pattern_and_normalize(view,x,y,first,
+			last_plus_one,buf,buf_len,flags); }
+
+int textsw_function_find(view,x,y) 
+		Textsw_view view; int x; int y; 
+		{ return textsw_function_find(view,x,y); }
+
+Ei_handle ei_plain_text_create() 
+		{ return ei_plain_text_create(); }
+
+struct pr_pos fonthome(font) 
+		PIXFONT *font; 
+		{ return fonthome(font); }
+
+int textsw_begin_get(view) 
+		Textsw_view view; 
+		{ return textsw_begin_get(view); }
+
+int textsw_end_get(view) 
+		Textsw_view view; 
+		{ return textsw_end_get(view); }
+
+Es_index textsw_read_only_boundary_is_at(folio) 
+		Textsw_folio folio; 
+		{ return textsw_read_only_boundary_is_at(folio); }
+
+Es_index textsw_insert_pieces(view,pos,pieces) 
+		Textsw_view view; Es_index pos; Es_handle pieces; 
+		{ return textsw_insert_pieces(view,pos,pieces); }
+
+int textsw_function_get(view) 
+		Textsw_view view; 
+		{ return textsw_function_get(view); }
+
+int textsw_put_then_get(view) 
+		Textsw_view view; 
+		{ return textsw_put_then_get(view); }
+
+Ev_mark_object textsw_add_mark_internal(textsw,position,flags) 
+		Textsw_folio textsw; Es_index position; unsigned flags; 
+		{ return textsw_add_mark_internal(textsw,position,flags); }
+
+Es_index textsw_find_mark_internal(textsw,mark) 
+		Textsw_folio textsw; Ev_mark_object mark; 
+		{ return textsw_find_mark_internal(textsw,mark); }
+
+void textsw_remove_mark_internal(textsw,mark) 
+		Textsw_folio textsw; Ev_mark_object mark; 
+		{;}
+
+/* VARARGS1 */ 
+int es_set(esh) 
+		Es_handle esh; 
+		{ return es_set(esh); }
+
+Es_handle ps_create(client_data,original,scratch) 
+		char *client_data; Es_handle original; Es_handle scratch; 
+		{ return ps_create(client_data,original,scratch); }
+
+int textsw_flush_caches(view,flags) 
+		Textsw_view view; int flags;
+		{ return textsw_flush_caches(view,flags); }
+
+void textsw_read_only_msg(textsw,locx,locy) 
+		Textsw_folio textsw; int locx; int locy; 
+		{;}
+
+int textsw_note_event_shifts(textsw,ie) 
+		Textsw_folio textsw; struct inputevent *ie; 
+		{ return textsw_note_event_shifts(textsw,ie); }
+
+int textsw_process_event(abstract,ie,arg) 
+		Textsw abstract; Event *ie; Notify_arg arg; 
+		{ return textsw_process_event(abstract,ie,arg); }
+
+Key_map_handle textsw_do_filter(view,ie) 
+		Textsw_view view; Event *ie; 
+		{ return textsw_do_filter(view,ie); }
+
+Es_index textsw_get_saved_insert(textsw) 
+		Textsw_folio textsw; 
+		{ return textsw_get_saved_insert(textsw); }
+
+int textsw_clear_pending_func_state(textsw) 
+		Textsw_folio textsw; 
+		{ return textsw_clear_pending_func_state(textsw); }
+
+int textsw_set_base_mask(fd) 
+		int fd; 
+		{ return textsw_set_base_mask(fd); }
+
+int textsw_set_mouse_button_mask(fd) 
+		int fd; 
+		{ return textsw_set_mouse_button_mask(fd); }
+
+void textsw_begin_function(view,function) 
+		Textsw_view view; unsigned function; 
+		{;}
+
+void textsw_end_function(view,function) 
+		Textsw_view view; unsigned function; 
+		{;}
+
+int textsw_again(view,x,y) 
+		Textsw_view view; int x; int y; 
+		{ return textsw_again(view,x,y); }
+
+int textsw_end_delete(view) 
+		Textsw_view view; 
+		{ return textsw_end_delete(view); }
+
+int textsw_function_delete(view) 
+		Textsw_view view; 
+		{ return textsw_function_delete(view); }
+
+int textsw_undo(textsw) 
+		Textsw_folio textsw; 
+		{ return textsw_undo(textsw); }
+
+int es_file_append_error(error_buf,file_name,status) 
+		char *error_buf; char *file_name; Es_status status; 
+		{ return es_file_append_error(error_buf,file_name,status); }
+
+Es_handle es_file_create(name,options,status) 
+		char *name; int options; Es_status *status; 
+		{ return es_file_create(name,options,status); }
+
+int es_file_copy_status(esh,to) 
+		Es_handle esh; char *to; 
+		{ return es_file_copy_status(esh,to); }
+
+Es_handle es_file_make_backup(esh,backup_pattern,status) 
+		Es_handle esh; char *backup_pattern; Es_status *status; 
+		{ return es_file_make_backup(esh,backup_pattern,status); }
+
+int match_in_table(to_match,table) 
+		char *to_match; char **table;
+		{ return match_in_table(to_match,table); }
+
+/*VARARGS2*/
+int textsw_printf(ptr_to_string,fmt) 
+		string_t *ptr_to_string; char *fmt; 
+		{ return textsw_printf(ptr_to_string,fmt); }
+
+int textsw_record_delete(textsw) 
+		Textsw_folio textsw; 
+		{ return textsw_record_delete(textsw); }
+
+int textsw_record_edit(textsw,unit,direction) 
+		Textsw_folio textsw; unsigned unit; unsigned direction; 
+		{ return textsw_record_edit(textsw,unit,direction); }
+
+int textsw_record_find(textsw,pattern,pattern_length,direction) 
+		Textsw_folio textsw; char *pattern; int pattern_length; 
+		int direction; 
+		{ return textsw_record_find(textsw,pattern,pattern_length,
+			direction); }
+
+int textsw_record_filter(textsw,event) 
+		Textsw_folio textsw; Event *event; 
+		{ return textsw_record_filter(textsw,event); }
+
+int textsw_record_input(textsw,buffer,buffer_length) 
+		Textsw_folio textsw; char *buffer; long buffer_length; 
+		{ return textsw_record_input(textsw,buffer,buffer_length); }
+
+int textsw_record_piece_insert(textsw,pieces) 
+		Textsw_folio textsw; Es_handle pieces; 
+		{ return textsw_record_piece_insert(textsw,pieces); }
+
+int textsw_record_trash_insert(textsw) 
+		Textsw_folio textsw; 
+		{ return textsw_record_trash_insert(textsw); }
+
+int textsw_free_again(textsw,again) 
+		Textsw_folio textsw; string_t *again; 
+		{ return textsw_free_again(textsw,again); }
+
+int textsw_do_again(view,x,y) 
+		Textsw_view view; int x; int y; 
+		{ return textsw_do_again(view,x,y); }
+
+Es_handle es_mem_create(maximum,init) 
+		unsigned maximum; char *init; 
+		{ return es_mem_create(maximum,init); }
+
+Textsw_status textsw_set_internal(view,attrs) 
+		Textsw_view view; Attr_avlist attrs;
+		{ return textsw_set_internal(view,attrs); }
+
+/* VARARGS1 */ 
+void textsw_notify(view) 
+		Textsw_view view; 
+		{;}
+
+void textsw_notify_replaced(folio_or_view,insert_before,length_before,
+		replaced_from,replaced_to,count_inserted) 
+		Textsw_opaque folio_or_view; Es_index  insert_before; 
+		Es_index length_before; Es_index replaced_from; 
+		Es_index replaced_to; Es_index count_inserted; 
+		{;}
+
+void textsw_init_again(folio,count) 
+		Textsw_folio folio; int count; 
+		{;}
+
+void textsw_init_undo(folio,count) 
+		Textsw_folio folio; int count; 
+		{;}
+
+Textsw_view textsw_init_internal(view,status,default_notify_proc,attrs) 
+		Textsw_view view; Textsw_status *status; 
+		int (*default_notify_proc)(); char **attrs; 
+		{ return textsw_init_internal(view,status,default_notify_proc,
+			attrs); }
+
+Textsw_view textsw_create_view(folio,rect,left_margin, right_margin)
+		Textsw_folio folio; Rect rect; int left_margin, right_margin;
+		{ return textsw_create_view(folio,rect,left_margin); }
+
+void textsw_add_scrollbar_to_view(view,sb) 
+		Textsw_view view; Scrollbar sb; 
+		{;}
+
+void textsw_cleanup_view(view) 
+		Textsw_view view; 
+		{;}
+
+void textsw_destroy_view(view) 
+		Textsw_view view; 
+		{;}
+
+Notify_value textsw_notify_destroy(abstract,status) 
+		Textsw abstract; Destroy_status status; 
+		{ return textsw_notify_destroy(abstract,status); }
+
+int es_advance_buf(esbuf) 
+		Es_buf_handle esbuf; 
+		{ return es_advance_buf(esbuf); }
+
+Es_index es_backup_buf(esbuf) 
+		Es_buf_handle esbuf; 
+		{ return es_backup_buf(esbuf); }
+
+int es_make_buf_include_index(esbuf,index,desired_prior_count) 
+		Es_buf_handle esbuf; Es_index index; int desired_prior_count; 
+		{ return es_make_buf_include_index(esbuf,index,
+			desired_prior_count); }
+
+Es_status es_copy(from,to,newline_must_terminate) 
+		Es_handle from; Es_handle to; int newline_must_terminate; 
+		{ return es_copy(from,to,newline_must_terminate); }
+
+int textsw_does_index_not_show(abstract,index,line_index) 
+		Textsw abstract; Es_index index; int *line_index; 
+		{return textsw_does_index_not_show(abstract,index,line_index); }
+
+int textsw_screen_column_count(abstract) 
+		Textsw abstract; 
+		{ return textsw_screen_column_count(abstract); }
+
+void textsw_set_start(abstract,pos) 
+		Textsw abstract; Textsw_index pos; 
+		{;}
+
+void textsw_view_line_info(abstract,top,bottom) 
+		Textsw abstract; int *top; int *bottom; 
+		{;}
+
+int textsw_contains_line(abstract,line,rect) 
+		Textsw abstract; int line; Rect *rect; 
+		{ return textsw_contains_line(abstract,line,rect); }
+
+int textsw_nop_notify(abstract,attrs) 
+		Textsw abstract; Attr_avlist attrs; 
+		{ return textsw_nop_notify(abstract,attrs); }
+
+int textsw_begin_put(view,inform_svc) 
+		Textsw_view view; int inform_svc;
+		{ return textsw_begin_put(view,inform_svc); }
+
+int textsw_end_put(view) 
+		Textsw_view view; 
+		{ return textsw_end_put(view); }
+
+int textsw_put(view) 
+		Textsw_view view; 
+		{ return textsw_put(view); }
+
+char *ev_get(view,attribute,args1,args2,args3) 
+		Ev_handle view; Ev_attribute attribute; char *args1; 
+		char *args2; char *args3; 
+		{ return ev_get(view,attribute,args1,args2,args3); }
+
+/* VARARGS1 */ 
+Ev_status ev_set(view) 
+		Ev_handle view; 
+		{ return ev_set(view); }
+
+/* VARARGS1 */ 
+void ev_notify(view) 
+		Ev_handle view; 
+		{;}
+
+void ev_flush_view_caches(view) 
+		Ev_handle view; 
+		{;}
+
+void textsw_display(abstract) 
+		Textsw abstract; 
+		{;}
+
+void textsw_display_view(abstract,rect) 
+		Textsw abstract; Rect *rect; 
+		{;}
+
+void textsw_display_view_margins(view,rect) 
+		Textsw_view view; struct rect *rect; 
+		{;}
+
+void textsw_repaint(view) 
+		Textsw_view view; 
+		{;}
+
+void textsw_resize(view) 
+		Textsw_view view;
+		{;}
+
+Textsw_expand_status textsw_expand(abstract,start,stop_plus_one,out_buf,
+		out_buf_len,total_chars) 
+		Textsw abstract; Es_index start; Es_index stop_plus_one; 
+		char *out_buf; int out_buf_len; int *total_chars; 
+		{ return textsw_expand(abstract,start,stop_plus_one,
+			out_buf,out_buf_len,total_chars); }
+
+void textsw_update_scrollbars(folio,only_view) 
+		Textsw_folio folio; Textsw_view only_view; 
+		{;}
+
+void ev_note_esh_modified(views,first,last_plus_one,by) 
+		Ev_chain views; Es_index first; Es_index last_plus_one;	int by;
+		{;}
+
+int ev_check_cached_pos_info(view,pos,cache) 
+		Ev_handle view; Es_index pos; Ev_pos_info *cache; 
+		{ return ev_check_cached_pos_info(view,pos,cache); }
+
+int ev_insert_visible_in_view(view) 
+		Ev_handle view; 
+		{ return ev_insert_visible_in_view(view); }
+
+void ev_check_insert_visibility(views) 
+		Ev_chain views; 
+		{;}
+
+void ev_blink_caret(views,on) 
+		Ev_chain views; int on; 
+		{;}
+
+int ev_clear_rect(view,rect) 
+		Ev_handle view; Rect *rect; 
+		{ return ev_clear_rect(view,rect); }
+
+int ev_clear_to_bottom(view,rect,new_top,clear_current_first) 
+		Ev_handle view; Rect *rect; int new_top; 
+		unsigned clear_current_first; 
+		{ return ev_clear_to_bottom(view,rect,new_top,
+			clear_current_first); }
+
+Ev_line_table ev_ft_for_rect(eih,rect) 
+		Ei_handle eih; Rect *rect; 
+		{ return ev_ft_for_rect(eih,rect); }
+
+Ev_range ev_get_selection_range(private,type,mode) 
+		Ev_chain_pd_handle private; unsigned type; int *mode; 
+		{ return ev_get_selection_range(private,type,mode); }
+
+int ev_clear_selection(chain,type) 
+		Ev_chain chain; unsigned type; 
+		{ return ev_clear_selection(chain,type); }
+
+int ev_view_range(view,first,last_plus_one) 
+		Ev_handle view; Es_index *first; Es_index *last_plus_one; 
+		{ return ev_view_range(view,first,last_plus_one); }
+
+int ev_xy_in_view(view,pos,lt_index,rect) 
+		Ev_handle view; Es_index pos; int *lt_index; Rect *rect; 
+		{ return ev_xy_in_view(view,pos,lt_index,rect); }
+
+int ev_display_range(chain,first,last_plus_one) 
+		Ev_chain chain; Es_index first; Es_index last_plus_one; 
+		{ return ev_display_range(chain,first,last_plus_one); }
+
+int ev_set_selection(chain,first,last_plus_one,type) 
+		Ev_chain chain; Es_index first; Es_index last_plus_one; 
+		unsigned type; 
+		{ return ev_set_selection(chain,first,last_plus_one,type); }
+
+int ev_get_selection(chain,first,last_plus_one,type) 
+		Ev_chain chain; Es_index *first; Es_index *last_plus_one; 
+		unsigned type; 
+		{ return ev_get_selection(chain,first,last_plus_one,type); }
+
+int ev_display_view(view) 
+		Ev_handle view; 
+		{ return ev_display_view(view); }
+
+int ev_display_views(chain) 
+		Ev_chain chain; 
+		{ return ev_display_views(chain); }
+
+void ev_clear_from_margin(view,from_rect,to_rect) 
+		Ev_handle view; Rect *from_rect; Rect *to_rect; 
+		{;}
+
+int ev_set_start(view,start) 
+		Ev_handle view; Es_index start; 
+		{ return ev_set_start(view,start); }
+
+int ev_display_starting_at_line(view,from_line) 
+		Ev_handle view; int from_line; 
+		{ return ev_display_starting_at_line(view,from_line); }
+
+int ev_slide_lines(view,to_line,from_line,to_rect,from_rect) 
+		Ev_handle view; int to_line; int from_line; Rect *to_rect; 
+		Rect *from_rect; 
+		{ return ev_slide_lines(view,to_line,from_line,to_rect,
+			from_rect); }
+
+int ev_display_fixup(view) 
+		Ev_handle view; 
+		{ return ev_display_fixup(view); }
+
+int ev_scroll_lines(view,line_count) 
+		Ev_handle view; int line_count; 
+		{ return ev_scroll_lines(view,line_count); }
+
+int ev_display_in_rect(view,rect) 
+		Ev_handle view; Rect *rect; 
+		{ return ev_display_in_rect(view,rect); }
+
+int ev_fill_esbuf(esbuf,ptr_to_last_plus_one) 
+		Es_buf_handle esbuf; Es_index *ptr_to_last_plus_one; 
+		{ return ev_fill_esbuf(esbuf,ptr_to_last_plus_one); }
+
+int ev_range_info(op_bdry,pos,range) 
+		Ev_line_table op_bdry; Es_index pos; struct range *range; 
+		{ return ev_range_info(op_bdry,pos,range); }
+
+struct ei_process_result ev_ei_process(view,start,stop_plus_one) 
+		Ev_handle view; Es_index start; Es_index stop_plus_one; 
+		{ return ev_ei_process(view,start,stop_plus_one); }
+
+struct ei_process_result ev_display_internal(view,rect,line,stop_plus_one,
+		ei_op,break_action) 
+		Ev_handle view; Rect *rect; int line; Es_index stop_plus_one; 
+		int ei_op; int break_action; 
+		{ return ev_display_internal(view,rect,line,stop_plus_one,
+			ei_op,break_action); }
+
+Ev_expand_status ev_expand(view,start,stop_plus_one,out_buf,out_buf_len,
+		total_chars) 
+		Ev_handle view; Es_index start; Es_index stop_plus_one; 
+		char *out_buf; int out_buf_len; int *total_chars; 
+		{ return ev_expand(view,start,stop_plus_one,out_buf,
+			out_buf_len,total_chars); }
+
+int ev_line_for_y(view,y) 
+		Ev_handle view; int y; 
+		{ return ev_line_for_y(view,y); }
+
+Es_index ev_index_for_line(view,line) 
+		Ev_handle view; int line; 
+		{ return ev_index_for_line(view,line); }
+
+Rect ev_rect_for_line(view,line) 
+		Ev_handle view; int line; 
+		{ return ev_rect_for_line(view,line); }
+
+int ev_extend_to_view_bottom(view,rect) 
+		Ev_handle view; Rect *rect; 
+		{ return ev_extend_to_view_bottom(view,rect); }
+
+Ev_handle ev_resolve_xy_to_view(views,x,y) 
+		Ev_chain views; int x; int y; 
+		{ return ev_resolve_xy_to_view(views,x,y); }
+
+Ev_handle ev_nearest_view(views,x,y,x_used,y_used) 
+		Ev_chain views; int x; int y; int *x_used; int *y_used; 
+		{ return ev_nearest_view(views,x,y,x_used,y_used); }
+
+Es_index ev_resolve_xy(view,x,y) 
+		Ev_handle view; int x; int y; 
+		{ return ev_resolve_xy(view,x,y); }
+
+int rect_is_fully_visible(pw,rect) 
+		struct pixwin *pw; Rect *rect; 
+		{ return rect_is_fully_visible(pw,rect); }
+
+Es_handle textsw_esh_for_span(view,first,last_plus_one,to_recycle) 
+		Textsw_view view; Es_index first; Es_index last_plus_one;
+		Es_handle	to_recycle;
+		{ return textsw_esh_for_span(view,first,last_plus_one,to_recycle); }
+
+int textsw_adjust_delete_span(folio,first,last_plus_one) 
+		Textsw_folio folio; Es_index *first; Es_index *last_plus_one; 
+		{ return textsw_adjust_delete_span(folio,first,last_plus_one); }
+
+Es_index textsw_delete_span(view,first,last_plus_one,flags) 
+		Textsw_view view; Es_index first; Es_index last_plus_one; 
+		unsigned flags; 
+		{ return textsw_delete_span(view,first,last_plus_one,flags); }
+
+Es_index textsw_do_pending_delete(view,type,flags) 
+		Textsw_view view; unsigned type; int flags; 
+		{ return textsw_do_pending_delete(view,type,flags); }
+
+int textsw_do_insert_makes_visible(view) 
+		Textsw_view view; 
+		{ return textsw_do_insert_makes_visible(view); }
+
+void textsw_input_before(view,old_insert_pos,old_length) 
+		Textsw_view view; Es_index *old_insert_pos; 
+		Es_index *old_length; 
+		{;}
+
+int textsw_input_partial(view,buf,buf_len) 
+		Textsw_view view; char *buf; long buf_len; 
+		{ return textsw_input_partial(view,buf,buf_len); }
+
+Es_index textsw_input_after(view,old_insert_pos,old_length,record) 
+		Textsw_view view; Es_index old_insert_pos; Es_index old_length;
+		int record; 
+		{ return textsw_input_after(view,old_insert_pos,old_length,
+			record); }
+
+Es_index textsw_do_input(view,buf,buf_len) 
+		Textsw_view view; char *buf; long buf_len; 
+		{ return textsw_do_input(view,buf,buf_len); }
+
+int textsw_possibly_normalize_and_set_selection(
+		abstract,first,last_plus_one,type) 
+		Textsw abstract; Es_index first; Es_index last_plus_one; 
+		unsigned type; 
+		{ return textsw_possibly_normalize_and_set_selection(
+			abstract,first,last_plus_one,type); }
+
+int textsw_normalize_internal(
+		view,first,last_plus_one,upper_context,lower_context,flags) 
+		Textsw_view view; Es_index first; Es_index last_plus_one; 
+		int upper_context; int lower_context; unsigned flags; 
+		{ return textsw_normalize_internal(view,first,last_plus_one,
+			upper_context,lower_context,flags); }
+
+Es_index textsw_set_insert(folio,pos) 
+		Textsw_folio folio; Es_index pos; 
+		{ return textsw_set_insert(folio,pos); }
+
+char *textsw_checkpoint_undo(abstract,undo_mark) 
+		Textsw abstract; char *undo_mark; 
+		{ return textsw_checkpoint_undo(abstract,undo_mark); }
+
+int textsw_checkpoint_again(abstract) 
+		Textsw abstract; 
+		{ return textsw_checkpoint_again(abstract); }
+
+Textsw_view textsw_view_for_entity_view(folio,e_view) 
+		Textsw_folio folio; Ev_handle e_view; 
+		{ return textsw_view_for_entity_view(folio,e_view); }
+
+int start_selection_tracking(view,ie) 
+		Textsw_view view; Event *ie; 
+		{ return start_selection_tracking(view,ie); }
+
+int track_selection(view,ie) 
+		Textsw_view view; Event *ie; 
+		{ return track_selection(view,ie); }
+
+int textsw_get_selection_as_int(textsw,type,default_value) 
+		Textsw_folio textsw; unsigned type; int default_value; 
+		{return textsw_get_selection_as_int(textsw,type,default_value);}
+
+int textsw_get_selection_as_string(textsw,type,buf,buf_max_len) 
+		Textsw_folio textsw; unsigned type; char *buf; int buf_max_len;
+		{ return textsw_get_selection_as_string(textsw,type,buf,
+			buf_max_len); }
+
+int ev_span(views, position, first, last_plus_one, group_spec) 
+		Ev_chain views; Es_index position; Es_index *first;
+		Es_index *last_plus_one; int group_spec;
+		{return ev_span(views,position,first,last_plus_one,group_spec);}
+
+Es_index ev_line_start(view,position) 
+		Ev_handle view; Es_index position; 
+		{ return ev_line_start(view,position); }
+
+Es_index ev_get_insert(views) 
+		Ev_chain views; 
+		{ return ev_get_insert(views); }
+
+Es_index ev_set_insert(views,position) 
+		Ev_chain views; Es_index position; 
+		{ return ev_set_insert(views,position); }
+
+struct ei_span_result ev_span_for_edit(views,edit_action) 
+		Ev_chain views; int edit_action; 
+		{ return ev_span_for_edit(views,edit_action); }
+
+int ev_delete_span(views,first,last_plus_one,delta) 
+		Ev_chain views; Es_index first; Es_index last_plus_one; 
+		Es_index *delta; 
+		{ return ev_delete_span(views,first,last_plus_one,delta); }
+
+int ev_update_after_edit(views,last_plus_one,delta,old_length,min_insert_pos)
+		Ev_chain views; Es_index last_plus_one; int delta; 
+		Es_index old_length; Es_index min_insert_pos; 
+		{ return ev_update_after_edit(views,last_plus_one,delta,
+			old_length,min_insert_pos); }
+
+void ev_make_visible(view,position,lower_context,auto_scroll_by,delta) 
+		Ev_handle view; Es_index position; int lower_context; 
+		int auto_scroll_by; int delta; 
+		{;}
+
+void ev_scroll_if_old_insert_visible(views,insert_pos,delta) 
+		Ev_chain views; Es_index insert_pos; int delta; 
+		{;}
+
+void ev_input_before(views) 
+		Ev_chain views; 
+		{;}
+
+int ev_input_partial(views,buf,buf_len) 
+		Ev_chain views; char *buf; long buf_len; 
+		{ return ev_input_partial(views,buf,buf_len); }
+
+int ev_input_after(views,old_insert_pos,old_length) 
+		Ev_chain views; Es_index old_insert_pos; Es_index old_length; 
+		{ return ev_input_after(views,old_insert_pos,old_length); }
+
+Textsw_folio textsw_folio_for_view(view) 
+		Textsw_view view; 
+		{ return textsw_folio_for_view(view); }
+
+Textsw_view textsw_view_abs_to_rep(abstract) 
+		Textsw abstract; 
+		{ return textsw_view_abs_to_rep(abstract); }
+
+Textsw textsw_view_rep_to_abs(rep) 
+		Textsw_view rep; 
+		{ return textsw_view_rep_to_abs(rep); }
+
+Notify_value textsw_input_func(abstract,fd) 
+		Textsw abstract; int fd; 
+		{ return textsw_input_func(abstract,fd); }
+
+Notify_value textsw_event(abstract,event,arg,type) 
+		Textsw abstract; Event *event; Notify_arg arg; 
+		Notify_event_type type; 
+		{ return textsw_event(abstract,event,arg,type); }
+
+void textsw_add_timer(textsw,timeout) 
+		Textsw_folio textsw; struct timeval *timeout; 
+		{;}
+
+void textsw_remove_timer(textsw) 
+		Textsw_folio textsw; 
+		{;}
+
+void textsw_take_down_caret(textsw) 
+		Textsw_folio textsw; 
+		{;}
+
+void textsw_invert_caret(textsw) 
+		Textsw_folio textsw; 
+		{;}
+
+void textsw_clear_secondary_selection(textsw,type) 
+		Textsw_folio textsw; unsigned type;
+		{;}
+
+Seln_rank seln_rank_from_textsw_info(type) 
+		unsigned type; 
+		{ return seln_rank_from_textsw_info(type); }
+
+Seln_rank textsw_acquire_seln(textsw,rank) 
+		Textsw_folio textsw; Seln_rank rank; 
+		{ return textsw_acquire_seln(textsw,rank); }
+
+unsigned textsw_determine_selection_type(textsw,acquire) 
+		Textsw_folio textsw; int acquire; 
+		{ return textsw_determine_selection_type(textsw,acquire); }
+
+void textsw_give_shelf_to_svc(folio) 
+		Textsw_folio folio; 
+		{;}
+
+void textsw_sync_with_seln_svc(folio) 
+		Textsw_folio folio; 
+		{;}
+
+int textsw_inform_seln_svc(textsw,function,is_down) 
+		Textsw_folio textsw; unsigned function; int is_down; 
+		{ return textsw_inform_seln_svc(textsw,function,is_down); }
+
+void textsw_may_win_exit(textsw) 
+		Textsw_folio textsw; 
+		{;}
+
+int textsw_prepare_buf_for_es_read(to_read,buf,buf_max_len,fixed_size) 
+		int *to_read; char **buf; int buf_max_len; int fixed_size; 
+		{ return textsw_prepare_buf_for_es_read(
+			to_read,buf,buf_max_len,fixed_size); }
+
+int textsw_es_read(esh,buf,first,last_plus_one) 
+		Es_handle esh; char *buf; Es_index first;Es_index last_plus_one;
+		{ return textsw_es_read(esh,buf,first,last_plus_one); }
+
+int textsw_fill_selection_from_reply(context,reply) 
+		Tsfh_handle context; Seln_request *reply; 
+		{ return textsw_fill_selection_from_reply(context,reply); }
+
+int textsw_selection_from_holder(textsw,selection,holder,type,flags) 
+		Textsw_folio textsw; Textsw_selection_handle selection; 
+		Seln_holder *holder; unsigned type; unsigned flags; 
+		{ return textsw_selection_from_holder(
+			textsw,selection,holder,type,flags); }
+
+int textsw_func_selection_internal(textsw,selection,type,flags) 
+		Textsw_folio textsw; Textsw_selection_handle selection; 
+		unsigned type; unsigned flags; 
+		{ return textsw_func_selection_internal(
+			textsw,selection,type,flags); }
+
+int textsw_func_selection(textsw,selection,flags) 
+		Textsw_folio textsw; Textsw_selection_handle selection; 
+		unsigned flags; 
+		{ return textsw_func_selection(textsw,selection,flags); }
+
+void textsw_init_selection_object(
+		textsw,selection,buf,buf_max_len,buf_is_dynamic) 
+		Textsw_folio textsw; Textsw_selection_handle selection; 
+		char *buf; int buf_max_len; int buf_is_dynamic; 
+		{;}
+
+int textsw_is_seln_nonzero(textsw,type) 
+		Textsw_folio textsw; unsigned type; 
+		{ return textsw_is_seln_nonzero(textsw,type); }
+
+int textsw_stuff_selection(view,type) 
+		Textsw_view view; unsigned type; 
+		{ return textsw_stuff_selection(view,type); }
+
+int textsw_seln_svc_had_secondary(textsw) 
+		Textsw_folio textsw; 
+		{ return textsw_seln_svc_had_secondary(textsw); }
+
+Seln_response textsw_setup_function(folio,function) 
+		Textsw_folio folio; Seln_function_buffer *function; 
+		{ return textsw_setup_function(folio,function); }
+
+void textsw_end_selection_function(folio) 
+		Textsw_folio folio; 
+		{;}
+
+void textsw_seln_svc_function(first_view,function) 
+		Textsw_view first_view; Seln_function_buffer *function; 
+		{;}
+
+char *textsw_base_name(full_name) 
+		char *full_name; 
+		{ return textsw_base_name(full_name); }
+
+Seln_result textsw_seln_svc_reply(attr,context,max_length) 
+		Seln_attribute attr; Seln_replier_data *context; int max_length;
+		{ return textsw_seln_svc_reply(attr,context,max_length); }
+
+Ev_chain ev_create_chain(esh,eih) 
+		Es_handle esh; Ei_handle eih;
+		{ return ev_create_chain(esh,eih); }
+
+Ev_handle ev_create_view(chain,pw,rect) 
+		Ev_chain chain; struct pixwin *pw; Rect *rect; 
+		{ return ev_create_view(chain,pw,rect); }
+
+int ev_destroy(view) 
+		Ev_handle view; 
+		{ return ev_destroy(view); }
+
+Ev_chain ev_destroy_chain_and_views(chain) 
+		Ev_chain chain; 
+		{ return ev_destroy_chain_and_views(chain); }
+
+Ev_handle ev_view_above(this_view) 
+		Ev_handle this_view; 
+		{ return ev_view_above(this_view); }
+
+Ev_handle ev_view_below(this_view) 
+		Ev_handle this_view; 
+		{ return ev_view_below(this_view); }
+
+Ev_handle ev_highest_view(chain) 
+		Ev_chain chain; 
+		{ return ev_highest_view(chain); }
+
+Ev_handle ev_lowest_view(chain) 
+		Ev_chain chain; 
+		{ return ev_lowest_view(chain); }
+
+void ev_line_info(view,top,bottom) 
+		Ev_handle view; int *top; int *bottom; 
+		{;}
+
+int ev_newlines_in_esh(esh,first,last_plus_one) 
+		Es_handle esh; Es_index first; Es_index last_plus_one; 
+		{ return ev_newlines_in_esh(esh,first,last_plus_one); }
+
+int ev_rect_for_ith_physical_line(view,phys_line,first,rect,skip_white_space)
+		Ev_handle view; int phys_line; Es_index *first; Rect *rect; 
+		int skip_white_space; 
+		{ return ev_rect_for_ith_physical_line(
+			view,phys_line,first,rect,skip_white_space); }
+
+Es_index ev_position_for_physical_line(chain,line,skip_white_space) 
+		Ev_chain chain; int line; int skip_white_space; 
+		{ return ev_position_for_physical_line(
+			chain,line,skip_white_space); }
+
+int ev_find_in_esh(esh,pattern,
+		pattern_length,position,count,flags,first,last_plus_one) 
+		Es_handle esh; char *pattern; unsigned pattern_length; 
+		Es_index position; unsigned count; unsigned flags; 
+		Es_index *first; Es_index *last_plus_one; 
+		{ return ev_find_in_esh(esh,pattern,pattern_length,
+			position,count,flags,first,last_plus_one); }
+
+Es_handle textsw_create_file_ps(folio,name,scratch_name,status) 
+		Textsw_folio folio; char *name; char *scratch_name; 
+		Es_status *status;
+		{return textsw_create_file_ps(folio,name,scratch_name,status); }
+
+Es_status textsw_load_file_internal(
+	textsw,name,scratch_name,piece_esh,start_at,flags) 
+	Textsw_folio textsw; char *name; char *scratch_name; 
+	Es_handle *piece_esh; Es_index start_at; int flags; 
+	{ return textsw_load_file_internal(
+		textsw,name,scratch_name,piece_esh,start_at,flags); }
+
+void textsw_destroy_esh(textsw,esh) 
+		Textsw_folio textsw; Es_handle esh; 
+		{;}
+
+void textsw_replace_esh(textsw,new_esh) 
+		Textsw_folio textsw; Es_handle new_esh; 
+		{;}
+
+Es_handle textsw_create_mem_ps(folio,initial_greeting) 
+		Textsw_folio folio; char *initial_greeting; 
+		{ return textsw_create_mem_ps(folio,initial_greeting); }
+
+int textsw_load_selection(folio,locx,locy,no_cd) 
+		Textsw_folio folio; int locx; int locy; int no_cd; 
+		{ return textsw_load_selection(folio,locx,locy,no_cd); }
+
+char *textsw_full_pathname(name) 
+		char *name; 
+		{ return textsw_full_pathname(name); }
+
+int textsw_format_load_error(msg,status,filename,scratch_name) 
+		char *msg; Es_status status; char *filename; char *scratch_name;
+		{ return textsw_format_load_error(
+			msg,status,filename,scratch_name); }
+
+Es_status textsw_process_save_error(abstract,error_buf,status,locx,locy) 
+		Textsw abstract; char *error_buf; Es_status status; 
+		int locx; int locy; 
+		{ return textsw_process_save_error(
+			abstract,error_buf,status,locx,locy); }
+
+int textsw_file_stuff(view,locx,locy) 
+		Textsw_view view; int locx; int locy; 
+		{ return textsw_file_stuff(view,locx,locy); }
+
+Es_status textsw_store_init(textsw,filename) 
+		Textsw_folio textsw; char *filename; 
+		{ return textsw_store_init(textsw,filename); }
+
+Es_status textsw_process_store_error(textsw,filename,status,locx,locy) 
+		Textsw_folio textsw; char *filename; Es_status status; 
+		int locx; int locy; 
+		{ return textsw_process_store_error(
+			textsw,filename,status,locx,locy); }
+
+int textsw_expand_filename(textsw,buf,sizeof_buf,locx,locy) 
+		Textsw_folio textsw; char *buf; int sizeof_buf; 
+		int locx; int locy; 
+		{ return textsw_expand_filename(
+			textsw,buf,sizeof_buf,locx,locy); }
+
+int textsw_get_selection_as_filename(textsw,buf,sizeof_buf,locx,locy) 
+		Textsw_folio textsw; char *buf; int sizeof_buf; 
+		int locx; int locy; 
+		{ return textsw_get_selection_as_filename(
+			textsw,buf,sizeof_buf,locx,locy); }
+
+int textsw_possibly_edited_now_notify(textsw) 
+		Textsw_folio textsw; 
+		{ return textsw_possibly_edited_now_notify(textsw); }
+
+void textsw_post_error(folio_or_view,locx,locy,msg1,msg2) 
+		Textsw_opaque folio_or_view; int locx; int locy; 
+		char *msg1; char *msg2; 
+		{;}
+
+Es_status textsw_checkpoint_internal(folio) 
+		Textsw_folio folio; 
+		{ return textsw_checkpoint_internal(folio); }
+
+Es_status textsw_checkpoint(folio) 
+		Textsw_folio folio; 
+		{ return textsw_checkpoint(folio); }
+
+int textsw_default_notify(abstract,attrs) 
+		Textsw abstract; Attr_avlist attrs;
+		{ return textsw_default_notify(abstract,attrs); }
+
+/* VARARGS1 */ 
+Textsw textsw_build(tool) 
+		struct tool *tool; 
+		{ return textsw_build(tool); }
+		
+int await_neg_event(windowfd,event) 
+		int windowfd; Event *event; 
+		{ return await_neg_event(windowfd,event); }
+
+int fd_menu_prompt(fd,event,locx,locy,msg) 
+		int fd; Event *event; int locx; int locy; char *msg; 
+		{ return fd_menu_prompt(fd,event,locx,locy,msg); }
+
+/* Private */
+int updateutmp(username,ttyslotuse,ttyfd) 
+		char *username; int ttyslotuse; int ttyfd; 
+		{ return updateutmp(username,ttyslotuse,ttyfd); }
+
+int vpos(row,col) 
+		int row; int col; 
+		{ return vpos(row,col); }
+
+int bold() 
+		{ return bold(); }
+
+int nobold() 
+		{ return nobold(); }
+
+int writePartialLine(s,curscolStart) 
+		char *s; int curscolStart; 
+		{ return writePartialLine(s,curscolStart); }
+
+int cim_scroll(n) 
+		int n; 
+		{ return cim_scroll(n); }
+
+int insert_lines(where,n) 
+		int where; int n; 
+		{ return insert_lines(where,n); }
+
+int delete_lines(where,n) 
+		int where; int n; 
+		{ return delete_lines(where,n); }
+
+int roll(first,mid,last) 
+		int first; int mid; int last; 
+		{ return roll(first,mid,last); }
+
+int swapregions(a,b,n) 
+		int a; int b; int n; 
+		{ return swapregions(a,b,n); }
+
+int swap(a,b) 
+		int a; int b; 
+		{ return swap(a,b); }
+
+int ttysw_setboldstyle(new_boldstyle) 
+		int new_boldstyle; 
+		{ return ttysw_setboldstyle(new_boldstyle); }
+
+int ttysw_getboldstyle() 
+		{ return ttysw_getboldstyle(); }
+
+int ttysw_setleftmargin(left_margin) 
+		int left_margin; 
+		{ return ttysw_setleftmargin(left_margin); }
+
+int ttysw_getleftmargin() 
+		{ return ttysw_getleftmargin(); }
+
+int ttysw_restoreparms(ttyfd) 
+		int ttyfd; 
+		{ return ttysw_restoreparms(ttyfd); }
+
+int we_getptyparms(ldisc,localmodes,mode,tchars,ltchars) 
+		int *ldisc; int *localmodes; struct sgttyb *mode; 
+		struct tchars *tchars; struct ltchars *ltchars; 
+		{ return we_getptyparms(ldisc,localmodes,mode,tchars,ltchars); }
+
+char *ttysw_init(windowfd) 
+		int windowfd; 
+		{ return ttysw_init(windowfd); }
+
+int ttysw_fork(ttysw0,argv,inputmask,outputmask,exceptmask) 
+		char *ttysw0; char **argv; int *inputmask; 
+		int *outputmask; int *exceptmask; 
+		{ return ttysw_fork(ttysw0,argv,inputmask,outputmask,
+			exceptmask); }
+
+int ttysw_becomeconsole(ttysw0) 
+		char *ttysw0; 
+		{ return ttysw_becomeconsole(ttysw0); }
+
+int ttysw_done(ttysw0) 
+		char *ttysw0; 
+		{ return ttysw_done(ttysw0); }
+
+int ttyinit(ttysw_client) 
+		struct ttysubwindow *ttysw_client; 
+		{ return ttyinit(ttysw_client); }
+
+char *ttysw_create(tool,name,width,height) 
+		struct tool *tool; char *name; short width; short height; 
+		{ return ttysw_create(tool,name,width,height); }
+
+int ttysw_start(ttysw_client,argv) 
+		struct ttysubwindow *ttysw_client; char **argv; 
+		{ return ttysw_start(ttysw_client,argv); }
+
+int ttysw_display(ttysw_client) 
+		struct ttysubwindow *ttysw_client; 
+		{ return ttysw_display(ttysw_client); }
+
+int ttysw_saveparms(ttyfd) 
+		int ttyfd; 
+		{ return ttysw_saveparms(ttyfd); }
+
+int we_setptyparms(ldisc,localmodes,mode,tchars,ltchars) 
+		int ldisc; int localmodes; struct sgttyb *mode; 
+		struct tchars *tchars; struct ltchars *ltchars; 
+		{ return we_setptyparms(ldisc,localmodes,mode,tchars,ltchars); }
+
+int ttysw_handlesigwinch(ttysw0) 
+		char *ttysw0; 
+		{ return ttysw_handlesigwinch(ttysw0); }
+
+struct toolsw *ttysw_createtoolsubwindow(tool,name,width,height) 
+		struct tool *tool; char *name; short width; short height; 
+		{ return ttysw_createtoolsubwindow(tool,name,width,height); }
+
+int ttytlsw_escape(ttysw,c,ac,av) 
+		struct ttysubwindow *ttysw; char c; int ac; int *av; 
+		{ return ttytlsw_escape(ttysw,c,ac,av); }
+
+int ttytlsw_string(data,type,c) 
+		char *data; char type; char c; 
+		{ return ttytlsw_string(data,type,c); }
+
+char *ttytlsw_create(tool,name,width,height) 
+		struct tool *tool; char *name; short width; short height; 
+		{ return ttytlsw_create(tool,name,width,height); }
+
+Notify_value ttytlsw_destroy(ttysw,status) 
+		struct ttysubwindow *ttysw; Destroy_status status; 
+		{ return ttytlsw_destroy(ttysw,status); }
+
+struct toolsw *ttytlsw_createtoolsubwindow(tool,name,width,height) 
+		struct tool *tool; char *name; short width; short height; 
+		{ return ttytlsw_createtoolsubwindow(tool,name,width,height); }
+
+int ttytlsw_done(ttysw) 
+		struct ttysubwindow *ttysw; 
+		{ return ttytlsw_done(ttysw); }
+
+int cim_clear(a,b) 
+		int a; int b; 
+		{ return cim_clear(a,b); }
+
+int deleteChar(fromcol,tocol,row) 
+		int fromcol; int tocol; int row; 
+		{ return deleteChar(fromcol,tocol,row); }
+
+int insertChar(fromcol,tocol,row) 
+		int fromcol; int tocol; int row; 
+		{ return insertChar(fromcol,tocol,row); }
+
+int imageinit(window_fd) 
+		int window_fd; 
+		{ return imageinit(window_fd); }
+
+char **imagealloc() 
+		{ return imagealloc(); }
+
+int imagefree(imagetofree,imagecharstofree) 
+		char **imagetofree; char *imagecharstofree; 
+		{ return imagefree(imagetofree,imagecharstofree); }
+
+int imagerepair(ttysw) 
+		Ttysw *ttysw; 
+		{ return imagerepair(ttysw); }
+
+int pstring(s,col,row,op) 
+		char *s; int col; int row; int op; 
+		{ return pstring(s,col,row,op); }
+
+int pclearline(fromcol,tocol,row) 
+		int fromcol; int tocol; int row; 
+		{ return pclearline(fromcol,tocol,row); }
+
+int pcopyline(tocol,fromcol,count,row) 
+		int tocol; int fromcol; int count; int row; 
+		{ return pcopyline(tocol,fromcol,count,row); }
+
+int pclearscreen(fromrow,torow) 
+		int fromrow; int torow; 
+		{ return pclearscreen(fromrow,torow); }
+
+int pcopyscreen(fromrow,torow,count) 
+		int fromrow; int torow; int count; 
+		{ return pcopyscreen(fromrow,torow,count); }
+
+int pdisplayscreen(dontrestorecursor) 
+		int dontrestorecursor; 
+		{ return pdisplayscreen(dontrestorecursor); }
+
+int prepair(windowfd,rlp) 
+		int windowfd; struct rectlist *rlp; 
+		{ return prepair(windowfd,rlp); }
+
+int drawCursor(yChar,xChar) 
+		int yChar; int xChar; 
+		{ return drawCursor(yChar,xChar); }
+
+int removeCursor() 
+		{ return removeCursor(); }
+
+int saveCursor() 
+		{ return saveCursor(); }
+
+int restoreCursor() 
+		{ return restoreCursor(); }
+
+int screencomp() 
+		{ return screencomp(); }
+
+int blinkscreen() 
+		{ return blinkscreen(); }
+
+int pselectionhilite(r) 
+		struct rect *r; 
+		{ return pselectionhilite(r); }
+
+int wininit(window_fd,maximagewidth,maximageheight) 
+		int window_fd; int *maximagewidth; int *maximageheight; 
+		{ return wininit(window_fd,maximagewidth,maximageheight); }
+
+int winCleanup() 
+		{ return winCleanup(); }
+
+int whandlesigwinch(ttysw) 
+		Ttysw *ttysw; 
+		{ return whandlesigwinch(ttysw); }
+
+int ansiinit(ttysw) 
+		struct ttysubwindow *ttysw; 
+		{ return ansiinit(ttysw); }
+
+int ansi_string(data,type,c) 
+		char *data; char type; char c; 
+		{ return ansi_string(data,type,c); }
+
+int gfxstring(addr,len) 
+		char *addr; int len; 
+		{ return gfxstring(addr,len); }
+
+void ttysw_lighten_cursor() 
+		{;}
+int ttysw_restore_cursor() 
+		{ return ttysw_restore_cursor(); }
+
+int ttysw_clear(ttysw) 
+		Ttysw *ttysw; 
+		{ return ttysw_clear(ttysw); }
+
+ttyhist_open(ttysw0, hfile)
+		caddr_t ttysw0;	char *hfile;
+		{ return ttyhist_open(ttysw0, hfile); }
+		
+ttyhist_close(ttysw0)
+		caddr_t ttysw0;
+		{ return ttyhist_close(ttysw0); }
+		
+ttyhist_on(ttysw)
+		struct ttysubwindow *ttysw;
+		{ return ttyhist_on(ttysw); }
+
+ttyhist_off(ttysw)
+		struct ttysubwindow *ttysw;
+		{ return ttyhist_off(ttysw); }
+
+ttyhist_write(ttysw, n)
+		struct ttysubwindow *ttysw; int n;
+		{ return ttyhist_write(ttysw, n); }
+
+ttyhist_flush(ttysw)
+		struct ttysubwindow *ttysw;
+		{ return ttyhist_flush(ttysw); }
+
+int ttysw_is_seln_nonzero(ttysw,rank) 
+		struct ttysubwindow *ttysw; Seln_rank rank; 
+		{ return ttysw_is_seln_nonzero(ttysw,rank); }
+
+void ttysel_init_client(ttysw) 
+		struct ttysubwindow *ttysw; 
+		{;}
+
+void ttysel_destroy(ttysw) 
+		struct ttysubwindow *ttysw; 
+		{;}
+
+void ttysel_acquire(ttysw,sel_desired) 
+		struct ttysubwindow *ttysw; Seln_rank sel_desired; 
+		{;}
+
+Seln_rank ttysel_mode(ttysw) 
+		struct ttysubwindow *ttysw; 
+		{ return ttysel_mode(ttysw); }
+
+void ttysel_make(ttysw,event,multi) 
+		struct ttysubwindow *ttysw; struct inputevent *event; int multi;		{;}
+
+void ttysel_move(ttysw,event) 
+		struct ttysubwindow *ttysw; struct inputevent *event; 
+		{;}
+
+int ttysel_adjust(ttysw,event,multi) 
+		struct ttysubwindow *ttysw; struct inputevent *event; int multi;		{ return ttysel_adjust(ttysw,event,multi); }
+
+int ttysel_cancel(ttysw,rank) 
+		struct ttysubwindow *ttysw; Seln_rank rank; 
+		{ return ttysel_cancel(ttysw,rank); }
+
+void ttynullselection(ttysw) 
+		struct ttysubwindow *ttysw; 
+		{;}
+
+void ttysel_deselect(ttysel,rank) 
+		struct ttyselection *ttysel; Seln_rank rank; 
+		{;}
+
+void ttysel_hilite(ttysw) 
+		struct ttysubwindow *ttysw; 
+		{;}
+
+void ttyhiliteselection(ttysel,rank) 
+		struct ttyselection *ttysel; Seln_rank rank; 
+		{;}
+
+void ttysetselection(ttysw) 
+		struct ttysubwindow *ttysw; 
+		{;}
+
+void ttygetselection(ttysw) 
+		struct ttysubwindow *ttysw; 
+		{;}
+
+int ttysel_get_selection(ttysw,holder) 
+		struct ttysubwindow *ttysw; Seln_rank *holder; 
+		{ return ttysel_get_selection(ttysw,holder); }
+
+void ttysw_do_put_get(ttysw) 
+		Ttysw *ttysw; 
+		{;}
+
+Es_handle ts_create(ttysw,original,scratch) 
+		Ttysw *ttysw; Es_handle original; Es_handle scratch; 
+		{ return ts_create(ttysw,original,scratch); }
+
+int ttysw_lookup_boldstyle(str) 
+		char *str; 
+		{ return ttysw_lookup_boldstyle(str); }
+
+int ttysw_print_bold_options() 
+		{ return ttysw_print_bold_options(); }
+
+int ttysw_add_FNDELAY(fd) 
+		int fd; 
+		{ return ttysw_add_FNDELAY(fd); }
+
+int ttysw_fork_it(ttysw0,argv) 
+		char *ttysw0; char **argv; 
+		{ return ttysw_fork_it(ttysw0,argv); }
+
+char *ttysw_to_textsw(ttysw) 
+		struct ttysubwindow *ttysw; 
+		{ return ttysw_to_textsw(ttysw); }
+
+int ttysw_pty_output(ttysw,pty) 
+		struct ttysubwindow *ttysw; int pty; 
+		{ return ttysw_pty_output(ttysw,pty); }
+
+int ttysw_pty_input(ttysw,pty) 
+		struct ttysubwindow *ttysw; int pty; 
+		{ return ttysw_pty_input(ttysw,pty); }
+
+int ttysw_consume_output(ttysw) 
+		struct ttysubwindow *ttysw; 
+		{ return ttysw_consume_output(ttysw); }
+
+int ttysw_input(ttysw0,addr,len) 
+		char *ttysw0; char *addr; int len; 
+		{ return ttysw_input(ttysw0,addr,len); }
+
+int ttysw_handle_itimer(ttysw) 
+		struct ttysubwindow *ttysw; 
+		{ return ttysw_handle_itimer(ttysw); }
+
+int ttysw_eventstd(ttysw,ie) 
+		struct ttysubwindow *ttysw; struct inputevent *ie; 
+		{ return ttysw_eventstd(ttysw,ie); }
+
+int ttynewsize(cols,lines) 
+		int cols; int lines; 
+		{ return ttynewsize(cols,lines); }
+
+int ttysw_freeze(ttysw,on) 
+		struct ttysubwindow *ttysw; int on; 
+		{ return ttysw_freeze(ttysw,on); }
+
+int ttysw_setopt(ttysw0,opt,on) 
+		char *ttysw0; int opt; int on; 
+		{ return ttysw_setopt(ttysw0,opt,on); }
+
+int ttysw_getopt(ttysw0,opt) 
+		char *ttysw0; int opt; 
+		{ return ttysw_getopt(ttysw0,opt); }
+
+int ttysw_flush_input(ttysw0) 
+		char *ttysw0; 
+		{ return ttysw_flush_input(ttysw0); }
+
+int ttysw_readrc(ttysw) 
+		struct ttysubwindow *ttysw; 
+		{ return ttysw_readrc(ttysw); }
+
+int ttysw_doset(ttysw,var) 
+		struct ttysubwindow *ttysw; char *var; 
+		{ return ttysw_doset(ttysw,var); }
+
+int ttysw_mapkey(ttysw,key,to,output) 
+		struct ttysubwindow *ttysw; char *key; char *to; int output; 
+		{ return ttysw_mapkey(ttysw,key,to,output); }
+
+int ttysw_mapsetim(ttysw) 
+		struct ttysubwindow *ttysw; 
+		{ return ttysw_mapsetim(ttysw); }
+
+int ttysw_domap(ttysw,ie) 
+		struct ttysubwindow *ttysw; struct inputevent *ie; 
+		{ return ttysw_domap(ttysw,ie); }
+
+int ttysw_strtokey(s) 
+		char *s; 
+		{ return ttysw_strtokey(s); }
+
+void ttysw_display_capslock(ttysw) 
+		struct ttysubwindow *ttysw; 
+		{;}
+
+int ttysw_process_menu(ttysw,ie) 
+		struct ttysubwindow *ttysw; struct inputevent *ie; 
+		{ return ttysw_process_menu(ttysw,ie); }
+
+Menu ttysw_walkmenu(ttysw) 
+		struct ttysubwindow *ttysw; 
+		{ return ttysw_walkmenu(ttysw); }
+
+int ttysw_set_menu(textsw) 
+		Textsw textsw; 
+		{ return ttysw_set_menu(textsw); }
+
+int ttysw_menu_append_only(cmd_menu,cmd_item) 
+		Menu cmd_menu; Menu_item cmd_item; 
+		{ return ttysw_menu_append_only(cmd_menu,cmd_item); }
+
+int swap_windows(old_window,new_window) 
+		char *old_window; char *new_window; 
+		{ return swap_windows(old_window,new_window); }
+
+int ttysw_be_ttysw(ttysw) 
+		Ttysw *ttysw; 
+		{ return ttysw_be_ttysw(ttysw); }
+
+int ttysw_be_cmdsw(ttysw) 
+		Ttysw *ttysw; 
+		{ return ttysw_be_cmdsw(ttysw); }
+
+int ttysw_getp(ttysw) 
+		Ttysw *ttysw; 
+		{ return ttysw_getp(ttysw); }
+
+int ttysw_cooked_echo(ttysw,old_cooked_echo,new_cooked_echo) 
+		Ttysw *ttysw; int old_cooked_echo; int new_cooked_echo; 
+		{ return ttysw_cooked_echo(ttysw,old_cooked_echo,
+				new_cooked_echo); }
+
+int ttysw_interpose(ttysw) 
+		Ttysw *ttysw; 
+		{ return ttysw_interpose(ttysw); }
+
+Notify_value ttysw_destroy(ttysw,status) 
+		Ttysw *ttysw; Destroy_status status; 
+		{ return ttysw_destroy(ttysw,status); }
+
+int ttysw_cmd(ttysw_opaque,buf,buflen) 
+		char *ttysw_opaque; char *buf; int buflen; 
+		{ return ttysw_cmd(ttysw_opaque,buf,buflen); }
+
+Notify_value ttysw_event(ttysw,event,arg,type) 
+		Ttysw *ttysw; Event *event; Notify_arg arg; 
+		Notify_event_type type; 
+		{ return ttysw_event(ttysw,event,arg,type); }
+
+int ttysw_textsw_changed(textsw,attributes) 
+		Textsw textsw; Attr_avlist attributes; 
+		{ return ttysw_textsw_changed(textsw,attributes); }
+
+Notify_value ttysw_pty_input_pending(ttysw,pty) 
+		Ttysw *ttysw; int pty; 
+		{ return ttysw_pty_input_pending(ttysw,pty); }
+
+Notify_value ttysw_itimer_expired(ttysw,which) 
+		Ttysw *ttysw; int which; 
+		{ return ttysw_itimer_expired(ttysw,which); }
+
+int ttysw_reset_conditions(ttysw) 
+		Ttysw *ttysw; 
+		{ return ttysw_reset_conditions(ttysw); }
+
+Notify_value ttysw_prioritizer(ttysw,nfd,ibits_ptr,obits_ptr,ebits_ptr,
+		nsig,sigbits_ptr,auto_sigbits_ptr,event_count_ptr,events) 
+		Ttysw *ttysw; int nfd; int *ibits_ptr; int *obits_ptr; 
+		int *ebits_ptr; int *sigbits_ptr; int *event_count_ptr; 
+		int *auto_sigbits_ptr; int nsig; Notify_event *events; 
+		{ return ttysw_prioritizer(ttysw,nfd,ibits_ptr,obits_ptr,
+		  ebits_ptr,nsig,sigbits_ptr,auto_sigbits_ptr,
+		  event_count_ptr,events); }
+
+int ttysw_resize(ttysw) 
+		Ttysw *ttysw; 
+		{ return ttysw_resize(ttysw); }
+
+int cim_resize(ttysw) 
+		Ttysw *ttysw; 
+		{ return cim_resize(ttysw); }
+
+int csr_resize(ttysw) 
+		Ttysw *ttysw; 
+		{ return csr_resize(ttysw); }
+
+int ttysw_null_getclipping() 
+		{ return ttysw_null_getclipping(); }
+
+int ttysw_selected(ttysw0,ibits,obits,ebits,timer) 
+		char *ttysw0; int *ibits; int *obits; int *ebits; 
+		struct timeval **timer; 
+		{ return ttysw_selected(ttysw0,ibits,obits,ebits,timer); }
+
+int ttytlsw_setup(ttytlsw,ttysw) 
+		struct ttytoolsubwindow *ttytlsw; struct ttysubwindow *ttysw; 
+		{ return ttytlsw_setup(ttytlsw,ttysw); }
+
+int ttytlsw_cleanup(ttysw) 
+		struct ttysubwindow *ttysw; 
+		{ return ttytlsw_cleanup(ttysw); }
+
+/* Window private routines */
+char *win_last_window;
+char *win_last_client;
+
+typedef void	(*Function)();
+
+#define	BIT_FIELD(field)	int field : 1
+
+typedef struct {
+    Pixwin	*pw;		/* region of window's pixwin */
+    Rect	rect;		/* object left, top, width, height */
+    int		depth;		/* retained depth */
+    int		margin;		/* view pixwin margin */
+    Rect	win_rect;	/* cached window width & height */
+    Scrollbar	scrollbars[2];	/* 0 -> vertical, 1 -> horizontal */
+    Function 	repaint_proc;
+    Function 	resize_proc;
+    struct {
+	BIT_FIELD(retained); 		/* retained region or not */
+	BIT_FIELD(width);		/* fixed width */
+	BIT_FIELD(height);		/* fixed height */
+	BIT_FIELD(auto_clear);		/* auto clear canvas for repaint */
+	BIT_FIELD(auto_expand);		/* auto expand canvas with window */
+	BIT_FIELD(auto_shrink);		/* auto shrink canvas with window */
+	BIT_FIELD(in_view);		/* the last event was in the view pw */
+	BIT_FIELD(dirty);		/* screen needs repaint */
+	BIT_FIELD(fixed_image);		/* canvas is a fixed size image */
+	BIT_FIELD(first_resize);	/* resize proc called at least once */
+    } status_bits;
+} Canvas_info;
+
+char *canvas_window_object(win,avlist) 
+		Window win; char **avlist; 
+		{ return canvas_window_object(win,avlist); }
+		
+void canvas_repaint_window(canvas) 
+		Canvas_info *canvas; 
+		{;}
+		
+void canvas_request_repaint(canvas,repaint_area,repaint) 
+		Canvas_info *canvas; struct rectlist *repaint_area; int repaint;
+		{;}
+		
+void canvas_restrict_clipping(canvas) 
+		Canvas_info *canvas; 
+		{;}
+
+int canvas_resize_pixwin(canvas,repaint) 
+		Canvas_info *canvas; short repaint; 
+		{ return canvas_resize_pixwin(canvas,repaint); }
+
+int canvas_resize_canvas(canvas,width,height,repaint) 
+		Canvas_info *canvas; int width; int height; short repaint; 
+		{ return canvas_resize_canvas(canvas,width,height,repaint); }
+		
+void canvas_inform_resize(canvas) 
+		Canvas_info *canvas; 
+		{;}
+
+void canvas_setup_scrollbar(canvas,direction,sb) 
+		Canvas_info *canvas; Scrollbar_setting direction; Scrollbar sb; 
+		{;}
+		
+void canvas_open_region(canvas,pw) 
+		Canvas_info *canvas; struct pixwin *pw; 
+		{;}
+
+void canvas_update_scrollbars(canvas,repaint) 
+		Canvas_info *canvas; short repaint; 
+		{;}
+
+void canvas_scroll(canvas,sb) 
+		Canvas_info *canvas; Scrollbar sb; 
+		{;}
+		
+caddr_t frame_window_object(win,avlist) 
+		Window win; Frame_attribute *avlist; 
+		{ return frame_window_object(win,avlist); }
+		
+Notify_value frame_destroy(tool,_status) 
+		struct toolplus *tool; Destroy_status _status; 
+		{ return frame_destroy(tool,_status); }
+		
+void frame_default_done_func(frame) 
+		int frame; 
+		{;}
+
+/* VARARGS2 */ 
+caddr_t frame_get(win,attr) 
+		Window win; Frame_attribute attr; 
+		{ return frame_get(win,attr); }
+
+/*VARARGS3*/
+int frame_layout(frame,win,op) 
+		Window frame; Window win; Window_layout_op op;
+		{ return frame_layout(frame,win,op); }
+
+int frame_set(win,avlist) 
+		Window win; Frame_attribute *avlist; 
+		{ return frame_set(win,avlist); }
+
+void frame_cmdline_help(name) 
+		char *name; 
+		{;}
+		
+caddr_t panel_window_object(win) 
+		Window win; 
+		{ return panel_window_object(win); }
+
+/* VARARGS1 */ 
+caddr_t textsw_window_object(win) 
+		Window win; 
+		{ return textsw_window_object(win); }
+		
+caddr_t textsw_view_window_object(win,avlist) 
+		Window win; Window_attribute *avlist; 
+		{ return textsw_view_window_object(win,avlist); }
+		
+void textsw_swap_wins(view1,view2) 
+		struct textsw_view_object *view1; 
+		struct textsw_view_object *view2; 
+		{;}
+		
+void textsw_clear_win(view) 
+		struct textsw_view_object *view; 
+		{;}
+
+int window_fd(window) 
+		Window window; 
+		{ return window_fd(window); }
+
+void window_release_event_lock(window) 
+		Window window; 
+		{;}
+
+void window_refuse_kbd_focus(window) 
+		Window window; 
+		{;}
+
+int window_read_event(window,event) 
+		Window window; struct inputevent *event; 
+		{ return window_read_event(window,event); }
+
+int win_appeal_to_owner(adjust,win,op,datum) 
+		int adjust; struct window *win; char *op; char *datum; 
+		{ return win_appeal_to_owner(adjust,win,op,datum); }
+
+Notify_value window_default_event_func() 
+		{ return window_default_event_func(); }
+
+Notify_value window_default_destroy_func() 
+		{ return window_default_destroy_func(); }
+
+Window win_from_client(client) 
+		Window client; 
+		{ return win_from_client(client); }
+
+char *win_set_client(win,client,create) 
+		struct window *win; char *client; int create; 
+		{ return win_set_client(win,client,create); }
+
+void win_clear_client(win) 
+		Window win; 
+		{;}
+
+
+
+int window_set_avlist(win,avlist) 
+		struct window *win; Window_attribute *avlist; 
+		{ return window_set_avlist(win,avlist); }
+
+void window_rc_units_to_pixels(client_win,avlist) 
+		Window client_win; Window_attribute *avlist; 
+		{;}
+
+char *tty_window_object(win) 
+		Window win; 
+		{ return tty_window_object(win); }
+
+char *term_window_object(win) 
+		Window win; 
+		{ return term_window_object(win); }

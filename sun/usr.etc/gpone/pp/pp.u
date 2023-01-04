@@ -1,0 +1,160 @@
+| "@(#)pp.u 1.1 86/09/25 SMI"
+
+| Copyright 1985 by Sun Microsystems, Inc.
+
+|   Command processor from vp to pp.
+
+#include "pp.h"
+
+#define FBHi	r[31]	/* High address of frame buffer. */
+#define FBCont	r[30]
+#define planes	r[29]
+#define op	r[28]
+#define color	r[27]
+#define nodst	r[26]
+
+| The starting org address had been changed for 3.2 to make more room for vp microcode.
+org 0x1123
+debug off
+
+reset:	movw 0, y;		am->fl2reg;	;				| 
+	;			DebugLevel->scrmemp; ;				| 
+	;			0->scrmem;	;				| 
+	;			LastCmd->scrmemp; ;				| 
+	movw 0, y;		am->scrmem;	cjs, go resetrr;		| 
+start:	movw d, acc;		fifo1->am;	cjp, f1e .;			| Get new command.
+	;			;		cjs, go badcmd;			| 
+|   Reset ropreg memory (resetrr) if last cmd was ack && current command is not ack.
+|   Doing resetrr here means that the next command was in the fifo (retrieved at start:).
+	movw acc, r[0];		LastCmd->scrmemp; ;				| copy acc to r[0] so sub2nw later preserves acc
+	sub2nw,s 0, d, y;	scrmem->am;	;				| Is last command ack?
+	movw acc, y;		am->scrmem;	cjp, ~zer norr;			| 
+	sub2nw,s 0, r[0];	;		;				| Is current command not ack?
+	;			;		cjs, ~zer resetrr;		| 
+norr:	movw d, r[0];		=cmd->am;	;				| 
+	addw r[0], acc, y;	am->brreg;	;				| 
+	mov2nw 14, r[0];	;		cjp, go;			| 0x4000 to add to bad commands.
+cmd:	;			;		cjp, go stopit;			| 0 Null cmd
+	;			;		cjp, go ppack;			| 1 Painting processor acknowledge
+	;			;		cjp, go roptex1;		| 2 textured 1 bit deep rops.
+	;			;		cjp, go ppinit;			| 3 Software reset.  1 means get gpaddr off fifo
+	;			;		cjp, go rnull;			| 4 Rop null to fb
+	;			;		cjp, go ropfb;			| 5 Rop fb to fb
+	;			;		cjp, go fbaddr;			| 6 Frame buffer board high address
+	;			;		cjp, go flashy;			| 7 Flash screen (for debugging)
+	;			;		cjp, go ppmask;			| 8 Planes mask
+	;			;		cjp, go vecvec;			| 9  Draw vectors  Must have called stclip first
+	;			;		cjp, go stclip;			| 10 Store multiple clip rectangles
+	;			;		cjp, go stcolor;		| 11 Store color
+	movw 0, r[24];		;		cjp, go start;			| 12 Initialization for solid, width 1 xf vectors.
+	;			;		cjp, go vecvecxf;		| 13 Xformed, solid width 1 vectors.
+	addw r[0], acc, acc;	;		cjp, go badcmd;			| 14
+	;			;		cjp, go scrbuf;			| 15 screen rectangle to buffer rectangle
+	;			;		cjp, go setbuf;			| 16 set a rectangle of buffer to color
+	;			;		cjp, go bufscr;			| 17 buffer rectangle bytes to screen rectangle
+	;			;		cjp, go plginit;		| 18 Polygon  (2D) initialization
+	;			;		cjp, go plhinit;		| 19 Polyhedra (3D) initialization
+	;			;		cjp, go fillinit;		| 20 filling initialization
+	;			;		cjp, go shinit;			| 21 gouraud shading initialization
+	;			;		cjp, go plgfill;		| 22 Polygon (2D) fill (one segment)
+	;			;		cjp, go plhfill;		| 23 Polyhedra (3D) fill (one segment)
+	;			;		cjp, go plgsh;			| 24 Polygon (2D) Gouraud shading (one segment)
+	;			;		cjp, go plhsh;			| 25 Polyhedra (3D)Gouraud shading (one segment)
+	;			;		cjp, go textex;			| 26 Textured vectors.
+	;			;		cjp, go ldtex;			| 27 Load polygon texture into scratch.
+	;			;		cjp, go plgtex1;		| 28 1 line textured 1-to-8 rop.
+	;			;		cjp, go plgtex8;		| 29 1 line textured 8-to-8 rop.
+	;			;		cjp, go polypoly;		| 30 Polylines, textured and solid.
+	;			;		cjp, go xflineinit;		| 31 Initialization for xfline.
+	;			;		cjp, go xfline;			| 32 For drawing transformed textured & fat vecs.
+	;			;		cjp, go setlinetex;		| 33 Set line texture.
+	;			;		cjp, go setlinewidth;		| 34 Set line width.
+	;			;		cjp, go roptex8;		| 35 8 bit textured multi-line rops.
+|	;			;		cjp, go rdback;			|  Write fifo.
+
+badcmd:	subw,s d, acc, y;	36->am;		;				| #->am is highest command + 1.
+	movw,s d, r[6];		2->am;		crtn, ~cry;			| Number of times to flash - 1.
+	;			0x21->vhiareg;	;				| 
+	;			0xf800->am;	;				| 
+	movw d, r[5];		0xf800->vloareg; ;				| 
+	;			1020->brreg;	;				| Maximum number of shorts to write.
+	;			;		cjp, ~vir .;			| 
+	movw acc, r[0];		GPVWord->vctlreg; push, go;			| Write command in shmem.
+	movw r[0], y;		am->vwdreg;	cjp, ~vir .;		vmewr	| 
+	movw d, acc;		160->am;	;				| Length of flash in milliseconds.
+	;			;		cjs, ~neg flash;		| Flash if r[6] not negative.
+	movw d, r[0];		fifo1->am;	cjp, f1e .;			| Get data out of fifo.  Maybe hang here.
+	add2nw 1, r[5], r[5];	am->vloareg;	;				| increment shmem address by two bytes.
+	sub2nw,s 0, r[6];	0x21->vhiareg;	rfct;				| 
+	;			;		cjp, go .;			| Hang here.
+
+#ifdef rdback
+rdback:	;			;		cjp, ~vir .;			| 
+	;			0x7b->vctlreg;	;				| 
+	;			;		cjp, ~vir .;			| 
+	;			0x21->vhiareg;	;				| 
+	;			0xf800->vloareg; ;				| 
+	;			;		ldct 500;			| 
+wait:	;			fifo1->am;	cjp, f1e .;			| 
+	movw d, y;		am->vwdreg;	cjp, ~vir .;		vmewr	| 
+	;			;		;			varegs +| 
+	;			;		rpct wait;		varegs +| 
+	;			;		cjp, go .;			| Hang here.
+#endif
+
+#ifdef cmdflash
+cmdflash: movw acc, r[3];	;		;				| 
+	sub2nw 0, acc;		am->brreg;	;				| 
+	;			;		push, go;			| 
+	movw d, acc;		0x130->am;	;				| 
+	;			;		cjs, go flash;			| 
+	;			;		rfct;				| 
+	movw d, acc;		0x1000->am;	;				| 
+	;			;		cjs, go delay;			| 
+	movw r[3], acc;		;		crtn, go;			| 
+#endif
+
+flashy:	mov2nw 5, acc;		;		cjs, go flash;			| 
+	;			;		cjp, go start;			| 
+
+vecvec:	movw 0,r[24];		;		cjs, go vector;			| Initialization for pixrect routines.
+	;			;		cjp, go start;			| 
+
+vecvecxf: ;			;		cjs, go vector;			| Xformed vectors, single width, solid.
+	;			;		cjp, go start;			| 
+
+textex: ;			;		cjs, go texvec;			| 
+	;			;		cjp, go start;			| 
+
+polypoly: ;			;		cjs, go polyln;			| 
+	;			;		cjp, go start;			| 
+
+#ifdef MULCHIP
+#include "mulchip.pp.u"
+#else
+#include "mul.pp.u"
+#endif
+
+#include "div.pp.u"
+#include "ack.pp.u"
+#include "init.pp.u"
+#include "ropnull.pp.u"
+#include "ropfb.pp.u"
+#include "vector.pp.u"
+#include "stclip.pp.u"
+#include "octant.pp.u"
+#include "gbuffer.pp.u"
+#include "shade.pp.u"
+#include "delay.pp.u"
+#include "texvector.pp.u"
+#include "texvec.pp.u"
+#include "fatvec.pp.u"
+#include "polyline.pp.u"
+#include "xfline.pp.u"
+#include "xflineinit.pp.u"
+#include "setlineatts.pp.u"
+#include "roptex.pp.u"
+
+stop
+stopit:	movw 0xa, y;		;		;				| 
+	;			am->stlreg;	cjp, go stopit;			| 

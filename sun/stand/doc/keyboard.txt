@@ -1,0 +1,330 @@
+.de SX		\" call 'so' something else so derof
+.so \\$1
+..
+.\" .SX /usr/lib/tmac/tmac.e
+.po 1.5i
+.nr PO 1.5i
+.hy 14		\" don't hyphenate in bad places
+.pn 1		\" start page number at 'A'
+.af % A
+.ds PN "\\\\n%
+.nr sf 3	\" set section headings in bold face
+.nr si 2	\" indent nested sections 2 spaces
+.de $0		\" macro to enter section heading in to table of contents
+.(x C
+.if (\\$3=1) .sp
+\\$2   \\$1
+.)x \\*(PN
+..
+.de [R		\" routine declaration
+.ds RC \\$1
+.sp
+.ne 10
+.(l L
+.fi
+.na
+..
+.de *Q
+.ds RM \\$1 \\$2
+\\*(RM
+..
+.de *R
+.ds RN \\$1
+.(x R
+\\*(RN - \\*(RC
+.)x
+\\$1
+..
+.de {R
+\\*(RN
+.nf
+.ad
+..
+.de [R
+.)l
+..
+.de }R
+..
+.de {E			\" possible errors sub-section
+.lp
+Possible errors:
+.nr ps 0n
+.LB \\(bu
+..
+.de }E
+.LE
+.nr ps 1n
+.lp
+..
+.de WP
+.lp
+\fb***\fp
+..
+.de IP
+.ip "\fB\\$1\fP"
+..
+.de EB
+.sp -1
+.nf
+\L'|\\$1-1'\h'-1n'\1'\\n(.lu'\h-1n'\L'-1\\$1+1'\1-\\ln(.lu'
+.fi
+..
+.nr ii 5
+.nr hm 3v
+.nr tm 6v
+.nr fm 4v
+.nr bm 7v
+.de $h
+.tl 'APPROVAL SECTION''\*(PN'
+..
+.de $f
+.tl '\*(td''DO NOT COPY'
+.tl 'SUN MICROSYSTEMS INC''COMPANY CONFIDENTIAL'
+..
+.bp
+.sp
+.ce 2
+\fBE X T E R N A L  S P E C I F I C A T I O N
+(User Perspective)
+.sp
+.\" Fill in you project's name in place of the dot below and elsewhere
+.\" in this file.
+TITLE	     : 	Sun 2 & 3 Keyboard System Test External Specification\fR
+.sp
+AUTHOR	     :	Gale Snow / Sunny Kirsten
+.sp
+REPORT NO.   :	950-1018
+.sp
+REVISION NO. :	B @(#)keyboard.txt 1.1 86/09/25
+.sp
+DATE         : \*(td	\"td=printing date if reformated
+.sp
+STATUS       :  Release
+.sp 2
+.(l L
+APPROVALS    :						DATE
+.de SG			\" Macro to define signiture lines
+.ip "\\$1" 20n		\" Position and signiture line
+------------------------------------------------------------
+.br
+\\$2			\" Name Underneath
+..
+.SG "Originator" "Sunny Kirsten"
+.SG "Test Engineering"
+.SG "Manufacturing"
+.SG "Production"
+.SG "Quality Control"
+.)l
+.bp
+.(l L
+.ce
+Document Review Form
+.lp
+Please make note and initial on this page all corrections and/or
+proposed amendments by page number and/or section number.
+.sp
+.ce
+---------------------------------------------
+Recommendations, Differences, Construction Errors, and comments:
+.sp 36
+.ce 2
+---------------------------------------------
+Typographical Errors:
+.sp 4
+.ce 2
+---------------------------------------------
+Attach additional sheet(s) as needed.
+.)l
+.\" redefine headers for the body of the document
+.de $h
+.tl 'Sun 2 & 3 Keyboard Test EXTERNAL SPECIFICATION ''
+.tl '(User\'s Perspective)''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fBSun 2 & 3 Keyboard Test EXTERNAL SPECIFICATION\fR
+.sh 1 "INTRODUCTION"
+.sh 2 "Purpose"
+.\"	1.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+The Sun 2 & 3 Keyboard Test,
+.i kb.diag
+, tests the Sun 2 Micro Switch keyboard and the Sun 3 Oak keyboard
+in a system environment.
+This specification describes the test itself and the procedure for using it.
+.sh 2 "Applicable Documents"
+.\"	1.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.np
+Micro Switch Keyboard Specifications
+.np
+Oak          Keyboard Specifications
+.sh 2 "General Performance Characteristics
+The Sun 2 & 3 Keyboard System Test takes 3 minutes to execute.
+.sh 1 "SYSTEM OVERVIEW"
+.\"	2.
+.sh 2 "General Description"
+.\"	2.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+The Sun 2 & 3 Keyboard Test,
+.i kb.diag
+, has been designed to test the Micro Switch and Oak
+keyboards used in Sun 2 & 3 configurations
+(PN:320-1000-01/PN:540-1006-01/PN:950-1029-01).  It is
+a bootable diagnostic and runs on a Sun 2 processor.
+.sh 2 "Features"
+.\"	2.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+The features provided in
+.i kb.diag
+are :
+.np
+The operator interface is presented graphically.
+.np
+Each key is checked sequentially for a key-down code and an key-up code.
+.np
+The keyboard idle state is indicated on the test station display.
+.np
+The keyboard audio annunciator is tested.
+.np
+Upon completion of the test, the operator is so notified.
+.sh 2 "Required Configuration"
+.\"	2.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+The diagnostic is intended to run in a system environment and can be booted on
+any of the Sun 2 & 3 system configurations containing a Sun 2 processor, memory, and
+a Sun 2 video board.
+.sh 2 "Error Handling"
+.\"	2.4
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+The following errors are detected by
+.i kb.diag
+:
+.pp
+Unknown Keycode Error 
+.pp
+Other possible keyboard problems require assistance from the test operator.
+The operator must confirm the performance of the audio annunciator.
+That each key is functioning properly must be checked.
+If a key seems to be "stuck", that is,
+if a key is pressed and not acknowledged by
+.i kb.diag
+, then the operator must conclude that the keyboard is bad.  In this case,
+.i kb.diag
+can easily be or aborted by pressing L1 and typing 'a'.
+.sh 2 "Limitations"
+.\"	2.7
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+The following limitations exist in 
+.i kb.diag
+:
+.np
+If several keys (greater than 10) are mashed and released simultaneously
+some of the keycodes will be missed (because of inadequate buffering).  This
+is not a major problem and does not limit the actual testing of the keyboard in
+any way.
+.sp 2
+.\" Replace the dot below with the name of the major component you are
+.\" describing.  Repeat the entire section for each of your major components.
+.\" The subsections below are some of the ones that may be applicable.
+.\" Delete the ones that do not apply, and add new ones as necessary.
+.sh 1 "Sun 2 & 3 Keyboard Test SPECIFICATION"
+.sh 2 "User Interface"
+.\"	3.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+The user interface has been designed for ease of use.  The 
+keyboard layout is presented graphically on the test station monitor display.
+Before testing begins, each key is represented by a solid filled box.
+As each key on the keyboard under test is pressed, the corresponding key on
+the display is hatched confirming the key-down code for that key.  When the
+key is released the corresponding key on the display is represented as an open
+box thereby verifying the key-up code.
+.sh 2 "Operation"
+.\"	3.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+The steps listed below should be followed for setting up the keyboard test:
+.np
+First, reset the test station to it's power-up state.  This may be
+accomplished by either cycling power off then on, or by issuing the "k2"
+command to the PROM monitor.  If the test station attempts to boot UNIX
+after the power-up reset command "k2", abort the auto-boot by holding down
+the "L1" key in the upper left corner of the keyboard and depressing the
+"A" key.  NOTE:  Failure to issue the "k2" reset command or cycle power will
+result in failure to test the Keyboard ID, programmed into a DIP switch
+on the Sun 3 keyboard, and therefore the board might be shipped with
+the wrong DIP switch settings.
+.np
+Second, boot the test program
+.i kb.diag
+at the test station from the manufacturing file server.
+.pp
+The test sequence itself is described in the following steps:
+.np
+The keyboard layout is
+presented.  Initially all keys on the display should appear solid filled.
+.np
+The test proceeds with the test operator typing each key sequentially across
+each row from left to right, beginning with the upper left key in the top row
+of keys and continuing with the next row down until all keys in all rows have
+been tested.  As a key is pressed, and the key-down code is verified by
+.i kb.diag
+, the key will appear hatched on the display.  When the key is released, and
+the key-up code is confirmed, the key will appear as an open box on the
+display.  If a key is typed out of sequence, the key will appear hatched on
+the display and the keyboard will "beep".  No harm is done, just continue
+with the next key in sequence.  To determine which key is next in sequence,
+simply examine the test station display for the next solid filled key and
+type the corresponding key on the keyboard.
+.np
+The final test is of the audio annunciator.  The operator should verify that
+it works by listening for three (3) beeps after the last key (the lower
+right key) is typed.
+.np
+Finally, the operator is notifed that the test is complete.
+.sh 2 "Error Handling"
+.\"	3.4
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+If any of the following conditions occur, the keyboard should be rejected
+as it is not functioning properly:
+.np
+A KB DETECTED ERROR message is displayed.
+.np
+An UNKNOWN KEYCODE ERROR message is displayed.
+.np
+The idle indicator does not appear in the upper left corner of the display.
+.np
+Any key does not pass in sequence.
+.np
+The audio annunciator does not sound.
+.ds PN "\\\\n%
+.de $h
+.tl 'TABLE OF CONTENTS''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fBTABLE OF CONTENTS\fR
+.sp 3
+.xp C

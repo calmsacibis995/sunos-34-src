@@ -1,0 +1,73 @@
+c       .data
+c       .asciz  "@(#)FSlog10d.fs 1.1 86/09/25 Copyr 1986 Sun Micro"
+c       .even
+c       .text
+
+c       Copyright (c) 1986 by Sun Microsystems, Inc.
+
+	real*8 function FSlog10d ( x )
+	real*8 x
+	
+	real *8 xs, FFscaled
+	integer e, ixs, FFexpod
+	equivalence (xs, ixs)
+	real*8 log102a, log102b, log10e, log2e, half, zero
+	integer sqrt2, sqrthalf
+	parameter (log102a = 3.010299956639528318 d-1)
+	parameter (log102b = 2.836337935352428730 d-14)
+	parameter (log10e  = 0.43429 44819 03251 82765 d0)
+	parameter (log2e   = 1.44269 50408 88963 40735 d0)
+	parameter (half    = 0.5                       d0)
+	parameter (zero    = 0.0                       d0)
+	data sqrt2   / x'3f f6 a0 9f' /
+	data sqrthalf/ x'3f e6 a0 9e' /
+	
+	e = FFexpod(x)
+	xs = FFscaled( x, -e )
+	if (ixs .gt. sqrt2) then
+		xs = half * xs
+		e = e + 1
+	else if (ixs .lt. sqrthalf) then
+		if (xs .gt. zero) then
+ 1			continue
+			xs = xs + xs
+			e = e - 1
+			if (ixs .lt. sqrthalf) goto 1
+		endif
+	endif	
+	FSlog10d = log102a * e + (log102b * e + log10e * log(xs))
+	end
+
+	real*8 function FSlog2d ( x )
+	real*8 x
+	
+	real *8 xs, FFscaled
+	integer e, ixs, FFexpod
+	equivalence (xs, ixs)
+	real*8 log102a, log102b, log10e, log2e, half, zero
+	integer sqrt2, sqrthalf
+	parameter (log102a = 3.010299956639528318 d-1)
+	parameter (log102b = 2.836337935352428730 d-14)
+	parameter (log10e  = 0.43429 44819 03251 82765 d0)
+	parameter (log2e   = 1.44269 50408 88963 40735 d0)
+	parameter (half    = 0.5                       d0)
+	parameter (zero    = 0.0                       d0)
+	data sqrt2   / x'3f f6 a0 9f' /
+	data sqrthalf/ x'3f e6 a0 9e' /
+	
+	e = FFexpod(x)
+	xs = FFscaled( x, -e )
+	if (ixs .gt. sqrt2) then
+		xs = half * xs
+		e = e + 1
+	else if (ixs .lt. sqrthalf) then
+		if (xs .gt. zero) then
+ 1			continue
+			xs = xs + xs
+			e = e - 1
+			if (ixs .lt. sqrthalf) goto 1
+		endif
+	endif	
+	FSlog2d = e + log2e * log(xs)
+	end
+

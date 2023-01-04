@@ -1,0 +1,18 @@
+This file list the abbreviations used to make up phone numbers in the
+L.sys file (phone-number field).  Each line is of the form:
+
+word phone_number
+
+where
+	word	is the ascii abbreviation
+	number	is the digits it stands for.
+
+For example
+
+	ba 415-
+	factory 7716
+
+would cause the phone numbers in L.sys of the form
+
+	ba555-2233	to be changed to 415-555-2233
+	540-factory	to become 540-7716

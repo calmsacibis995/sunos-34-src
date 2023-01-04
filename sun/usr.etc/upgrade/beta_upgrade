@@ -1,0 +1,531 @@
+#! /bin/sh
+#
+# Usage is "beta_upgrade name machinetype yptype tapetype tapedev"
+#
+# Before running the script, be sure that all diskless clients of the
+# server are halted.
+#
+# 	@(#)  beta_upgrade 1.1 86/09/25
+#
+
+HOME=/; export HOME
+PATH=/bin:/usr/bin:/etc:/usr/etc:/usr/etc/upgrade:/usr/ucb
+
+NDLOCAL=/a/etc/nd.local
+endsym=$
+ind=0
+CLIENTLIST=""
+
+SERVERFILES="/a/.login /a/.cshrc /a/.rhosts /a/etc/passwd /a/etc/exports\
+	     /a/etc/printcap /a/etc/fstab /a/etc/hosts.equiv /a/etc/dumpdates\
+	     /a/etc/dump /a/etc/hosts /a/etc/nd.local /a/etc/rc.boot\
+	     /a/etc/rc.local /a/etc/ttytype /a/etc/ttys /a/usr/hosts/MAKEHOSTS\
+	     /a/private/usr/lib/crontab /a/private/usr/lib/sendmail.cf"
+CLIENTFILES=".login .cshrc .rhosts etc/passwd etc/printcap etc/fstab\
+	     etc/hosts.equiv etc/hosts etc/rc.local etc/rc.boot\
+	     private/usr/lib/crontab private/usr/lib/sendmail.cf"
+STANDALONEFILES="/a/.login /a/.cshrc /a/.rhosts /a/etc/passwd /a/etc/exports\
+	         /a/etc/printcap /a/etc/fstab /a/etc/hosts.equiv\
+		 /a/etc/dumpdates /a/etc/dump /a/etc/hosts /a/etc/rc.local\
+		 /a/etc/rc.boot /a/etc/ttytype /a/etc/ttys\
+		 /a/private/usr/lib/crontab /a/private/usr/lib/sendmail.cf"
+YPFILES="/a/etc/ethers /a/etc/netgroup /a/etc/services /a/etc/protocols\
+         /a/etc/servers /a/etc/group /a/etc/networks /a/etc/rpc\
+	 /a/usr/lib/aliases"
+
+CMDNAME=$0
+
+USAGE="
+usage: ${CMDNAME} op name machinetype yptype
+where:  
+        op          = \"save\" or \"restore\" or \"clean\" 
+        machinetype = \"standalone\" or \"server\" or \"diskless\"
+        yptype      = \"master\" or \"slave\" or \"client\" or \"none\"
+"
+if [ "$#" -lt 4 ]; then
+        echo "${CMDNAME}: Incorrect number of arguments."
+        echo "${USAGE}"
+        exit 1
+fi
+
+OP=${1}; shift
+case "$OP" in
+	"save" | "restore" | "clean" )
+		;;
+	* )
+        	echo "${CMDNAME}: Unknown operation (\"${OP}\") specified."
+        	echo "${USAGE}"
+        	exit 1 ;;
+esac
+
+NAME=${1}; shift
+
+MACHINETYPE=${1}; shift
+case "$MACHINETYPE" in
+	"standalone" | "server" | "diskless" )
+		;;
+	* )
+        	echo "${CMDNAME}: Unknown machinetype (\"${MACHINETYPE}\") specified."
+        	echo "${USAGE}"
+        	exit 1 ;;
+esac
+
+YPTYPE=${1}; shift
+case "$YPTYPE" in
+	"master" | "slave" | "client" | "none" )
+		;;
+	* )
+        	echo "${CMDNAME}: Unknown yptype  (\"${YPTYPE}\") specified."
+        	echo "${USAGE}"
+        	exit 1 ;;
+esac
+
+if [ "$OP" = "save" ]; then
+	#
+	# Save files for standalone machine
+	#
+	if [ "$MACHINETYPE" = "standalone" ]; then
+		echo "Start preserving ${NAME}'s files"
+		for i in $STANDALONEFILES
+		do
+			if [ -f "${i}" ]; then
+				cp ${i} ${i}.beta1
+				/bin/sync
+			fi
+		done
+	elif [ "$MACHINETYPE" = "server" ]; then
+		# 
+                # Create CLIENTLIST from /etc/nd.local 
+		# Looks ugly but handles all possible cases
+		# nd.local format
+		#   user hostname hisunit mydev myoff mysize mylunit maxpkts
+		# Will fix to look prettier
+                #
+		while true; do
+		   grep " $ind $endsym" $NDLOCAL >> /dev/null
+		   case "$?" in
+		      0)
+		         set `grep " $ind $endsym" $NDLOCAL` ;;
+		      1)
+		         grep " $ind	$endsym" $NDLOCAL >> /dev/null
+		         case "$?" in
+		            0)
+			       set `grep " $ind	$endsym" $NDLOCAL` ;;
+			    1)
+		               grep " $ind$endsym" $NDLOCAL >> /dev/null
+		               case "$?" in
+			          0)
+		                     set `grep " $ind$endsym" $NDLOCAL` ;;
+			          1)
+		                     grep " $ind [0-9]$endsym" $NDLOCAL >> /dev/null
+		                     case "$?" in
+				        0)
+		                           set `grep " $ind [0-9]$endsym" $NDLOCAL` ;;
+					1)
+		                           grep " $ind	[0-9]$endsym" $NDLOCAL >> /dev/null
+		                           case "$?" in
+					      0)
+		                                 set `grep " $ind	[0-9]$endsym" $NDLOCAL` ;;
+					      1)
+                                       	         break ;;
+					   esac 
+				     esac
+			       esac
+			 esac
+		   esac
+        	   CLIENT=$2
+		   case "$1" in
+			"#user" )
+				;;
+			"user"  )
+				CLIENTLIST="${CLIENTLIST} ${CLIENT}" ;;
+			* )
+				;;
+		   esac
+        	   ind=`expr ${ind} + 1`
+		done
+		#
+		# Save files for each client in the CLIENTLIST
+		#
+		for i in $CLIENTLIST
+        	do
+                	set `grep "user $i 0" $NDLOCAL | sed s,\/," ",g`
+                	ndl=ndl${8}
+			cd /dev
+			/dev/MAKEDEV ${ndl} 2>> /dev/null
+			/etc/nd < $NDLOCAL >> /dev/null
+                	mkdir /a/${i}
+                	if /etc/mount /a/dev/${ndl} /a/${i}; then
+				echo "Start preserving ${i}'s files"
+                		cd /a/${i}
+				for j in $CLIENTFILES
+				do
+					if [ -f "${j}" ]; then
+						cp ${j} ${j}.beta1
+						/bin/sync
+					fi
+				done
+				#
+                		# Save some /etc files for none yp machine
+                		#
+                		if [ "$YPTYPE" = "none" ]; then
+                        		for j in $YPCLIENTFILES
+                        		do
+						if [ -f "${j}" ]; then
+                                			cp ${j} ${j}.beta1
+							/bin/sync
+						fi
+                        		done
+                		fi
+                		cd /; /etc/umount /a/dev/${ndl}; rm -rf /a/${i}
+			else
+				echo "Can not mount ${ndl} to save files!"
+				exit 1
+			fi
+        	done
+		#
+		# Save server's files
+		#
+		echo "Start preserving ${NAME}'s files"
+		for i in $SERVERFILES 
+                do 
+			if [ -f "${i}" ]; then
+                        	cp ${i} ${i}.beta1 
+				/bin/sync
+			fi
+                done
+	elif [ "$MACHINETYPE" = "diskless" ]; then
+                set `grep "user $NAME 0" $NDLOCAL | sed s,\/," ",g`
+                ndl=ndl${8}
+		cd /dev
+                /dev/MAKEDEV ${ndl} 2>> /dev/null
+		/etc/nd < $NDLOCAL >> /dev/null
+                mkdir /a/${NAME}
+                if /etc/mount /a/dev/${ndl} /a/${NAME}; then
+			echo "Start saving ${NAME}'s files"
+                	cd /a/${NAME}
+                	for j in $CLIENTFILES
+                	do
+				if [ -f "${j}" ]; then
+                        		cp ${j} ${j}.beta1
+					/bin/sync
+				fi
+                	done
+			#
+        		# Save some /etc files for none yp machine
+        		#
+        		if [ "$YPTYPE" = "none" ]; then
+                		for j in $YPFILES
+                		do
+					if [ -f "${j}" ]; then
+                       				cp ${j} ${j}.beta1
+						/bin/sync
+					fi
+                		done
+        		fi
+                	cd /; /etc/umount /a/dev/${ndl}; rm -rf /a/${NAME}
+		else
+			echo "Can not mount ${ndl} to save files !"
+			exit 1
+		fi
+	else
+        	echo "${CMDNAME}: Unknown machinetype \"${MACHINETYPE}\"."
+        	echo "${USAGE}"
+        	exit 1
+	fi
+	#
+	# Save yp files for yp master and some /etc files for none yp machine 
+	#
+	if [ "$YPTYPE" = "master" -o "$YPTYPE" = "none" ]; then
+		if [ "$MACHINETYPE" = "server" -o "$MACHINETYPE" = "standalone" ]; then
+                	for i in $YPFILES
+                	do
+				if [ -f "${i}" ]; then
+                       			cp ${i} ${i}.beta1
+					/bin/sync
+				fi
+                	done
+		fi
+	fi
+
+	echo "All done preserving files."
+
+elif [ "$OP" = "restore" ]; then
+
+	#
+	# Restore files for standalone machine
+	#
+	if [ "$MACHINETYPE" = "standalone" ]; then
+		echo "Start restoring ${NAME}'s files."
+		for i in $STANDALONEFILES 
+                do 
+			if [ -f "${i}.beta1" ]; then
+                        	cp ${i}.beta1 ${i}
+				/bin/sync
+				case "${i}" in
+ 					"/a/etc/ttys" )
+ 						cat /usr/etc/upgrade/ttys.change >> ${i} ;;
+ 					"/a/etc/rc.local" ) 
+                                        	/usr/etc/upgrade/mergerclocal ${i} >> /dev/null ;;
+ 					"/a/private/usr/lib/crontab" ) 
+                                        	/usr/etc/upgrade/mergecrontab ${i} >> /dev/null ;;
+				esac
+				/bin/sync
+			fi
+                done
+        elif [ "$MACHINETYPE" = "server" ]; then
+		#
+		# Restore server's files
+		#
+                echo "Start restoring ${NAME}'s files"
+		for i in $SERVERFILES 
+                do 
+			if [ -f "${i}.beta1" ]; then 
+                                cp ${i}.beta1 ${i}
+				/bin/sync
+				case "${i}" in
+                                        "/a/etc/ttys" )
+                                                cat /usr/etc/upgrade/ttys.change >> ${i} ;;                                                 
+                                        "/a/etc/rc.local" ) 
+                                                /usr/etc/upgrade/mergerclocal ${i} >> /dev/null ;;
+                                        "/a/private/usr/lib/crontab" ) 
+                                                /usr/etc/upgrade/mergecrontab ${i} >> /dev/null ;; 
+                                esac
+				/bin/sync
+                        fi
+                done
+	elif [ "$MACHINETYPE" = "diskless" ]; then
+		#
+		# Restore client's files for specified client
+		#
+                echo "Start restoring ${NAME}'s files"
+                cd /a/${NAME}
+                for j in $CLIENTFILES
+                do
+			if [ -f "${j}.beta1" ]; then
+                                cp ${j}.beta1 ${j}
+				/bin/sync
+                                case "${j}" in
+                                        "etc/rc.local" )
+                                                /usr/etc/upgrade/mergerclocal ${j} >> /dev/null ;;
+                                        "private/usr/lib/crontab" )
+                                                /usr/etc/upgrade/mergecrontab ${j} >> /dev/null ;;
+                                esac
+				/bin/sync
+                        fi
+                done
+		#
+                # Restore files for none yp machine
+                #
+                if [ "$YPTYPE" = "none" ]; then
+                        for j in $YPFILES
+                        do
+				if [ -f "${j}.beta1" ]; then
+                                	cp ${j}.beta1 ${j}
+					/bin/sync
+					if [ "${j}" = "etc/servers" ]; then
+						cat /usr/etc/upgrade/servers.change >> ${j}
+						/bin/sync
+					fi
+				fi
+                        done
+                fi
+        else
+                echo "${CMDNAME}: Unknown machinetype \"${MACHINETYPE}\"."
+                echo "${USAGE}"
+                exit 1
+        fi
+	#
+	# Restore yp files for yp master and some /etc files for none yp machine
+	#
+	if [ "$YPTYPE" = "master" -o "$YPTYPE" = "none" ]; then
+		if [ "$MACHINETYPE" = "server" -o "$MACHINETYPE" = "standalone" ]; then
+                        for i in $YPFILES
+                        do
+				if [ -f "${i}.beta1" ]; then 
+                                        cp ${i}.beta1 ${i} 
+					/bin/sync
+                                        if [ "${i}" = "/a/etc/servers" ]; then 
+                                                cat /usr/etc/upgrade/servers.change >> ${i}
+						/bin/sync
+                                        fi 
+                                fi
+                        done
+                fi
+        fi
+	echo "All done restoring files."
+
+elif [ "$OP" = "clean" ]; then
+
+	#
+	# Clean files for standalone machine
+	#
+	if [ "$MACHINETYPE" = "standalone" ]; then
+		echo "Start cleaning ${NAME}'s files"	
+		for i in $STANDALONEFILES
+		do
+			if [ -f "${i}.beta1" ]; then
+				rm -f ${i}.beta1
+				/bin/sync
+			fi
+		done
+        elif [ "$MACHINETYPE" = "server" ]; then
+		#
+		# Create the CLIENTLIST from /etc/nd.local
+		# Looks ugly but handles all possible cases 
+                # nd.local format 
+                #   user hostname hisunit mydev myoff mysize mylunit maxpkts
+                # Will fix to look prettier
+		#
+		while true; do
+                   grep " $ind $endsym" $NDLOCAL >> /dev/null
+                   case "$?" in
+                      0)
+                         set `grep " $ind $endsym" $NDLOCAL` ;;
+                      1)
+                         grep " $ind	$endsym" $NDLOCAL >> /dev/null
+                         case "$?" in
+                            0)
+                               set `grep " $ind	$endsym" $NDLOCAL` ;;
+                            1)
+                               grep " $ind$endsym" $NDLOCAL >> /dev/null
+                               case "$?" in
+                                  0)
+                                     set `grep " $ind$endsym" $NDLOCAL` ;;
+                                  1)
+                                     grep " $ind [0-9]$endsym" $NDLOCAL >> /dev/null
+                                     case "$?" in
+                                        0)
+                                           set `grep " $ind [0-9]$endsym" $NDLOCAL` ;;
+                                        1)
+                                           grep " $ind	[0-9]$endsym" $NDLOCAL >> /dev/null
+                                           case "$?" in
+                                              0)
+                                                 set `grep " $ind	[0-9]$endsym" $NDLOCAL` ;;
+                                              1)
+                                                 break ;;
+                                           esac
+                                     esac
+			       esac
+                         esac
+                   esac
+		   CLIENT=$2
+		   case "$1" in
+			"#user" )
+				;;
+			"user"  )
+				CLIENTLIST="${CLIENTLIST} ${CLIENT}" ;;
+			* )
+				;;
+		   esac
+                   ind=`expr ${ind} + 1`
+                done
+		#
+		# Clean files for each client in the CLIENTLIST
+		#
+                for i in $CLIENTLIST
+                do
+                        set `grep "user $i 0" $NDLOCAL | sed s,\/," ",g`
+                        ndl=ndl${8}
+			cd /dev
+                        /dev/MAKEDEV ${ndl} 2>> /dev/null
+			/etc/nd < $NDLOCAL >> /dev/null
+                        mkdir /a/${i}
+                        if /etc/mount /a/dev/${ndl} /a/${i}; then
+				echo "Start cleaning ${i}'s files"
+                        	cd /a/${i}
+				for j in ${CLIENTFILES}
+				do
+					if [ -f "${j}.beta1" ]; then
+						rm -f ${j}.beta1
+						/bin/sync
+					fi
+				done
+				#
+                		# Clean files for none yp machine
+                		#
+                		if [ "$YPTYPE" = "none" ]; then
+                        		for j in $YPCLIENTFILES
+                        		do
+						if [ -f "${j}.beta1" ]; then 
+                                                	rm -f ${j}.beta1 
+							/bin/sync
+                                        	fi 
+                        		done
+                		fi
+                        	cd /; /etc/umount /a/dev/${ndl}; rm -rf /a/${i}
+			else
+				echo "Can not mount ${ndl} to clean files !"
+				exit 1
+			fi
+                done
+		#
+		# Clean server's files
+		#
+                echo "Start cleaning ${NAME}'s files"
+		for j in ${SERVERFILES} 
+                do 
+			if [ -f "${j}.beta1" ]; then  
+                                 rm -f ${j}.beta1  
+				 /bin/sync
+                        fi  
+                done
+	elif [ "$MACHINETYPE" = "diskless" ]; then
+                set `grep "user $NAME 0" $NDLOCAL | sed s,\/," ",g`
+                ndl=ndl${8}
+		cd /dev
+                /dev/MAKEDEV ${ndl} 2>> /dev/null
+		/etc/nd < $NDLOCAL >> /dev/null
+                mkdir /${NAME}
+                if /etc/mount /a/dev/${ndl} /a/${NAME}; then
+			echo "Start restoring ${NAME}'s files"
+                	cd /a/${NAME}
+                	for j in $CLIENTFILES
+                	do
+				if [ -f "${j}.beta1" ]; then
+                                	rm -f ${j}.beta1   
+					/bin/sync
+                        	fi   
+                	done
+                	#
+                	# Restore files for none yp machine
+                	#
+                	if [ "$YPTYPE" = "none" ]; then
+                        	for j in $YPFILES
+                        	do
+					if [ -f "${j}.beta1" ]; then
+                                 		rm -f ${j}.beta1   
+						/bin/sync
+                        		fi   
+                        	done
+                	fi
+                	cd /; /etc/umount /a/dev/${ndl}; rm -rf /a/${NAME}
+		else
+			echo "Can not mount ${ndl} to clean files !"
+			exit 1
+		fi
+        else
+                echo "${CMDNAME}: Unknown machinetype \"${MACHINETYPE}\"."
+                echo "${USAGE}"
+                exit 1
+        fi
+	#
+        # Clean yp files for yp master and some /etc files for none yp machine
+	#
+        if [ "$YPTYPE" = "master" -o "$YPTYPE" = "none" ]; then
+		if [ "$MACHINETYPE" = "server" -o "$MACHINETYPE" = "standalone" ]; then
+                        for i in $YPFILES
+                        do
+				if [ -f "${i}.beta1" ]; then 
+                                        rm -f ${i}.beta1    
+					/bin/sync
+                                fi    
+                        done
+                fi
+        fi
+	echo "All done cleaning files."
+else
+        echo "${CMDNAME}: Unknown operation (\"${OP}\") specified."
+        echo "${USAGE}" 
+        exit 1 
+fi

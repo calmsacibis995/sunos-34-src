@@ -1,0 +1,21 @@
+# !/bin/sh
+#
+#	Script to convert 3.0fcs servers to 3.2fcs servers
+#
+#       @(#)  3.0servers_3.2servers 1.1 86/09/25 
+#
+#       Copyright (c) 1986 by Sun Microsystems, Inc.
+#
+
+ed $1 <<NEW
+/rpc.mountd/
+a
+#tftp   udp     /usr/etc/in.tftpbootd
+time    udp     /usr/etc/in.timed
+name    udp     /usr/etc/in.tnamed
+finger  tcp     /usr/etc/in.fingerd
+#rpc    tcp     /usr/etc/rpc.rexd       100017  1
+.
+w
+q
+NEW

@@ -1,0 +1,12 @@
+Because some files are expected to found in the ../machine
+directory which are the same for sun2 and sun3, the following
+files are actually symbolic links to files in this directory.
+
+../machine/frame.h		-> ../sun/frame.h
+../machine/pcb.h		-> ../sun/pcb.h
+../machine/reg.h		-> ../sun/reg.h
+../machine/scb.h		-> ../sun/scb.h
+../machine/sir.h		-> ../sun/sir.h
+../machine/swapgeneric.c	-> ../sun/swapgeneric.c
+../machine/trap.h		-> ../sun/trap.h
+

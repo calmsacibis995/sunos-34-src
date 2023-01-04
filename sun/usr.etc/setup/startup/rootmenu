@@ -1,0 +1,9 @@
+#
+# @(#)rootmenu 1.1 86/09/25 SMI
+#
+#  Copyright (c) 1985 by Sun Microsystems, Inc.
+#
+# setup root menu
+#
+Refresh		REFRESH
+Exit		EXIT

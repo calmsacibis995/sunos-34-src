@@ -1,0 +1,3 @@
+# perform every hour on the half-hour
+uulog
+/usr/lib/uucp/uucico -r1

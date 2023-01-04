@@ -1,0 +1,20 @@
+#! /bin/sh
+#
+# @(#)fix_servers 1.1 86/09/25 SMI; from UCB X.X XX/XX/XX
+#
+if [ $# -ne 1 ]
+then
+	echo "Usage: $0 dir"
+	exit 1
+fi
+cd $1
+ed - servers <<END
+/rpc\.mountd/s/^/# /
+1
+/in\.timed/s/^/# /
+/in\.timed/s/^/# /
+1
+/in\.tnamed/s/^/# /
+w
+q
+END

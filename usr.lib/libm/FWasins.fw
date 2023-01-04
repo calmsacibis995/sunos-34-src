@@ -1,0 +1,12 @@
+c       .data
+c       .asciz  "@(#)FWasins.fw 1.1 86/09/25 Copyr 1985 Sun Micro"
+c       .even
+c       .text
+
+c       Copyright (c) 1985 by Sun Microsystems, Inc.
+
+	real*4 function FWasins ( x )
+	real*4 x,d
+	d  = (1.0-x) * (1.0+x)
+	FWasins = atan( x + x *(x*x) /( d + sqrt(d)))
+	end

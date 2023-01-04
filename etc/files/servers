@@ -1,0 +1,21 @@
+ftp	tcp	/usr/etc/in.ftpd
+telnet	tcp	/usr/etc/in.telnetd
+shell	tcp	/etc/in.rshd
+login	tcp	/etc/in.rlogind
+exec	tcp	/usr/etc/in.rexecd
+tftp	udp	/usr/etc/in.tftpd
+#tftp	udp	/usr/etc/in.tftpbootd
+syslog	udp	/usr/etc/in.syslog
+comsat	udp	/usr/etc/in.comsat
+talk	udp	/usr/etc/in.talkd
+time	tcp	/usr/etc/in.timed
+time	udp	/usr/etc/in.timed
+name	udp	/usr/etc/in.tnamed
+finger	tcp	/usr/etc/in.fingerd
+rpc	udp	/usr/etc/rpc.rstatd	100001	1-3
+rpc	udp	/usr/etc/rpc.rusersd	100002	1-2
+rpc	udp	/usr/etc/rpc.rwalld	100008	1
+rpc	udp	/usr/etc/rpc.mountd	100005	1
+rpc	udp	/usr/etc/rpc.rquotad	100011	1
+rpc	udp	/usr/etc/rpc.sprayd	100012	1
+#rpc	tcp	/usr/etc/rpc.rexd	100017	1

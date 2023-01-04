@@ -1,0 +1,8 @@
+./bin
+./boot
+./lib
+./stand/diag
+./stand/copy
+./vmunix
+./tftpboot
+./pub.boot

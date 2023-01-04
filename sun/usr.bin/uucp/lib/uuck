@@ -1,0 +1,36 @@
+#! /bin/sh
+: uuck - uucp consistency check
+
+D=/tmp/D$$
+E=/tmp/E$$
+T=/tmp/T$$
+trap "rm -f $D $E $T" 0 1 15
+
+echo '*** Phase 1 - Collect Files'
+cd /usr/spool/uucp
+uulog
+(cd D.; ls; cd ../D.`hostname`; ls) | sort >$D
+cd C.
+cat C.* | tr -s "\040" "\012" | grep "^D\." | sort | uniq >$E
+cd /usr/spool/uucp
+
+echo '*** Phase 2 - Look for Missing Files'
+comm -13 $D $E >$T
+if [ -s $T ]
+then
+	echo 'MISSING FILES:'
+	cat $T
+	echo 'LOGFILE REFERENCES:'
+	fgrep -n -f $T LOGFILE
+fi
+
+echo '*** Phase 3 - Look for Extra Files'
+comm -23 $D $E >$T
+if [ -s $T ]
+then
+	echo 'EXTRA FILES:'
+	cat $T
+	echo 'LOGFILE REFERENCES:'
+	fgrep -n -f $T LOGFILE
+fi
+rm -f $D $E $T

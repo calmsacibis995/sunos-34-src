@@ -1,0 +1,134 @@
+#! /bin/sh
+# 
+#       @(#)buildclient 1.1 86/09/25 SMI
+#
+. buildclient.config
+DISTROOT=/proto
+
+date
+
+umount /dev/${clientdisk}
+newfs /dev/r${clientdisk}
+fsck /dev/r${clientdisk}
+mount /dev/${clientdisk} /mnt
+
+set -x
+cd /mnt
+rm -fr lost+found
+
+mkdir dev etc etc/yp lib mnt 
+mkdir private private/usr private/usr/adm
+mkdir private/usr/lib private/usr/preserve private/usr/spool
+mkdir private/usr/spool/at private/usr/spool/at/past 
+mkdir private/usr/spool/log private/usr/spool/lpd 
+mkdir private/usr/spool/mail private/usr/spool/mqueue
+mkdir private/usr/spool/rwho private/usr/spool/secretmail 
+mkdir private/usr/tmp
+mkdir pub pub/bin tmp usr
+chmod 777 private/usr/tmp tmp private/usr/spool/mail
+
+cp ${DISTROOT}/.cshrc .cshrc
+cp ${DISTROOT}/.login .login
+cp ${DISTROOT}/.profile .profile
+cp ${DISTROOT}/.rhosts .rhosts
+if [ -f ${DISTROOT}/pub.boot ]; then
+	cp ${DISTROOT}/pub.boot boot
+fi
+(cd etc; ln -s /usr/etc/config)
+(cd etc; ln -s /etc/dump rdump)
+(cd etc; ln -s /etc/restore rrestore)
+(cd etc; ln -s /usr/etc/termcap)
+(cd etc; ln -s /usr/etc/yp)
+cp ${DISTROOT}/dev/MAKEDEV dev/MAKEDEV
+cp ${DISTROOT}/etc/arp etc/arp
+cp ${DISTROOT}/etc/biod etc/biod
+cp ${DISTROOT}/etc/chown etc/chown
+cp ${DISTROOT}/etc/clri etc/clri
+cp ${DISTROOT}/etc/cron etc/cron
+cp ${DISTROOT}/etc/dkinfo etc/dkinfo
+cp ${DISTROOT}/etc/dmesg etc/dmesg
+cp ${DISTROOT}/etc/dump etc/dump
+cp ${DISTROOT}/etc/dumpdates etc/dumpdates
+cp ${DISTROOT}/etc/ethers etc/ethers
+cp ${DISTROOT}/etc/exportfs etc/exportfs
+cp ${DISTROOT}/etc/fastboot etc/fastboot
+cp ${DISTROOT}/etc/fasthalt etc/fasthalt
+cp ${DISTROOT}/etc/fsck etc/fsck
+cp ${DISTROOT}/etc/fsirand etc/fsirand
+cp ${DISTROOT}/etc/getty etc/getty
+cp ${DISTROOT}/etc/gettytab etc/gettytab
+cp ${DISTROOT}/etc/group etc/group
+cp ${DISTROOT}/etc/halt etc/halt
+cp ${DISTROOT}/etc/hosts etc/hosts
+cp ${DISTROOT}/etc/hosts.equiv etc/hosts.equiv
+cp ${DISTROOT}/etc/ifconfig etc/ifconfig
+cp ${DISTROOT}/etc/in.rlogind etc/in.rlogind
+cp ${DISTROOT}/etc/in.routed etc/in.routed
+cp ${DISTROOT}/etc/in.rshd etc/in.rshd
+cp ${DISTROOT}/etc/inetd etc/inetd
+cp ${DISTROOT}/etc/init etc/init
+cp ${DISTROOT}/etc/magic etc/magic
+cp ${DISTROOT}/etc/mkfs etc/mkfs
+cp ${DISTROOT}/etc/mknod etc/mknod
+cp ${DISTROOT}/etc/motd etc/motd
+cp ${DISTROOT}/etc/mount etc/mount
+cp ${DISTROOT}/etc/mtab etc/mtab
+cp ${DISTROOT}/etc/nd etc/nd
+cp ${DISTROOT}/etc/networks etc/networks
+cp ${DISTROOT}/etc/newfs etc/newfs
+cp ${DISTROOT}/etc/nfsd etc/nfsd
+cp ${DISTROOT}/etc/passwd etc/passwd
+cp ${DISTROOT}/etc/portmap etc/portmap
+cp ${DISTROOT}/etc/printcap etc/printcap
+cp ${DISTROOT}/etc/protocols etc/protocols
+cp ${DISTROOT}/etc/pstat etc/pstat
+cp ${DISTROOT}/etc/rc etc/rc
+cp ${DISTROOT}/etc/rc.boot etc/rc.boot
+cp ${DISTROOT}/etc/rc.local etc/rc.local
+cp ${DISTROOT}/etc/reboot etc/reboot
+cp ${DISTROOT}/etc/remote etc/remote
+cp ${DISTROOT}/etc/renice etc/renice
+cp ${DISTROOT}/etc/restore etc/restore
+cp ${DISTROOT}/etc/rmt etc/rmt
+cp ${DISTROOT}/etc/rpc etc/rpc
+cp ${DISTROOT}/etc/rpc.lockd etc/rpc.lockd
+cp ${DISTROOT}/etc/rpc.statd etc/rpc.statd
+cp ${DISTROOT}/etc/servers etc/servers
+cp ${DISTROOT}/etc/services etc/services
+cp ${DISTROOT}/etc/shutdown etc/shutdown
+cp ${DISTROOT}/etc/syslog.conf etc/syslog.conf
+cp ${DISTROOT}/etc/syslog.pid etc/syslog.pid
+cp ${DISTROOT}/etc/ttys etc/ttys
+cp ${DISTROOT}/etc/ttytype etc/ttytype
+cp ${DISTROOT}/etc/umount etc/umount
+cp ${DISTROOT}/etc/update etc/update
+cp ${DISTROOT}/etc/utmp etc/utmp; chmod 777 etc/utmp
+cp ${DISTROOT}/etc/vipw etc/vipw
+cp ${DISTROOT}/etc/ypbind etc/ypbind
+cp ${DISTROOT}/usr/adm/aculog private/usr/adm/aculog
+cp ${DISTROOT}/usr/adm/lastlog private/usr/adm/lastlog
+cp ${DISTROOT}/usr/adm/messages private/usr/adm/messages
+cp ${DISTROOT}/usr/adm/msgbuf private/usr/adm/msgbuf
+cp ${DISTROOT}/usr/adm/newsyslog private/usr/adm/newsyslog
+cp ${DISTROOT}/usr/adm/shutdownlog private/usr/adm/shutdownlog
+cp ${DISTROOT}/usr/adm/usracct private/usr/adm/usracct
+cp ${DISTROOT}/usr/adm/wtmp private/usr/adm/wtmp
+cp ${DISTROOT}/usr/lib/aliases private/usr/lib/aliases
+cp ${DISTROOT}/usr/lib/crontab private/usr/lib/crontab
+cp ${DISTROOT}/usr/spool/log/syslog private/usr/spool/log/syslog
+cp ${DISTROOT}/usr/spool/log/syslog.0 private/usr/spool/log/syslog.0
+cp ${DISTROOT}/usr/spool/log/syslog.1 private/usr/spool/log/syslog.1
+cp ${DISTROOT}/usr/spool/log/syslog.2 private/usr/spool/log/syslog.2
+cp ${DISTROOT}/usr/spool/log/syslog.3 private/usr/spool/log/syslog.3
+cp ${DISTROOT}/usr/spool/log/syslog.4 private/usr/spool/log/syslog.4
+cp ${DISTROOT}/usr/spool/log/syslog.5 private/usr/spool/log/syslog.5
+cp ${DISTROOT}/usr/spool/log/syslog.6 private/usr/spool/log/syslog.6
+cp ${DISTROOT}/usr/spool/log/syslog.7 private/usr/spool/log/syslog.7
+cp ${DISTROOT}/usr/spool/secretmail/notice private/usr/spool/secretmail/notice
+cp ${DISTROOT}/bin/sh pub/bin/sh
+
+cd /sys/dist; sync
+umount /dev/${clientdisk}
+fsck /dev/${clientdisk}
+
+date

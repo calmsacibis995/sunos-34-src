@@ -1,0 +1,37 @@
+#
+# Diskless Model 120
+#
+machine		"sun2"
+cpu		"SUN2_120"		# generic for machine type 1 (Multibus)
+ident		"ND120"
+timezone	8 dst
+maxusers	4
+options		INET
+options		NFS
+options		NIT
+
+config		vmunix		root on nd
+
+pseudo-device	pty
+pseudo-device	ether
+pseudo-device	loop
+pseudo-device	nd
+pseudo-device	win128
+pseudo-device	dtop1
+pseudo-device	ms1
+pseudo-device	kb1
+
+# connections for machine type 1 (SUN2_120)
+controller	virtual 1 at nexus ?	# virtual preset
+controller	obmem 1 at nexus ?	# on board memory
+controller	obio 1 at nexus ?	# on board io
+controller	mbmem 1 at nexus ?	# Multibus memory
+controller	mbio 1 at nexus ?	# Multibus io
+
+device		sky0 at mbio ? csr 0x2000 priority 2
+device		zs0 at obio 1 csr 0x2000 flags 3 priority 3
+device		zs1 at obmem 1 csr 0x780000 flags 0x103 priority 3
+device		ie0 at mbmem ? csr 0x88000 priority 3
+device		ec0 at mbmem ? csr 0xe0000 priority 3
+device		bwtwo0 at obmem 1 csr 0x700000 priority 4
+device		tod0 at obio 1 csr 0x3800

@@ -1,0 +1,14 @@
+./bin/uucp
+./bin/uulog
+./bin/uuname
+./bin/uusend
+./bin/uustat
+./bin/uux
+./lib/uucp
+./spool/uucppublic
+./spool/uucp/C./
+./spool/uucp/D./
+./spool/uucp/D.noname/
+./spool/uucp/LOGFILE
+./spool/uucp/OLD/
+./spool/uucp/SYSLOG

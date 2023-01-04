@@ -1,0 +1,1986 @@
+.\" static char	sccid[] = "@(#)ether2.diag.msun 1.1 9/25/86 Copyright Sun Microsystems";
+.\"
+.\" USER'S DOCUMENT Template for the Diagnostic Department. 
+.\" 
+.\" Comment lines begin with .\" and are ignored by the formaters.
+.\" 
+.\" Instruction lines begin with .\" I: and may require input. 
+.\" 
+.\" 
+.\" ******************** beginning of Title Page ***********************
+.LP
+.B
+.ps 14
+.nf
+S U N  Microsystems
+.sp 17
+.ce 100
+.ps 20
+.\"
+.\" I: The Major Title of the document is to replace 
+.\" I: "Major Title" below.
+.\"
+Sun-2/120 Ethernet Board Diagnostic
+.sp 2
+.ps 20
+User's Document
+.sp 15   
+.ps 14
+.\"
+.\" I: The author's name is to replace "Author" below.  If there are 
+.\" I: multiple authors, put their names on separate lines.
+.\"
+Ching-Tai Hu
+.sp 2
+\*(DY
+.sp 2
+.\"
+.\" I: The appropriate revision letter replaces "A" below.
+.\"
+Revision A
+.ce 0
+.fi
+.\" *********************** end of Title Page **************************
+.\" 
+.\" 
+.\" ******************** beginning of document *************************
+.R
+.bp 1
+.ps 12
+.\"
+.\" I: The Major Title of the document is to replace "Major Title" 
+.\" I: in the 2 lines below.
+.\"
+.EH 'S U N  Microsystems''Sun-2/120 Ethernet Board Diagnostic'
+.OH 'S U N  Microsystems''Sun-2/120 Ethernet Board Diagnostic'
+.\" 
+.\" I: The appropriate revision letter replaces "A" 
+.\" I: in the 2 lines below.
+.\" 
+.EF '\*(DY'Revision A'page \\\\n(PN'
+.OF '\*(DY'Revision A'page \\\\n(PN'
+.P1
+.\" ####################################################
+.H 1 "Preface"
+.PP
+.\" 
+.\" I: A brief description of the contents of the document replaces
+.\" I: "Preface" below.
+.\" I: For example:
+.\"         The User's Document associated with the Sun-2/120' Video
+.\"     Board Diagnostic is presented.
+.\"
+The user document for Sun-2/120 ethernet board diagnostic is presented.
+.\" #####################################################
+.H 2 "Purpose"
+.PP
+.\" 
+.\" I: The purpose of the document replaces "Purpose" below.  What 
+.\" I: knowledge will the reader gain by reading this document?
+.\" I: For example:
+It is the intention of this document to inform the reader how to use 
+the Sun-2/120 ethernet board diagnostic. Also, to indicate how it works.
+.\"
+.\" ######################################################
+.H 2 "Audience"
+.PP
+.\" 
+.\" I: The audience replaces "Audience" below.  Who should read this 
+.\" I: document?  What prior knowledge, if any, is the reader assumed 
+'\" I: to have?
+.\" I: For example:
+Members of any of the following departments may find this document 
+of interest for various reasons: (1) Design Engineering, (2) Manufacturing,
+(3) Field Service, and (4) Documentation.  Using the
+Sun-2/120 ethernet board diagnostic, the Design Engineer(s) of the 
+Sun-2/120
+ethernet board will be able to confirm the correctness of their design.  
+Manufacturing and Field Service personnel will use Sun-2/120 ethernet board 
+diagnostic for testing and/or troubleshooting purposes.
+Finally, the Documentation 
+department will use this document as a basis for developing the User's 
+Guide which will be shipped with the product itself.
+.\" ###############################################################
+.H 1 "Revision History"
+.LP
+.\"
+.\" I: The appropriate date (MDY form) replaces "Month Day, Year" below.
+.\" I: If this is the first release of the document, replace 
+.\" I: "Month Day, Year" below with \*(DY and the date will 
+.\" I: automatically be added.  "Initial release of this document" can 
+.\" I: be replaced if so desired.
+.\"
+Revision A     \*(DY     Initial release of this document.
+.\"
+.\" I: For each additional revision, (1) add a line containing ".LP".
+.\" I: Then, (2) add a line containing "Revision x     MD,Y     Comment"
+.\" I: where "x" is replaced by the appropriate revision letter 
+.\" I: (B,C,D,...), "MD,Y" is replaced by the appropriate date and
+.\" I: "Comment" is replaced by a brief comment indicating what changes
+.\" I: were made in the revision.
+.\" I: SUGGESTION: Put the entries in alphabetical order by revision.
+.\" I: For example:
+.\"    .LP
+.\"    Revision B     November 9, 1984     Reorganized the document.
+.\"
+.\" ################################################################
+.H 1 "Glossary"
+.\"
+.\" I: For each term, (1) add a line containing ".LP".  Then (2)
+.\" I: add a line containing "term  -  definition of term" where "term"
+.\" I: is replaced by the appropriate to-be-defined term and 
+.\" I: "definition of term" is replaced by the definition of the term. 
+.\" I: SUGGESTION: Put the terms in alphabetical order.
+.\" I: For example:
+.\"    .LP
+.\"    FRU  -  Field Replaceable Unit.
+.\"
+82586 EDLC (Ethernet Data Link Controller) -- it is an intelligent,
+high performance local communications controller by Intel.
+.LP
+MB502 -- it is an ethernet serial interface controller (encoder/decoder)
+by Fujitsu which is located between ethernet controller (82586)
+and ethernet transceiver cable. The major functions are to generate 
+the 10MHz transmit clock for 82586, perform Manchester encoding/decoding 
+of transmitted/received frame(s), and provide the electrical interface 
+to the ethernet transceiver cable.
+.LP
+multibus -- it is a trademark of Intel corporation for standard bus 
+structure.
+.LP
+ethernet -- it is a trademark of Xerox corporation for local area network.
+.LP
+ethernet register space -- it is multibus memory space from 0x88000 to
+0x88800 and contains 2K bytes of page map pointers to ethernet memory,
+32 bytes of ID PROM, and control/status bytes.
+.LP
+ethernet memory space -- it is multibus memory space from 0x40000 to
+0x80000.
+.LP
+ethernet channel attention (CA) -- writing a one to the CA bit in 
+the control/status register causes the CA line of the EDLC (82586) to be 
+asserted, which is the way the CPU (68010) catches the EDLC's 
+attention.
+.LP
+ethernet board reset -- writing a one to the reset bit in the control/status 
+register will cause the whole ethernet board to be reset. The board 
+will remain in reset state until a zero is written to that register.
+.LP
+TDR -- Time Domain Relectometer.
+.LP
+RFD -- Receive Frame Descriptor.
+.LP
+TXD -- Transmit data line.
+.LP
+RXD -- Receive data line.
+.\" #############################################################
+.H 1 "Introduction"
+.PP
+.\"
+.\" I: The Introduction to the document is to replace "Introduction" 
+.\" I: below.  This is the appropriate section to state the background
+.\" I: of the project itself if you desire (i.e. breifly state the 
+.\" I: purpose of the project).  Each paragraph is to be preceded by a
+.\" I: line containing ".PP".
+.\"
+This document is meant to help you understand how the Sun-2/120 ethernet 
+board diagnostic works. It starts with a general description of 
+hardware/software requirements, and moves on to a description of the user 
+interface which includes error messages. Following is a description of the 
+suggested testing sequence which will result in an accurate test.
+Also, included is a section with detailed descriptions of each module and
+how it works.
+.\" ###############################################################
+.H 1 "Requirements"
+.PP
+.\" ###############################################################
+.H 2 "Hardware Requirements"
+.PP
+The minimum configuration of hardware required to run the Sun-2/120
+ethernet board diagnostic is:
+.DS
+1). Multibus card cage and power supply.
+2). Processor board.
+3). Memory board.
+4). Sun video console (video board needed) or televideo-like terminal.
+5). Boot device, local disk (disk controller needed), local tape (tape
+controller needed), and remote disk via ethernet (ethernet board needed).
+.DE
+.\" ###############################################################
+.H 2 "Software Requirements"
+.PP
+The standard firmware (rom diagnostic/monitor) and standalone ethernet 
+board diagnostic (ehter.diag) are needed.
+.H 1 "General Information"
+.PP
+This is a standalone Sun-2/120 ethernet board diagnostic package. 
+.H 2 "Hardware-related Information"
+.PP
+The "heart" of ethernet board is an Ethernet Data Link Controller 
+(EDLC - 82586 by Intel). It interfaces the Sun-2/120 ethernet board 
+with the ethernet transceiver through an ethernet encoder/decoder
+(MB502 by Fujitsu) serial interface unit. Also, on the board are
+256 Kbytes of dual-ported dynamic ram memory, one of whose ports
+is dedicated to the EDLC, the other to the Multibus.
+.PP
+It is accessed through virtual addressing (using its own page map).
+The base of multibus memory space starts from system memory location 
+0xF00000.
+Ethernet memory (data) space starts from system memory location 0xF40000
+to 0xF80000. Ethernet register space starts from system memory location
+0xF88000 to 0xF88800.
+.PP
+Contents of ethernet register space are described as follows:
+.br
+.in +4
+.nf
+offset 0x000	page map word 0000
+			(words 0001 - 1022)
+offset 0x7FE	page map word 1023
+offset 0x800	ID PROM  byte 00
+			(bytes 01 - 30)
+offset 0x83E	ID PROM  byte 32
+offset 0x840	status/control register
+offset 0x844	error latch register
+.fi
+.in -4
+.PP
+Contents of ethernet status/control register are described as follows:
+.br
+.in +4
+.nf
+bit_15		reset
+bit_14		normal/loopback(MB502)
+bit_13		channel attention
+bit_12		EDLC interrupt enable
+bit_11		parity error interrupt enable
+bit_10		unused
+bit_09		parity error indicator
+bit_08		EDLC interrupt indicator
+bit_07		unused
+bit_06		unused
+bit_05		expansion enabled indicator
+bit_04		on_board memory size indicator
+bit_03 - 00		multibus base address (bits 19 - 16)
+.fi
+.in -4
+.PP
+Contents of ethernet error latch register are described as follows:
+.br
+.in +4
+.nf
+first word
+	bit_15 - 08		unused
+	bit_07		EDLC or multibus error
+	bit_06		high byte indicator
+	bit_05 - 04		unused
+	bit_03 - 00		high order error address
+second word
+	bit_15 - 00		low order error address
+.fi
+.in -4
+.LP
+.H 2 "Software-Related Information"
+.PP
+All I/O routines  provided by the standalone libraries are linked to the
+ethernet board diagnostic. It is a sequencing, menu driven, and 
+interruptible package and has parameterization capability.
+It is a useful tool for both engineers and technicians to
+troubleshoot and evaluate the operation of Sun-2/120 ethernet board. 
+.\" ###########################################################
+.bp
+.H 1 "Operating Instructions"
+.H 2 "Loading And Starting"
+.PP
+When you turn on the system, after power-on rom diagnostics are run, the
+system automatically begins booting Unix. Then, break out of the
+boot sequence and return to the rom monitor by typing L1-a (hold
+down the "L-1" key while typing "a" key) on the Sun-2 console or by 
+typing <break> key on the televideo-type terminal.
+.PP
+At this point, type K1 to the rom monitor to reset the memory maps
+to the initial state. We are now ready to boot the ethernet board 
+diagnostic.
+.PP
+There are several ways of booting
+.br
+1). from local disk
+.IP
+Assuming the diagnostic 'ether.diag' exists on your local disk in
+the /pub/stand (fileserver) or the /stand (standalone) directory,
+the ethernet diagnostic is loaded by typing
+.DS
+> b stand/ether.diag
+.DE
+.br
+.LP
+2). from remote disk
+.IP
+Assuming the network fileserver has a partition reserved for the
+system under test (legitimate client) and the ethernet diagnostic
+exists in the /pub/stand on the fileserver, the ethernet diagnostic
+is loading by typing
+.DS
+> b stand/ether.diag
+.DE
+If the system under test is not a client of the fileserver where
+the diagnostic lives in the /pub/stand directory, the ethernet
+diagnostic is loading by typing
+.DS
+> b ec(,fileserver_host_net_#)stand/ether.diag
+.DE
+for example, (fileserver_host_net_# = 0x1a) indicates fileserver venus.
+.LP
+.H 2 "User Interface"
+.PP
+After loading the ethernet diagnostic, the control of system is passed from
+the rom monitor to the ethernet diagnostic. First, it prints configuration 
+messages on the screen as follows. Parts of them might be different for your 
+system.
+.br
+.DS
+Boot: ec(0,1A,0) stand/ether.diag
+Load: ec(0,1A,0) boot
+Boot: ec(0,1A,0) stand/ether.diag
+Size: 18940+7932+628 bytes
+Register @ 0xF88000
+Memory @ 0xF40000
+Memory size 0x40000
+My ethernet address = 0x123456789abc
+.DE
+.PP
+"Register @ 0xF88000" indicates the starting address of register memory space.
+"memory @ 0xF40000" indicates the starting address of data memory space.
+"Memory size 0x40000" (256 Kbytes) is the total available data area. Then, 
+it prints the ethernet diagnostic menu as follows:
+.br
+.DS
+Select test:
+
+  r - Multibus register
+  p - Multibus page map
+  m - Multibus memory
+  l - local loopback
+  e - encoder loopback
+  E - external loopback
+  d - diagnose/TDR 
+  D - dump control blocks
+  h - help
+  q - quit 
+
+
+Command :
+.DE
+.PP
+The prompt sign is shown by  "Command :". After the sign is prompted,
+the user can issue a command and parameters separated by spaces. If the 
+selected command is not supported by the ethernet diagnostic, the error
+message
+.DS
+no such test as (nonexist command)
+.DE
+is printed. (nonexist command) is whatever you have typed. Also, the 
+menu is displayed again.
+.H 3 "Special Notations"
+1). Separator ( ; )
+.IP
+The semicolon (;) mark is used between commands at the command line 
+prompt. It must be isolated on the line and surrounded by spaces.
+It allows tests to be flexibly sequenced.
+.LP
+2). Default (.)
+.IP
+The period (.) mark is used as a place holder to indicate default values
+for some parameters.
+.LP
+3). Forever (*)
+.IP
+The star (*) mark is approximately equal to infinity or 0x7fffffff times
+for loop count parameters. 
+.LP
+4). Null ( )
+.IP
+If a parameter is not supplied, then, the default values are used.
+.LP
+.H 3 "Command Line"
+.PP
+The following message shows allowable commands and their parameters 
+needed.
+.DS
+r passcount(10)
+p passcount(10)
+m passcount(10) from(16) size(16)
+l passcount(10) blocksize(16)
+e passcount(10)
+E passcount(10)
+d passcount(10)
+D flags
+h
+q
+.DE
+.H 3 "Parameters"
+1). passcount(10)
+.IP
+It is the loop count parameter which specifies how many times to run 
+through the test, before passing control to the next test(s) or prompt. 
+.DS
+default(.) = 1
+forever(*) = 2147483647 in decimal
+100	   = 100 times in decimal
+.DE
+.LP
+2). from(16)
+.IP
+This is the parameter which specifies the offset of the starting
+memory location to be tested.
+.DS
+default(.) = 0
+forever(*) = 0
+1f0	   = 1f0 in hexdecimal (ie, 0xf401f0 in our case)
+.DE
+.LP
+3). size(16)
+.IP
+It is the size parameter which specifies the length of the tested memory 
+block.
+.DS
+default(.) = 0x4000 in hexdecimal
+forever(*) = 0x4000 in hexdecimal
+f00	   = 0xf00 in hexdecimal
+.DE
+.LP
+4). blocksize(16)
+.IP
+It is the size parameter which specifies the frame size of each
+transmit/receive block.
+.DS
+default(.) = 0x2000 in hexdecimal
+forever(*) = 0x2000 in hexdecimal
+1000	   = 0x1000 in hexdecimal
+.DE
+.LP
+5). flags
+.IP
+This is an index parameter which specifies the selected control block
+to be dumped.
+.DS
+	   = -1 in decimal (for all blocks)
+1	   = 1 in decimal (system control block)
+2	   = 2 in decimal (control block(s))
+4	   = 4 in decimal (TDR block)
+8	   = 8 in decimal (RFD (Receive Frame Descriptor) block)
+16	   = 16 in decimal (RBD (Receive Buffer Descriptor) block)
+32	   = 32 in decimal (STATS block)
+64	   = 64 in decimal (TBD (Transmit Buffer Descriptor))
+128	   = 128 in decimal (RXBUF (Receive Buffer(s))
+.DE
+.LP
+.H 3 "Sequencing"
+.PP
+You can specify several commands separated by separator mark ( ; ) on a 
+single command line. This is equivalent to traditional batch mode operation.
+The ethernet diagnostic program will fetch each command and sequentially
+execute them until the end of line mark is reached. This feature gives
+users flexibility.
+.PP
+For example, when the user types the following string,
+.DS
+command : r ; p ; m ; l ; E ; e ; d
+.DE
+first, the control of system is passed to the register check routine and
+exercises the multibus registers. It then sequentially checks page 
+map memory and data memory and checks the transmission 
+capability by local loopback, external loopback, and encoder loopback
+tests. Finally, the internal operations of 82586 and TDR are checked.
+.\" ##############################################################
+.bp
+.H 1 "Message Handling"
+.H 2 "Messages For Help (h) Command"
+.PP
+When you are confused about the format of an ethernet diagnostic command, 
+typing "h" will help you confirm how to issue the correct
+command(s). After typing the "h" key, the following message is displayed.
+.in +4
+.nf
+r	Multibus registers	r passcount(10)
+p	Multibus page map	p passcount(10)
+m	Multibus memory m passcount(10) from(16) size(16)
+l	local loopback  l passcount(10) blocksize(16)
+e	encoder loopback	e passcount(10)
+E	external loopback	E passcount(10)
+d	diagnose/TDR    d passcount(10)
+D	dump control blocks	D flags
+h	help	
+q	quit
+.fi
+.in -4
+.PP
+The first column is the command itself, the second column is the
+explanation of the command, and
+the third column is the syntax of each command and parameter(s).
+.IP 
+1). Passcount(10) is the loop count as a decimal number.
+.IP 
+2). From(16) is the starting memory location as a hexdecimal number. 
+.IP 
+3). Size(16) is the length of the memory block to be tested in hexdecimal.
+.IP
+4). Blocksize(16) is the size of transmit/receive buffer(s) in hexdecimal. 
+.IP
+5). Flags is an index indicating which block(s) should be dumped.
+.LP
+.\" ###########################################################
+.H 2  "Messages For Multibus Register (r) Command"
+.PP
+If the contents of the status register are correct, the message:
+.DS
+status register OK
+.DE
+is displayed on the screen. Otherwise the message:
+.DS
+status register read 0x[data]
+.DE
+is displayed. "[data]" is the contents of the status register.
+Then, the following messages are dumped.
+.DS
+expansion is disabled
+rams are 64k
+mbaddr = 4 (as in 0x40000)
+Prom:
+0x0:	0	0	0	0	0	0	0	0
+0x8:	0	0	0	0	0	0	0	0
+0x10:	0	0	0	0	0	0	0	0
+0x18:	0	0	0	0	0	0	0	0
+.DE
+Mbaddr is the multibus high order address bits (bit_19 - bit_16). The
+dynamic rams are 64K devices (total memory is 256 Kbytes). If 256K 
+devices are used, the maximum memory can be 1 Mbytes. With external memory
+the maximum memory can be expanded to 3 Mbytes.
+The above message will be displayed N times depending on the selected loop
+count. At the end of the loop, the message :
+.DS
+End of Multibus register pass N
+.DE
+is displayed on the screen. The diagnostic then jumps back to the menu and 
+prompts for more tests.
+.LP
+.\" ################################################################
+.H 2 "Messages For Multibus Page Map (p) Command"
+.PP
+It starts with a data bus check routine and prints:
+.DS
+Pass N Constant 0x[data]
+.DE
+on the screen, where "[data]" is one of the testing patterns (0, ffff, aaaa, 
+5555, 0101, 1010). If error(s) occurred, It prints:
+.DS
+Page map @ 0x[err loc] exp(0x[data]) obs(0x[data])
+.DE
+where "0x[err loc]" is the error address, "exp(0x[data])" is the written
+data (one of testing patterns) , "obs(0x[data])" is read data.
+It then executes an address bus check and prints:
+.DS
+Pass N Unique [data]
+.DE
+where "[data]" is one of incremental factors (1, -1, 16, -16, 256, -256).
+If error(s) occurred, it prints:
+.DS
+Page map @ 0x[err loc] exp(0x[data]) obs(0x[data])
+.DE
+The above sequence will loop N times until the selected loop count is
+reached. It then jumps back to the main menu.
+.LP
+.\" ################################################################
+.H 2 "Messages For Multibus Memory (m) Command"
+.PP
+It prints:
+.DS
+Test 0x[starting loc] (0x[blk len]) N times
+.DE
+"[starting loc]" is starting tested memory location, "[blk len]" is the
+length of tested block. Then, it prints:
+.DS
+Pass N Constant 0x[data]
+.DE
+and executes a constant pattern test, where "[data]" is one of constant 
+patterns (0, ffffffff, aaaaaaaa, 55555555, 01010101, 10101010, 21983940).
+If parity 
+error(s) occurred during the constant pattern test, the following message 
+is displayed.
+.DS
+p 1 m 1 b 0 addr 0x20000 index ???
+.DE
+where "p 1" indicates parity error occurred, "m 1" indicates the error 
+occurred
+on EDLC access or "m 0" indicates on Multibus access. "b 0" indicates 
+the high byte was 
+accessed and "b 1" low byte. "addr 0x20000" is the latched address at
+which the 
+parity error occurred. If a memory error(s) occurred, the following 
+message is shown.
+.DS
+Memory constant @ 0x[err loc] e(0x[data]) o(0x[data])
+.DE
+where "e(0x[data]" is the data being written and "o(0x[data])" is the data
+read. Then, it prints:
+.DS
+Pass N Unique [data]
+.DE
+and moves on executing the random data test, where "[data]" is the 
+increment factor. 
+If parity error(s) occurred during the random pattern test, the following 
+message is displayed.
+.DS
+p 1 m 1 b 1 addr 0x2000 index ????
+Parity unique @ 0x[err loc] e(0x[data]) o(0x[data])
+.DE
+If memory error(s) occurred, the following message is displayed.
+.DS
+Memory @ 0x[err loc] e(0x[data]) o(0x[data])
+.DE
+The above sequence (constant pattern test/random pattern test) loops 
+N times until the selected loop count is reached. Then, the main menu is
+displayed.
+.LP
+.\" ###############################################################
+.H 2 "Messages For Local Loopback (l) Command"
+.PP
+It prints:
+.DS
+local loopback blk 0x[blk len] for N passes
+.DE
+and reconfigures the EDLC in internal loopback mode. If the 82586 fails
+to process the configure command, it prints:
+.DS
+localloop: config failed
+.DE
+and jumps back to display the user menu.
+Otherwise, it executes the loopback test. If error(s) occurred during test, 
+it prints:
+.DS
+localloop: loopback failed at pass N
+.DE
+following the error messages of the loopback test which will be discussed 
+later. Otherwise, it prints:
+.DS
+localloop: OK pass N of L
+.DE
+If the user suspends execution of the local loopback test, it prints:
+.DS
+localloop: stopped pass N of L
+.DE
+and jumps back to the main menu.
+.LP
+.\" ###############################################################
+.H 2 "Messages For Encoder Loopback (e) Command"
+.PP
+It prints:
+.DS
+encoder loopback for N passes
+.DE
+and reconfigures the EDLC into external loopback mode. If the 82586 fails
+to process the command, it prints:
+.DS
+encoderloop: config failed
+.DE
+and jumps back to the user menu.
+Otherwise, it executes the loopback test. If error(s) occurred during test, 
+it prints:
+.DS
+encoderloop: loopback failed pass N
+.DE
+following the error messages of the loopback test which will be described 
+later. Otherwise, it prints:
+.DS
+encoderloop: OK pass N of L
+.DE
+If the user suspends execution of the encoder loopback test, it prints:
+.DS
+encoderloop: stopped pass N
+.DE
+and jumps back to the main menu.
+.LP
+.\" ###############################################################
+.H 2 "Messages For External Loopback (E) Command"
+.PP
+It prints:
+.DS
+external loopback for N passes
+.DE
+and reconfigures the EDLC in external loopback mode. If the 82586 fails
+to process the command, it prints:
+.DS
+externalloop: config failed
+.DE
+and jumps back to the user menu.
+Otherwise, it executes the loopback test. If error(s) occurred during test, 
+it prints:
+.DS
+externalloop: loopback failed pass N
+.DE
+following the error messages of the loopback test which will be described 
+later. Otherwise, it prints:
+.DS
+externalloop: OK pass N of L
+.DE
+If the user suspends execution of the external loopback test, it prints:
+.DS
+externalloop: stopped pass N
+.DE
+and jumps back to the main menu.
+.LP
+.\" ###############################################################
+.H 2 "Messages For Loopback Module"
+.sp 1
+.PP
+Before starting the transmit/receive command, it checks the CUC, CU, and RU 
+fields (in SCB block). 
+.PP
+If the 82586 can't clear the CUC field, the following 
+message is displayed.
+.DS
+loopback:CU begin command wait timeout
+.DE
+It then dumps the SCB/CB blocks and jumps back to the menu.
+.br
+.sp 1
+.PP
+If either the CU or RU of the 82586 cannot enter the idle state, the 
+following message is displayed.
+.DS
+loopback:CU/RU begin status wait timeout
+.DE
+It then dumps the CB block and jumps back to the menu.
+.PP
+If error(s) occurred during transmission, the message:
+.DS
+pass n:loopback check failed at 0x[err loc]
+.DE
+is displayed.
+.sp 1
+.PP
+If a timeout occurred, the following message is displayed.
+.DS
+loopback:CU/RU end wait timeout
+.DE
+and it dumps the STATS/SCB/CB/RBD/RFD/TBD blocks and jumps back to the menu.
+.sp 1
+.PP
+If the contents of the system control block (SCB) are wrong,
+then it prints one or more of the following messages.
+.DS
+loopback: scb CU command not NOP
+loopback: scb RU command not NOP
+loopback: scb CU status not IDLE
+loopback: scb RU status not NO RESOURCES
+loopback: scb cbl offset e(0x[cbl off]) o(0x[cbl off])
+loopback: scb rfa offset e(0x[rfa off]) o(0x[rfa off])
+loopback: scb errors in statistics
+.DE
+and dumps the contents of the SCB/STATS blocks. Both the CU and RU 
+command fields 
+should be in NOP state. The CU status field should be in IDLE state, 
+and the RU status
+field should be in NO RESOURCES state. "e(0x[cbl off])" is an expected 
+offset
+of the control block link (in SCB). "o(0x[cbl off])" is a read offset which
+indicates the link had been updated by the 82586 (not allowable).
+"e(0x[rfa off])"
+is an expected offset of the receive frame area in the SCB and 
+"o(0x[rfa off])" is the
+read offset. "scb errors in statistics" indicates one or more of the error
+counters have been updated during command(s) execution as follows.
+.DS
+crcerrs counter - it contains the number of aligned frames discarded due to a crc error.
+alnerrs counter - it contains the number of misaligned frames discarded due a to crc error.
+rscerrs counter - it contains the number of good frames discarded due to a lack of
+resources to receive them.
+ovrnerrs counter - it contains the number of frames that are known to be lost due to 
+a lack of availability of the system bus.
+.DE
+.sp 1
+.PP
+If the contents of the transmit command block (CB) are wrong, it then  prints 
+one or more of the following messages.
+.DS
+loopback tx[i]: c bit not set
+loopback tx[i]: b bit set
+loopback tx[i]: ok bit not set
+loopback tx[i]: abort bit set
+loopback tx[i]: nocarrier bit set
+loopback tx[i]: nocts bit set
+loopback tx[i]: underrun bit set
+loopback tx[i]: deferred bit set
+loopback tx[i]: heartbeat bit set
+loopback tx[i]: ? collisions
+loopback tx[i]: el set in mid list
+loopback tx[i]: el not set at end
+loopback tx[i]: s bit set
+loopback tx[i]: i bit set
+loopback tx[i]: cmd wrong 0x?
+loopback tx[i]: link wrong e(0x[link]) o(0x[link])
+loopback tx[i]: bdptr wrong e(0x[bdptr]) o(0x[bdptr])
+loopback tx[i]: ether address wrong
+loopback tx[i]: type wrong e(0x[type]) o(0x[type])
+.DE
+The c bit is set by the 82586, indicating the completion of the command.
+The b bit is set and cleared by the 82586 indicating the beginning and end of 
+execution respectively.
+The ok bit is set by the 82586, indicating the command was executed without 
+error.
+The abort bit is set by the 82586, indicating the command was abnormally 
+terminated due to a CU abort command.
+The nocarrier bit is set by the 82586, indicating an unsuccessful transmission 
+(transmission  stopped when lack of carrier sense has been detected).
+The nocts bit is set by the 82586, indicating transmission was 
+unsuccessful (stopped) due to lost of clear-to-send signal.
+The underrun bit is set by the 82586, indicating transmission was
+unsuccessful (stopped) due to DMA underrun, no data supplied by the system.
+The deferred bit is set by the 82586, indicating transmission was deferred.
+The heartbeat bit is set by the 82586, indicating the ethernet transceiver 
+collision detect logic performs well.
+? collisions is set by the 82586, indicating transmission attempt was 
+stopped due to too many collisions, number of retries is exhausted.
+"el set in mid list" indicates EL is set by the 82586 in the mid of command 
+link list.
+"el not set at end" indicates EL is cleared by the 82586 in the last
+command block.
+"s bit set" indicates that suspension of the CU upon completion of the
+current CB is not allowable.
+"i bit set" indicates that interrupt enable is not allowable.
+"cmd wrong 0x?" indicates that the command field should be 0x4.
+.sp 1
+.PP
+If the contents of the transmit buffer descriptor (TBD) are wrong, it prints
+one or more of the following messages.
+.DS
+loopback[i]: tbd eof not set
+loopback[i]:tbd blk e(0x[blk]) o(0x[blk])
+loopback[i]:tbd addr e(0x[addr]) o(0x[addr])
+.DE
+"tbd eof not set" indicates eof field was cleared by the 82586 (should be 1).
+.br
+"e(0x[blk])" is the expected block size and "o(0x[blk])" is the  read 
+block size which indicates the actual count field had been changed by the 
+82586.
+.br
+"tbd addr e(0x[addr]) o(0x[addr])" indicates the pointer to data memory was
+changed.
+.sp 1
+.PP
+If the contents of the received frame descriptor (RFD) are wrong, it prints
+one or more of the following messages.
+.DS
+loopback rfd[i]: c bit not set
+loopback rfd[i]: b bit set
+loopback rfd[i]: ok bit not set
+loopback rfd[i]: crc bit set
+loopback rfd[i]: align bit set
+loopback rfd[i]: buffer bit set
+loopback rfd[i]: overrun bit set
+loopback rfd[i]: short bit set
+loopback rfd[i]: el bit wrong
+loopback rfd[i]: s bit set
+loopback[i]:rfd link e(0x[link]) o(0x[link])
+loopback[i]:rfd bdptr e(0x[bdptr]) o(0x[bdptr])
+loopback[i]:rfd myaddr/source
+loopback[i]:rfd myaddr/dest
+loopback[i]:rfd type e(0x[type]) o(0x[type])
+.DE
+The c, b, ok, el, and s bits have the same meaning as above.
+The crc bit is set by the 82586, indicating a crc error in an aligned frame.
+The align bit is set by the 82586, indicating a crc error in a misaligned 
+frame.
+The buffer bit is set by the 82586, indicating it ran out of buffer space.
+The overrun bit is set by the 82586, indicating a DMA overrun.
+The short bit is set by the 82586, indicating the frame was too short.
+.sp 1
+.PP
+If the contents of the received buffer descriptor (RBD) are wrong, it prints
+one or more of the following messages.
+.DS
+loopback[i]:rdb eof not set
+loopback[i]:rbd f not set
+loopback[i]:rbd sz e(0x[count]) o(0x[count])
+loopback[i]:rbd link e(0x[link]) o(0x[link])
+loopback[i]:rbd addr e(0x[addr]) o(0x[addr])
+loopback[i]:rbd size e(0x[size]) o(0x[size])
+loopback[i]: data +0x[index] e(0x[data]) o(0x[data])
+.DE
+The eof bit should be 1.
+The rbd f bit is set by the 82586 indicating the buffer has been used.
+"rbd sz e(0x[count]) o(0x[count])" indicates the receive byte count is 
+different from the expected byte count.
+"rbd size e(0x[size]) o(0x[size])" indicates the buffer size field was
+changed by the 82586.
+"data +0x[index] e(0x[data]) o(0x[data])" indicates the data in the transmit 
+buffer is different from the receive buffer.
+.\" ###############################################################
+.H 2 "Messages For Diagnose/TDR (d) Command"
+.PP
+First, it performs an ethernet board reset; if successful, it prints:
+.DS
+Pass N: Reset OK or
+.DE
+otherwise, it prints:
+.DS
+Pass N: Reset failed
+.DE
+and dumps the system control block (SCB) on the screen. If the self-test
+of the EDLC was successful, it prints:
+.DS
+Diagnose OK
+.DE
+otherwise, it prints:
+.DS
+Diagnose failed command
+.DE
+If the execution of the TDR command is successful, it prints:
+.DS
+TDR OK
+.DE
+Otherwise, it prints:
+.DS
+TDR failed command
+.DE
+.LP
+.\" ###############################################################
+.H 2 "Messages For Dump Control Block (D) Command"
+.PP
+It prints one or more of the following messages.
+If the SCB flag is on, it prints the contents of the system control block.
+.DS
+SCB:    stat 0x[status] cmd 0x[cmd]
+        cus(status) rus(status) cuc(cmd) ruc(cmd)
+        cbl offset 0x[cbl off]
+        rfa offset 0x[rfa off]
+.DE
+"stat 0x[status]" shows the status field and "cmd 0x[cmd]" the command 
+field in hexdecimal.
+"cus(status)" is the status of the command unit. "(status)" could be one 
+of (idle),
+(suspend), (ready), (3), (4), (5), (6), or (7), but, (3), (4), (5), (6), 
+or (7) should never occur.
+"rus(status)" is the status of the receive unit. "(status)" could be one 
+of (idle),
+(suspend), (no resources), (3), (ready), (5), (6), (7), but, (3), (5),
+(6), or (7) should never occur.
+"cuc(cmd)" is the command in the command unit. "(cmd)" could be one of (nop),
+(start), (resume), (suspend), (abort), (5), (6), or (7), but, (5), (6),
+or(7) should never occur.
+"ruc(cmd)" is the command in the receive unit. "(cmd)" has the same meaning as 
+the "cuc(cmd)" above.
+"0x[cbl off]" is a pointer to the first command block and "0x[rfa off]" is a
+pointer to the receive frame area.
+.br
+.sp 1
+.PP
+If the CB flag is on, it prints the contents of the control block(s).
+.DS
+CB[i]:     c [d] b [d] ok [d] abrt [d] stat 0x[]/[] el [d] s [d] i [d] cmd(cmd) link 0x[link]
+.DE
+Any field on this line has the same meaning as above, "[d]" could be either
+1 - set, or 0 - reset.
+.br
+.sp 1
+.PP
+If the TBD flag is on, it prints the contents of the transmit buffer descriptor
+block.
+.DS
+TXEXT: tbdptr 0x[tbdptr] addr 0x[addr] type 0x[type]
+.DE
+"tbdptr 0x[tbdptr]" is a pointer in hexdecimal to the next transmit buffer 
+descriptor.
+"addr 0x[addr]" is a pointer in hexdecimal to the transmit buffer.
+"type 0x[type]" is a user defined type field.
+.br
+.sp 1
+.PP
+If the TDR flag is on, it prints the contents of the TDR command block.
+.DS
+TDR: link [link], transceiver [tran], [open][short]time [time] 0x[time]
+.DE
+"link [link]" could be either "link ok" or "link BAD", "[ok]" indicates
+no serial link problem was identified.
+"transceiver [tran]" could be either "transceiver BAD" or "transceiver ok",
+"[ok]" indicates no transceiver link problem was identified.
+"[open]" could be either "CABLE OPEN, " or "" (open on the ethernet link).
+"[short]" could be either "CABLE SHORTED, " OR "" (short on the ethernet link).
+.br
+.sp 1
+.PP
+If the RFD flag is on, it prints the contents of the receive frame descriptor
+block(s).
+.DS
+RFD[i]:    c [d] b [d] ok [d] crc [d] align [d] buf [d] DMA [d] short [D]
+RFD:      el [d] s [d] link 0x[link] bdptr 0x[bdptr]
+RFD:      src [b0:b1:b2] dst [b0:b1:b2] type 0x[type]
+.DE
+The c [d], b [d], ok [d], crc [d], align [d], buf [d], DMA [d], short [d],
+el [d], and s [d] have the same meaning as above. "[d]" could be either 
+1 or 0.
+"link 0x[link]" is a pointer in hexdecimal to the next receive frame 
+descriptor.
+"bdptr 0x[bdptr]" is a pointer in hexdecimal to the first receive buffer
+descriptor containing frame data.
+"src [b0:b1:b2]" and "dst [b0:b1:b2]" are ethernet source and 
+destination addresses respectively.
+.br
+.sp 1
+.PP
+If the RBD flag is on, it prints the contents of the receive buffer descriptor
+block(s).
+.DS
+RBD[i]:   eof [d] f [d] count 0x[cnt] bdptr 0x[bdptr] addr 0x[addr] el [d] size 0x[size]
+.DE
+.br
+.sp 1
+.PP
+If the STATS flag is on, it prints the contents of error counters.
+.DS
+STATS:   crc [crcerr] align [alignerr]  resource [reserr] overrun [overr]
+.DE
+"crc [crcerr]" is the error counter of aligned frames discarded due to a CRC 
+error.
+"align [alignerr]" is the error counter of misaligned frames discarded due to
+a CRC error.
+"resource [reserr]" is the error counter of good frames discarded due to a
+lack of available resources to receive them.
+"overrun [overr]" is the error counter of frames that are known to be lost
+because of a lack of system bus availability.
+.\" ##########################################################
+.bp
+.H 1 "Suggested Testing Sequence"
+.PP
+In order to isolate error(s) and perform accurate testing, it is 
+recommended to follow the testing sequence below.
+.IP 1.
+Run the multibus register subtest to verify the multibus interface.
+.IP 2.
+Run the page map subtest to exercise the static ram in order to have 
+correct memory pointers.
+.IP 3.
+Run the memory subtest to isolate and detect error(s) for both the data 
+and address buses.
+.IP 4.
+Run either the diagnose subtest or the local loopback subtest (isolate 
+the 82586 with network) to test the internal functions and transmission 
+capability of the 82586.
+.IP 5.
+Run the external loopback subtest to isolate the network.
+.IP 6.
+Run the encoder/decoder loopback subtest to exercise the transmission
+capability of the ethernet board without going through the network.
+.LP
+.bp
+.\" ###############################################################
+.H 1 "Description Of Modules"
+.PP
+Ethernet communication board diagnostic program contains 12 different
+C language modules and several 68000 assembly modules as follows.
+.\" ###############################################################
+.H 2 "Module -- Ether.c"
+.PP
+.in +2
+.IP 1.
+Routine -- main()
+.IP 2.
+Function: 
+.in +2
+It displays the user menu, parses command(s)/parameter(s), and dispatchs
+command(s) execution.
+.in -2
+.IP 3.
+Input parameters:
+.in +2
+None.
+.in -2
+.IP 4.
+Output parameters:
+.in +2
+None.
+.in -2
+.IP 5.
+Test steps:
+.RS
+.IP a).
+It configures the VME or Multibus ethernet board.
+.IP b).
+It prints:
+.DS
+Register @ 0xF8800
+Memory @ 0xF40000
+Memory size 0x4000
+My ethernet address = 0x123456789abc
+.DE
+.IP c).
+It prints a menu on the screen and waits for a command(s)/parameter(s).
+.DS
+Select test:
+
+  r - Multibus register
+  p - Multibus page map
+  m - Multibus memory
+  l - local loopback
+  e - encoder loopback
+  E - external loopback
+  d - diagnose/TDR 
+  D - dump control blocks
+  h - help
+
+
+Command :
+.DE
+.IP d).
+It accepts command/parameter tokens from the keyboard, and parses them.
+.IP e).
+The selected function is executed.
+.IP f). 
+Jump to step c). again.
+.RE
+.IP 6.
+Related functions:
+.in +2
+gets(), tokenparse(), ether_help().
+.in -2
+.in -2
+.LP
+.bp
+.\" #############################################################
+.H 2 "Module -- Dump.c"
+.PP
+This module contains two routines which dump the contents of the selected
+control block on the screen. Then the user can verify and troubleshoot
+the error(s) on the ethernet board.
+.sp 2
+.in +2
+.IP A).
+Routine -- ether_dump_cmd(eregp, blockp, memsize, nametoken)
+.RS
+.IP 1.
+Function:
+.in +2
+It gets a parameter and executes the dump command.
+.in -2
+.IP 2.
+Input parameters:
+.DS
+struct	ereg		*eregp,		/* pointer to register space */
+struct	etherblock	*blockp,	/* pointer to control block */
+int			memsize,	/* dummy */
+char			**nametoken;	/* */
+.DE
+.IP 3.
+Return value:
+.in +2
+always one -- successful return.
+.in -2
+.IP 4.
+Test steps:
+.in +2
+.RS
+.IP a). 
+It gets the control block flag from the token buffer.
+.IP b).
+It dumps the contents of the specified control block.
+.IP c).
+Exit.
+.RE
+.in -2
+.IP 5.
+Related functions:
+.in +2
+eattoken(), etherdump().
+.in -2
+.RE
+.sp 2
+.IP B).
+Routine -- etherdump(blockp, level)
+.RS
+.IP 1.
+Function:
+.in +2
+It dumps the control block(s) based on the level parameter.
+.in -2
+.IP 2.
+Input parameters:
+.DS
+struct	etherblock	*blockp,	/* pointer to control block */
+int			level;		/* specified block flag */
+.DE
+.IP 3.
+Return value:
+.in +2
+always one -- successful return.
+.in -2
+.IP 4.
+Test steps:
+.in +2
+.RS
+.IP a). 
+If the system control block flag is set, the contents of the system control 
+block are dumped to the screen.
+.IP b).
+If the command block flag is set, the contents of the command block are 
+dumped to the screen.
+.IP c).
+If the TDR (Time Domain Reflectometer) flag is set, the contents of the 
+TDR block are dumped to the screen.
+.IP d).
+If the RFD (receiver file descriptor) flag is set, the contents of the 
+RFD block are displayed on the screen.
+.IP e).
+If the RBD (Receiver Block Descriptor) flag is set, the contents of the
+RBD block are displayed on the screen.
+.IP f).
+If the STATS flag is on, the contents of the STATS block are dumped.
+.IP g).
+Exit.
+.RE
+.in -2
+.IP 5.
+Related functions:
+.in +2
+from_ieint(), maygetchar(), from_ieaddr().
+.in -2
+.in -2
+.RE
+.LP
+.bp
+.\" #############################################################
+.H 2 "Module -- Ether_register.c"
+.PP
+This is the module which verifies the contents of the status/control 
+register.
+.in +2
+.sp 2
+.IP 1.
+Routine --  ether_register(eregp, blockp, memsize, tokenname)
+.IP 2.
+Function:
+.in +2
+This routine verifies the contents of the multibus status/control register, and
+prints the configuration of this board and contents of the prom on the screen.
+.in -2
+.IP 3.
+Input parameters:
+.DS
+struct ereg		*eregp,		/* pointer to register space */
+struct etherblock	*blockp,	/* pointer to control block */
+int			memsize,	/* dummy */
+char			**tokenname;	/* */
+.DE
+.IP 4.
+Return value:
+.in +2
+0 -- successful return.
+.br
+1 -- status register error.
+.br
+2 -- statistics wrong.
+.in -2
+.IP 5.
+Test steps:
+.RS
+.IP a).
+It gets the loop_count parameter from the token buffer.
+.IP b).
+It verifies the contents of the status register.
+.IP c).
+It prints the configuration of the board, for example whether expansion 
+is enabled or disabled, the RAMs are 256k or 64k, mbaddr = 4 (as in 
+0x40000), etc.
+.IP d).
+It prints the contents of the PROM (ID information).
+.IP e).
+Jump to step b). until loop count=0.
+.IP f).
+Exit.
+.RE
+.in -2
+.IP 6.
+Related function:
+.in +2
+eattoken().
+.in -2
+.in -2
+.LP
+.bp
+.\" #############################################################
+.H 2 "Module -- Ether_pagemap.c"
+.PP
+This is the module which exercises the page map memory (static ram).
+.in +2
+.sp 2
+.IP 1.
+Routine -- ether_pagemap(eregp, blockp, memsize, nametoken)
+.IP 2.
+Function:
+.in +2
+It does an ethernet page map memory test (without parity).
+.in -2
+.IP 3.
+Input parameters:
+.DS
+struct ereg		*eregp,		/* pointer to register space */
+struct etherblock	*blockp,	/* pointer to control block */
+int			memsize,	/* dummy */
+char			**nametoken;	/* */
+.DE
+.IP 4.
+Return value:
+.in +2
+0 -- successful return.
+.br
+1 -- data error(s).
+.br
+2 -- address error(s).
+.in -2
+.IP 5.
+Test steps:
+.RS
+.IP a).
+It gets the loop_count parameter.
+.IP b).
+It does a data bus and memory check by writing constant patterns in
+the sequence:
+0, FFFF, AAAA, 5555, 0101, 1010, through whole page map array. If an error
+occurs, it loops at that error location forever until the "q" (suspension) 
+key is typed.
+.IP c).
+It does an address bus test by writing incremented data (delta = 1, -1, 10,
+-10, 100, -100) through the whole page map memory. If an error occurs, 
+it loops at the error location forever until "q" key is typed.
+.IP d).
+Jump to step b). until loop_count=0.
+.IP e).
+Exit.
+.RE
+.IP 6.
+Related functions:
+.in +2
+eattoken(), wfill(), wcheck(), wloop(), wunique().
+.in -2
+.in -2
+.LP
+.bp
+.\" ###############################################################
+.H 2 "Module -- Ether_memory.c"
+.PP
+This is the module which exercises the dynamic memory array.
+.in +2
+.sp 2
+.IP 1.
+Routine -- ether_memory(eregp, blockp, memsize, nametoken)
+.IP 2.
+Function:
+.in +2
+It does an ethernet memory test (with parity enable).
+.in -2
+.IP 3.
+Input parameters:
+.DS
+struct ereg		*eregp,		/* pointer to register space */
+struct etherblock	*blockp,	/* pointer to control block */
+int			memsize,	/* length of tested memory */
+char			**nametoken;	/* token buffer */
+.DE
+.IP 4.
+Return value:
+.in +2
+0 -- successful return.
+.br
+1 -- data error(s).
+.br
+2 -- address error(s).
+.in -2
+.IP 5.
+Test steps:
+.RS
+.IP a).
+It gets the loop count, starting address, and length parameters of the
+memory to be tested.
+.IP b).
+It sets page map pointer.
+.IP c).
+It does a data bus and memory check by writing constant patterns in the
+sequence:
+0, FFFFFFFF, AAAAAAAA, 55555555, 01010101, 10101010, 21983940, through
+the specified memory space. If an error occurs, it loops at the error
+address until the "q" key is typed.
+.IP d).
+It does an address bus check by writing incremented data (delta = 1, -1, 10,
+-10, 100, -100) through the specified memory space. If an error occurs, it 
+loops at the error location until the "q" key is typed.
+.IP e).
+Jump to step c). until loop_count=0.
+.IP f).
+Exit
+.RE
+.IP 6.
+Related functions:
+.in +2
+eattoken(), lfill(), lcheck(), lloop(), lunique().
+.in -2
+.in -2
+.bp
+.LP
+.\" ############################################################
+.H 2 "Module -- Ether_support.c"
+.PP
+This module provides several common routines which are used by
+other modules.
+.in +2
+.sp 2
+.IP A).
+Routines -- etherca(blockp, eregp)
+.RS
+.IP 1.
+Function:
+.in +2
+It sends the channel attention signal to the ethernet board (actually 
+to the 82586), and indicates commands should be executed.
+.in -2
+.IP 2.
+Input parameters:
+.DS
+struct etherblock	*blockp,	/* pointer to control block */
+struct ereg		*eregp;		/* pointer to register space */
+.DE
+.IP 3.
+Return value:
+.in +2
+None.
+.in -2
+.IP 4.
+Related functions:
+.in +2
+None.
+.in -2
+.RE
+.sp 2
+.IP B).
+Routine -- ether_reset(eregp, blockp, memsize)
+.RS
+.IP 1.
+Function:
+.in +2
+It resets the ethernet board (reset the 82586 chip, and put it into a ready
+state).
+.in -2
+.IP 2.
+Input parameters:
+.DS
+struct etherblock	*blockp,	/* pointer to control block */
+struct ereg		*eregp,		/* pointer to register space */
+u_long			memsize;	/* dummy */
+.DE
+.IP 3.
+Return value:
+.in +2
+o -- bad return.
+.br
+1 -- successful return.
+.in -2
+.IP 4.
+Related functions:
+.in +2
+to_ieaddr(), to_ieoff(), setpgreg(), delay(), etherca(),
+.in -2
+.RE
+.sp 2
+.IP C).
+Routine -- etherconf(eregp, blockp, intloop, extloop, cable, fifolim, framelen)
+.RS
+.IP 1.
+Function:
+.in +2
+It resets and configures the ethernet controller chip (82586).
+.in -2
+.IP 2.
+Input parameters:
+.DS
+struct etherblock	*blockp,	/* pointer to control block */
+struct ereg		*eregp,		/* pointer to register space */
+int			intloop,	/* internal loopback indicator */
+int			extloop,	/* external loopback indicator */
+int			cable,		/* */
+int			fifolim,	/* fifo limit value */
+int			framelen;	/* min # of bytes in a frame */
+.DE
+.IP 3.
+Return value:
+.in +2
+0 -- bad return.
+.br
+1 -- successful return.
+.in -2
+.IP 4.
+Related functions:
+.in +2
+ether_reset(), ethercommand(), bcopy().
+.in -2
+.RE
+.sp 2
+.IP D).
+Routine -- ethercommand(eregp, blockp, cmd)
+.RS
+.IP 1.
+Function:
+.in +2
+It executes one of the 82586's commands (nop, individual address set up,
+configure, multicast address set up, transmit, TDR, dump status,
+diagnose).
+.in -2
+.IP 2.
+Input parameters:
+.DS
+struct etherblock	*blockp, 	/* pointer to control block */
+struct ereg		*eregp,		/* pointer to register space */
+int			cmd;		/* command indicator */
+.DE
+.IP 3.
+Return value:
+.in +2
+0 -- bad return.
+.br
+1 -- successful return.
+.in -2
+.ip 4.
+Related functions:
+.in +2
+etherdump(), to_ieoff(), etherca().
+.in -2
+.RE
+.sp 2
+.IP E).
+Routine -- to_ieaddr(blockp, cp)
+.RS
+.IP 1.
+Function:
+.in +2
+It converts a cpu virtual address into an ethernet virtual address. 
+For the multibus environment, it is assumed that the address is in the 
+ethernet's memory space.
+.in -2
+.IP 2.
+Input parameters:
+.DS
+struct	etherblock	*blockp		/* pointer to control block */
+caddr_t			cp;		/* */
+.DE
+.IP 3.
+Return value:
+.in +2
+n -- converted ethernet address.
+.in -2
+.IP 4.
+Related functions:
+.in +2
+None.
+.in -2
+.RE
+.sp 2
+.IP F).
+Routine -- from_ieaddr(blockp, n)
+.RS
+.IP 1.
+Function:
+.in +2
+It converts an ethernet virtual address back to a cpu virtual address.
+.in -2
+.IP 2.
+Input parameters:
+.DS
+struct etherblock	*blockp,	/* pointer to control block */
+ieaddr_t		n;		/* */
+.DE
+.IP 3.
+Return value:
+.in +2
+n -- converted cpu address.
+.in -2
+.IP 4.
+Related functions:
+.in +2
+None.
+.in -2
+.RE
+.sp 2
+.IP G).
+Routine -- to_ieoff(blockp, addr)
+.RS
+.IP 1.
+Function:
+.in +2
+It converts a cpu virtual address into a 16-bit offset for the 
+ethernet chip. 
+.in -2
+.IP 2.
+Input parameters:
+.DS
+struct etherblock	*blockp,	/* pointer to control block */
+caddr_			addr;		/* */
+.DE
+.IP 3.
+Return value:
+.in +2
+s -- converted 16-bit ethernet offset.
+.in -2
+.IP 4.
+Related functions:
+.in +2
+None.
+.in -2
+.RE
+.sp 2
+.IP H).
+Routine -- to_ieint(n)
+.RS
+.IP 1.
+Function:
+.in +2
+It converts a cpu short integer into an EDLC short integer.
+.in -2
+.IP 2.
+Input parameters:
+.DS
+short			n;	/* converted integer */
+.DE
+.IP 3.
+Return value:
+.in +2
+s -- converted integer.
+.in -2
+.IP 4.
+Related functions:
+.in +2
+None.
+.in -2
+.RE
+.in -2
+.bp
+.LP
+.H 2 "Module -- Ether_diagnose.c"
+.PP
+This module provides a diagnose command check, and TDR (Time Domain 
+Reflectometer) command check.
+.PP
+The Diagnose command triggers an internal self test procedure of backoff 
+related registers and counters. Also, it checks the exponential Backoff 
+random number generator internal to the chip (82586).
+.PP
+The TDR command performs a Time domain reflectometer test on the serial
+link. By performing the command, the user is able to identify shorts
+or opens and their location. When the 82586 transmits All Ones, it
+triggers an internal timer. The timer measures the time elapsed 
+from transmission start until the echo is obtained. Echo is indicated by 
+either Collision Detect going active or a Carrier Sense signal drop.
+.in +2
+.sp 2
+.IP 1.
+Routine -- ether_diagnose(eregp, blockp, memsize, tokenname)
+.IP 2.
+Function:
+.in +2
+This routine provides chip self_test and network self_test.
+.in -2
+.IP 3.
+Input parameters:
+.DS
+struct	ereg		*eregp,		/* pointer to register block */
+struct	etherblock	*blockp,	/* pointer to control block */
+int			memsize,	/* dummy */
+char			**nametoken;	/* */
+.DE
+.IP 4.
+Return value:
+.in +2
+None.
+.in -2
+.IP 5.
+Test steps:
+.RS
+.IP a).
+It gets the loop_count parameter.
+.IP b).
+It does an ethernet board reset.
+.IP c).
+It executes the  diagnose command.
+.IP d).
+Now, it put cable on.
+.IP e).
+It executes the TDR command.
+.IP f).
+Jump to b). until loop_count=0.
+.IP g).
+Exit.
+.RE
+.IP 6.
+Related functions:
+.in +2
+ether_rest(), etherdump(), ethercommand, eattoken().
+.in -2
+.in -2
+.bp
+.LP
+.H 2 "Module -- Ether_localloop.c"
+.PP
+This is the module which executes the internal loopback test of the
+82586 chip.
+.in +2
+.sp 2
+.IP 1.
+Routine -- ether_localloop(eregp, blockp, memsize, tokenname)
+.IP 2
+Function:
+.in +2
+When the 82586 is configured in internal loopback mode, it is 
+disconnected from the serial interface unit (transmit data to 
+receive data and transmit clock to receive clock). Any frame transmitted 
+is immediately received. This allows the users to check the transmission 
+capability of the Intel 82586 chip.
+.in -2
+.IP 3.
+Input parameters:
+.DS
+struct	ereg		*eregp,		/* pointer to register space */
+struct	etherblock	*blockp,	/* pointer to control block */
+int			memsize,	/* dummy */
+char			**nametoken;	/* */
+.DE
+.IP 4.
+Return value:
+.in +2
+0 -- bad return.
+.br
+1 -- successful return.
+.in -2
+.IP 5.
+Test steps:
+.RS
+.IP a).
+It gets the loop_count and size of the frame block parameters from the token
+buffer.
+.IP b).
+It configures the 82586 to be in internal loopback mode.
+.IP c).
+It fills the transmit buffer(s) and receive buffer(s) with constant data
+patterns.
+.IP d).
+It issues an internal loopback test by calling the loopback function.
+.IP e).
+It checks for any user suspension.
+.IP f).
+Jump to step c). until loop_count=0.
+.IP g).
+Exit.
+.RE
+.IP 6.
+Related functions:
+.in +2
+eattoken(), etherconf(), lfill(), loopback(), maygetchar().
+.in -2
+.in -2
+.bp
+.LP
+.H 2 "Module -- Ether_enloop.c"
+.PP
+This is the module which executes the encoder/decoder loopback test.
+.in +2
+.sp 2
+.IP 1.
+Routine -- ether_enloop(eregp, blockp, memsize, nametoken)
+.IP 2.
+Function:
+.in +2
+When the ethernet serial interface chip (MB502) is configured in 
+internal loopback mode, the serial data is routed from TXD input, 
+through its transmit logic (retiming and manchester encoding),
+through the receive logic (manchester decoding and receive clock
+generator) to RXD output. Under these circumstances, all of the transmit 
+logic and receive logic, including the noise filter, is tested except 
+for the transceiver cable output driver and input receivers.
+.in -2
+.IP 3.
+Input parameters:
+.DS
+struct	ereg		*eregp,		/* pointer to register space */
+struct	etherblock	*blockp,	/* pointer to control block */
+int			memsize,	/* dummy */
+char			**nametoken;	/* */
+.DE
+.IP 4.
+Return value:
+.in +2
+0 -- bad return.
+.br
+1 -- successful return.
+.in -2
+.IP 5.
+Test steps:
+.RS
+.IP a).
+It gets the loop_count parameter from the token buffer.
+.IP b).
+It configures the ethernet serial interface controller chip (MB502) 
+to be in internal loopback (encoder/decoder) mode.
+.IP c).
+It issues an encoder/decoder loopback test by calling the loopback routine.
+.IP d).
+It checks for any suspension by the user.
+.IP e).
+Jump to step c). until loop_count=0.
+.IP f).
+Exit.
+.RE
+.IP 6.
+Related functions:
+.in +2
+eattoken(), etherconf(), loopback(), maygetchar)(.
+.in -2
+.in -2
+.bp
+.LP
+.H 2 "Module -- Ether_exloop.c"
+.PP
+This is the module which executes the external loopback test of the 
+82586 chip.
+.in +2
+.sp 2
+.IP 1.
+Routine -- ether_extloop(eregp, blockp, memsize, nametoken)
+.IP 2.
+Function:
+.in +2
+When the 82586 is configured in external loopback mode, it permits users
+to test all the external logic between the 82586 and the link itself.
+This allows the 82586 to check for correct operation of the carrier-sense
+and collision-detect signals from the transceiver for every frame 
+transmitted. 
+.in -2
+.IP 3.
+Input parameters:
+.DS
+struct	ereg		*eregp,		/* pointer to register space */
+struct	etherblock	*blockp,	/* pointer to control block */
+int			memsize,	/* dummy */
+char			**nametoken;	/* */
+.DE
+.IP 4.
+Return value:
+.in +2
+0 -- bad return.
+.br
+1 -- successful return.
+.in -2
+.IP 5.
+Test steps:
+.RS
+.IP a).
+It gets the loop_count parameter from the token buffer.
+.IP b).
+It configures the chip (82586) to be in external loopback mode.
+.IP c).
+It does the external loopback test by calling the loopback routine.
+.IP d). 
+It checks for any suspension by the user.
+.IP e).
+Jump to step c). until loop_count=0.
+.IP f).
+Exit.
+.RE
+.IP 5.
+Related functions:
+.in +2
+eattoken(), etherconf(), loopback(), maygetchar().
+.in -2
+.in -2
+.bp
+.LP
+.H 2 "Module -- Ether_loopback.c"
+.PP
+This is the module which provides ether_enloop.c, ether_inloop.c,
+and ether_exloop.c modules to handle transmission tests.
+.in +2
+.sp 2
+.IP 1.
+Routine --  ether_loopback(eregp, blockp, blocksize)
+.IP 2.
+Function:
+.in +2
+It does the common loop_back test depending on the configuration of 
+the ethernet board.
+It checks the transmit and receive buffer(s) and control blocks.
+.in -2
+.IP 3.
+Input parameters:
+.DS
+struct	ereg		*eregp,		/* pointer to register space */
+struct	etherblock	*blockp,	/* pointer to control block */
+int			blocksize;	/* frame block size */
+.DE
+.IP 4.
+Return value:
+.in +2
+0 -- bad return.
+.br
+1 -- successful return.
+.in -2
+.IP 5.
+Test steps:
+.RS
+.IP a).
+It clears all control lists.
+.IP b).
+It sets the  transmit command block.
+.IP c).
+It sets the transmit buffer descriptor block.
+.IP d).
+It sets the receive frame descriptor block.
+.IP e).
+It sets the receive buffer descriptor block.
+.IP f).
+It requests channel attention.
+.IP g).
+It compares the transmit buffer(s) with the receive buffer(s).
+.IP h).
+It sends an acknowledge command.
+.IP i).
+It checks the lists/buffers (system control block, transmit command 
+block, transmit buffer descriptor block, receive frame descriptor block,
+receive buffer descriptor block).
+.RE
+.IP 6.
+Related functions:
+.in +2
+wfill(), to_ieoff(), bcopy(), to_ieaddr(), etherdump(), etherca(), 
+lfill(), lcheck(), bcmp(), lcmp().
+.in -2
+.in -2
+.bp
+.LP
+.H 1 "References"
+.\"
+.\" I: For each reference, (1) add a line containing ".LP".  Then (2)
+.\" I: add a line containing "title, Revision x, MD,Y, author." where
+.\" I: "title" is replaced by the title of the referenced document,
+.\" I: "x" is replaced by the appropriate revision of the document,
+.\" I: "MD,Y" is replaced by the date when the document was released and
+.\" I: "author" is replaced by the author of the document (if known).
+.\" I: SUGGESTION: Put the entries in alphabetical order by title.
+.\" I: For example:
+.\"    .LP
+.\"    Theory of Operation Manual for the Sun-2/120' Video Board, 
+.\"    Revision A, September 26, 1984.
+.\"
+.\" ********************** end of document *****************************
+.LP
+Ethernet Board Engineering Manual for the Sun-2/120 Deskside SunStation,
+Revision 50, August 23, 1983.
+.LP
+Intel 82586 Reference Manual, January, 1983.
+.LP
+Intel MicroSystem Components Handbook, 1984.
+.LP
+The Design Document of Sun-2 Ethernet Board Diagnostic, Revision A, 1984.

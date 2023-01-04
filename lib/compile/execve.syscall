@@ -1,0 +1,4 @@
+#@(#)execve.syscall	1.1 9/24/86. 86/01/17 SMI
+int	execve(!path, argv, environ) char *path; char **argv; char **environ; {;} $
+0
+rw_read

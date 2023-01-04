@@ -1,0 +1,116 @@
+#
+#	@(#)Makefile.master	1.6	87/03/17 SMI
+#
+.KEEP_STATE:
+DESTDIR=
+CPUFLAG=
+PRODLIBDIR=${DESTDIR}/usr/lib
+PRODINCLUDEDIR=${DESTDIR}/usr/include/sunwindow
+REPLACETAGS=/usr/view/pe/bin/replace_tags
+FULLPATH= ${DESTDIR}/usr/src/usr.lib/libsunwindow/${WHOAMI}
+LINTLIBS= ${DESTDIR}/usr/src/usr.lib/libpixrect/llib-lpixrect.ln \
+	  ${DESTDIR}/usr/src/usr.lib/libsunwindow/llib-lsunwindow.ln \
+	  ${DESTDIR}/usr/src/usr.lib/libsunwindow/llib-lsunwindow-private.ln
+
+INCLUDE=/usr/include
+INSTALL=install -m 644
+CC=cc
+LINT=lint
+RANLIB= ranlib
+AR=ar
+AWK=	/bin/awk
+CTAGS= /usr/ucb/ctags -w
+TOUCH= touch -c
+LINTFLAGS= huz
+
+DBX=
+CFLAGS=	-O -I${INCLUDE}
+CFLAGS_LOCAL=
+
+CFLAGS_NOT_ROI_DATA= ${CFLAGS} ${DBX} ${CFLAGS_LOCAL} ${CPUFLAG}
+
+CFILESALL= ${CFILESLIB}
+OBJFILESALL= ${CFILESLIB:.c=.o} ${SFILESLIB:.s=.o}
+LINTFILESALL= ${CFILESLIB:.c=.ln}
+GPROFFILESALL= ${CFILESLIB:.c=.pg} ${SFILESLIB:.s=.pg}
+GPROFLIBFILE= ${LIBFILE:.a=_p.a}
+HDRSALL= ${HDRSPUBLIC} ${HDRSPRIVATE}
+SRCSALL= ${CFILESALL} ${HDRSALL} Makefile
+# add suffixes for lint and gprof
+.SUFFIXES: .ln .pg
+
+.c.o:
+	${CC} ${CFLAGS_NOT_ROI_DATA} -A-R -c $<
+	
+.c.ln:
+	${LINT} -${LINTFLAGS} $< ${LINTLIBS}
+	touch $*.ln
+
+.c.pg:
+	if [ -f $*.o ]; then \
+		mv $*.o $*.o.tmp; \
+	fi
+	${CC} ${CFLAGS_NOT_ROI_DATA} -A-R -pg -c $<
+	mv $*.o $*.pg
+	if [ -f $*.o.tmp ]; then \
+		mv $*.o.tmp $*.o; \
+	fi
+	
+all:	${LIBFILE}
+
+gprof:: ${GPROFLIBFILE}
+
+${LIBFILE}::	${OBJFILESALL}
+	if [ "${OBJFILESALL}" ]; then \
+		${AR} uvl ${LIBFILE} $?; \
+		${RANLIB} ${LIBFILE}; \
+	fi;
+
+${GPROFLIBFILE}:: ${GPROFFILESALL}
+	if [ "${GPROFFILESALL}" ]; then \
+		${AR} uvl ${GPROFLIBFILE} $?; \
+		${RANLIB} ${GPROFLIBFILE}; \
+	fi;
+
+lint::	${LINTFILESALL}
+	if [ ! -f llib-lsunwindow ]; then \
+		ln -s ${DESTDIR}/usr/src/usr.lib/libsunwindow/llib-lsunwindow .; \
+	fi
+	if [ ! -f llib-lsunwindow-private ]; then \
+		ln -s ${DESTDIR}/usr/src/usr.lib/libsunwindow/llib-lsunwindow-private .; \
+	fi
+	if [ ! -f llib-lpixrect ]; then \
+		ln -s ${DESTDIR}/usr/src/usr.lib/libpixrect/llib-lpixrect .; \
+	fi
+	if [ ! -f llib-lc ]; then \
+		ln -s /usr/lib/lint/llib-lc .; \
+	fi
+	@echo
+	@echo 'IF YOU CHANGE THE INTERFACE, PLEASE CHANGE THE LINT LIBRARY TO REFLECT THAT.'
+	@echo
+
+tag::	${CFILESALL} ${HDRSALL}
+	if [ "${TAGFILESALL}" ]; then \
+		rm -f tags; \
+		${CTAGS} -t ${TAGFILESALL}; \
+		${REPLACETAGS} tags ${DESTDIR}/usr/src/usr.lib/tags 'libsunwindow:${WHOAMI}'; \
+		rm -f tags; \
+		ln -s ${DESTDIR}/usr/src/usr.lib/tags tags; \
+	fi;
+
+clean::
+	-rm -f ${LIBFILE} core errs *.o *% *.BAK *.pg
+	
+install::	install_h 
+
+install_h::	${HDRSPUBLIC} FRC
+	-for i in ${HDRSPUBLIC}; do \
+		cmp -s $$i ${PRODINCLUDEDIR}/$$i || \
+		${INSTALL} $$i ${PRODINCLUDEDIR}/$$i; \
+	done
+
+FRC:
+# non-existent so always younger
+
+depend:
+	make_depend -I${INCLUDE} ${CFILESALL}

@@ -1,0 +1,31 @@
+#! /bin/csh -f
+#
+#       @(#)options 1.1 9/25/86 Copyright 1985 Sun Micro
+#
+#	List some sysdiag options.
+#
+onintr finit
+
+if ("$argv" != sd) echo ' '
+
+if (-e logtimes && "$argv" != sd) then
+#  echo ' '
+#  awk '/start/ {print "Test started on " $4, $5, $6, $7}' logtimes
+#  echo ' '
+  awk '/start/ {x = sprintf("Test was started on %s, %s %s %s", $4, $5, $6, $7)} END {print x}' logtimes
+endif
+
+if ($?SHOEBOX_TEST) echo Shoebox test is enabled
+if ($RUN_ON_ERROR == enabled) echo Run on error is $RUN_ON_ERROR
+if ($?LOG_PASS_MSG) echo Log pass msg is enabled
+if ($SD_LOAD_TEST == yes) echo 'Load test is    enabled'
+if ($?NO_TAPE_SLEEP) echo 'Tape sleep is  disabled'
+if ($?NO_CLEAN_HEADS) echo 'Tape clean is  disabled'
+if ("$argv" != sd) echo ' '
+
+finit: 
+
+if ("$argv" != sd && (!($?NEW_SHELL)) && $TERM == sun && $?WINDOW_PARENT) then
+  setenv NEW_SHELL no
+  exec /bin/csh
+endif

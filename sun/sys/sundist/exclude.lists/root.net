@@ -1,0 +1,9 @@
+./etc/arp
+./etc/biod
+./etc/in.rlogind
+./etc/in.routed
+./etc/in.rshd
+./etc/nd
+./etc/nfsd
+./etc/yp
+./etc/ypbind

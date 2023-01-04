@@ -1,0 +1,245 @@
+/*	@(#)divide.s 1.1 86/09/25 SMI	*/
+
+/*
+ * Copyright (c) 1983 by Sun Microsystems, Inc.
+ */
+
+#if REM && QUOT
+#include "can only do REM or QUOT: not both"
+#endif
+/* FIXED-POINT DIVISION AND REMAINDERING
+/*	
+/*	/*
+/*	 * fixed-point divide -- C prototype
+/*	 */
+/*	int
+/*	ldivt( a, b)
+/*		int a, b;
+/*	{
+/*		if (b&(b-1) == 0){
+/*			/* special power-of-two case */
+/*			register int i = 0;
+/*			if (b&0xffff == 0){
+/*				i = 16;
+/*				b >>= 16;
+/*			}
+/*			if ( b & 0xff == 0){
+/*				i += 8;
+/*				b >>= 8;
+/*			}
+/*			i += ptwo[b];
+/*			return a>>i;
+/*		}
+/*		
+/*		{
+/*			register short	blo = b;
+/*			if (b<=0xffff){
+/*				register short ahi = a>>16;
+/*				if (ahi < blo)
+/*					return ( a / blo );
+/*				return ((ahi/blo)<<16)+((short)a+((ahi%blo)<<16))/blo;
+/*			}
+/*			if ((a>>3)<=b){
+/*				/* its a small number 0 to 8 */
+/*				register int i;
+/*				for( i = 0; (a -= b)>0; i++) ;
+/*				return i;
+/*			}
+/*		}
+/*		{
+/*			register int i;
+/*			register bcopy = b-1;
+/*			register acopy;
+/*			register int x;
+/*			while (bcopy >0xffff){
+/*				i++;
+/*				bcopy >>= 1;
+/*			}
+/*			bcopy += 1;
+/*			if (bcopy>0xffff){
+/*				bcopy >>= 1;
+/*				i++;
+/*			}	
+/*			acopy = a >> i;
+/*			x = acopy / (short)bcopy;
+/*			a -= x*b;
+/*			if(a > b ){
+/*				a -= b;
+/*				x ++;
+/*			}
+/*			return x;
+/*		}
+/*	}
+*/
+	.globl ptwo
+
+	| register usage
+	a	=	d0
+	b	=	d1
+	ahi	=	d2
+	x	=	ahi
+	bhi	=	d3
+	lo_quot = 	bhi
+	bcopy	=	bhi
+	shf_cnt	=	d4
+	y	=	shf_cnt
+	z	=	d5
+	potreg	=	a0
+	| save mask
+	SAVE	=	0x3c80
+	| restore mask
+	RST	=	0x013c
+
+	| real beginning of division: save registers
+	tstb	sp@(-40)	| stack probe -- offset is a random guess
+	moveml	#SAVE, sp@-
+	movl	b, bhi		| detect special case of power-of-two
+	subql	#1, bhi
+	andl	b, bhi
+	beq	pot		| is b a power-of-two?
+	movl	b, bhi		| isolate high word of each
+	clrw	bhi
+	swap	bhi
+	bnes	div_big_b	| there are high-order bits in b
+	| here if b is < 2**16
+	movl	a, ahi
+	clrw	ahi
+	swap	ahi
+	cmpl	b, ahi
+	bges	1$
+	| here if a short division will not overflow
+	divu	b, a	| b < ahi !
+#ifdef REM
+	| get remainder
+	clrw	a
+	swap	a
+#endif
+#ifdef QUOT
+	| isolate quotient
+	andl	#0xffff, a
+#endif
+	moveml	sp@+,#RST
+	RET
+1$:	| here if the divisor is much smaller than the dividend,
+	| so a straight divide is untenable.
+	divu	b, ahi		| division of high-order word
+	movl	ahi, lo_quot	| remainder scoots down into
+	movw	a, lo_quot	| ... low-order division.
+	divu	b, lo_quot	| get remainder from this division
+#ifdef QUOT
+	movl	lo_quot, a
+	andl	#0xffff, a
+	swap	ahi
+	clrw	ahi
+	addl	ahi, a		| full quotient in a
+#endif
+#ifdef REM
+	clrw	lo_quot
+	movl	lo_quot, a
+	swap	a		| remainder in a
+#endif
+	moveml	sp@+,#RST
+	RET
+
+div_big_b:
+	| here if b is > 2**16, so simple division is impossible.
+	| one degenerate case is for a/b <= 8, which we can do by subtraction.
+	moveq	#0, shf_cnt
+	movl	a,  x
+	lsrl	#3, x
+	cmpl	b,  x
+	bhis	10$
+1$:
+		addql	#1, shf_cnt
+		subl	b,  a
+		bhis	1$		| really want bhss, or something.
+	    beqs	3$		| stupid instruction set.
+#ifdef QUOT
+		subql	#1, shf_cnt	| went too far: back up
+#endif
+#ifdef REM
+		addl	b, a
+#endif
+3$:	    | what remains is the remainder
+#ifdef QUOT
+	    movl	shf_cnt, a	| number of subtracts is quotient
+#endif
+	    moveml	sp@+,#RST
+	    RET
+
+10$:	| this is the hard case. 
+	| we must shift the dividend and the divisor until the divisor
+	| will fit into 16 bits. Then we can do a divide, which gives
+	| us a good guess as to the quotient. The guess may be off by
+	| one or two. so we correct for it at the end.
+	movl	a, x
+	movl	b, bcopy
+	subql	#1, bcopy
+11$:
+	    addql	#1, shf_cnt	
+	    lsrl	#1, bcopy
+	    cmpl	#0xffff, bcopy
+	    bhis	11$
+	addql	#1, bcopy
+	cmpl	#0xffff, bcopy	| did add cause a carry-out?
+	blss	12$
+	    lsrl	#1, bcopy
+	    addql	#1, shf_cnt
+12$:
+	lsrl	shf_cnt, x 	| shift a by a like amount
+	| divisor is now < 2**16, so division is now possible
+	| dividend could not have been bigger than 2**16 * divisor,
+	| so we cannot overflow.
+	divu	bcopy, x
+	movl	b, bcopy	| multiply back by divisor
+	movl	b, z
+	swap	bcopy
+	mulu	x, z
+	mulu	x, bcopy
+	swap	bcopy
+	clrw	bcopy
+	addl	bcopy, z
+	subl	z, a		| take trial remainder
+	cmpl	a, b
+	bgts	16$		| if remainder < b, we're done
+#ifdef QUOT
+	    addql	#1, x	| correct quotiend
+#endif
+#ifdef REM
+	    subl	b, a	| correct remainder
+#endif
+16$:	
+#ifdef QUOT
+	movl	x, a		|       quotient
+	andl	#0xffff, a	| blast away junk
+#endif
+	moveml	sp@+,#RST
+	RET
+
+
+pot:	| divisor is a power of two: find shift count
+	moveq	#0, shf_cnt
+	tstw	b
+	bnes	1$
+	    swap	b	| bit in high-half
+	    moveq	#16, shf_cnt
+1$:
+	lea	ptwo, potreg
+	tstb	b
+	bnes	2$
+	    addqb	#8, shf_cnt
+	    lsrw	#8, b
+2$:
+	addb	potreg@(0,b:w), shf_cnt
+	| prepare to form quotient and remainder
+#ifdef QUOT
+	lsrl	shf_cnt, a	| quotient
+#endif
+#ifdef REM
+	moveq	#1, x		| make remainder by masking
+	lsll	shf_cnt, x
+	subql	#1, x
+	andl	x, a
+#endif
+	moveml	sp@+,#RST
+	RET

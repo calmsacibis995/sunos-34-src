@@ -1,0 +1,33 @@
+#! /bin/sh
+#
+# @(#)copy_client 1.1 86/09/25 SMI; from UCB X.X XX/XX/XX
+#
+# Initialize one nd partition from another.
+#
+if [ $# != 2 ]; then
+	echo Usage: $0 from_ndl to_ndl 
+	exit
+fi
+
+from_ndl=$1
+to_ndl=$2
+
+#
+# At this point (examples in parens),
+#   from_ndl    - full name of nd logical partition to copy from (/dev/ndl1)
+#   to_ndl      - full name of nd logical partition to copy to (/dev/ndl5)
+#
+
+#
+# Mount both ndl partitions and copy files from one to the other
+#
+set -x
+mkdir /nd.to /nd.from
+/etc/mount $to_ndl /nd.to
+/etc/mount $from_ndl /nd.from
+cd /nd.from
+tar cfv - . | (cd /nd.to; tar xfp -)
+cd /
+/etc/umount $to_ndl
+/etc/umount $from_ndl
+rm -rf /nd.to /nd.from

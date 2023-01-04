@@ -1,0 +1,43 @@
+#! /bin/sh
+#
+#	xtr	1.1	86/09/25
+#
+disc=${disc-$disk}
+root=${root-a}
+: ${disc?'Usage: disc=xx tape=xx [root=x] xtr'}
+: ${tape?'Usage: disc=xx tape=xx [root=x] xtr'}
+set -x
+cd /dev;
+./MAKEDEV ${disc}0 ${tape}0
+# Xylogics 472 is also referred to as 'mt'
+if [ $tape = "xt" ]; then
+	tdev=/dev/nrmt0
+else
+	tdev=/dev/nr${tape}0
+fi
+if [ $tape = "mt" -o $tape = "xt" ]; then
+	bs=20
+else
+	bs=200
+fi
+echo /dev/${disc}0${root} / 4.2 rw 1 1 > /etc/fstab
+sync
+/etc/newfs /dev/r${disc}0${root}
+sync
+/etc/fsck /dev/r${disc}0${root}
+/etc/mount /dev/${disc}0${root} /a
+mt -f $tdev rew
+mt -f $tdev fsf 5
+cd /a
+tar xpfb $tdev $bs
+cd /a/dev
+./MAKEDEV std ${disc}0 ${tape}0 pty0 win0
+cat >/a/etc/fstab <<EOF
+/dev/${disc}0${root} / 4.2 rw 1 1
+/dev/${disc}0g /usr 4.2 rw 1 2
+EOF
+cd /
+/etc/umount /dev/${disc}0${root}
+sync
+/etc/fsck /dev/r${disc}0${root}
+echo 'Root filesystem extracted'

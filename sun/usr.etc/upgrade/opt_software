@@ -1,0 +1,135 @@
+# ! /bin/sh
+#
+#	opt_software archtype otherarch
+#
+#       @(#)  opt_software 1.1 86/09/25
+#
+#       Copyright (c) 1986 by Sun Microsystems, Inc.
+#
+
+HOME=/; export HOME
+PATH=/bin:/usr/bin:/etc:/usr/etc:/usr/etc/upgrade:/usr/ucb
+
+OPTLIST="ucb/dbx bin/lockscreen lib/libsunwindow.a src/sun/suntool/suntools.c \
+	 bin/troff etc/setup stand/extract_diags bin/f77 diag/sysdiag/sysdiag \
+	 lib/libcgi.a lib/how_pc lib/libc_p.a bin/uucp 5bin/dd man/man1/adb.1 \
+         demo/MAPS/map.1 games/backgammon lib/vfontinfo"
+
+if [ $# -lt 1 -o $# -gt 2 ]; then
+        echo Usage: $0 archtype otherarch 
+        exit 1
+fi
+if [ $# -eq 1 ]; then
+	OTHER=""
+elif [ $# -eq 2 ]; then
+	OTHER=$2
+fi
+	
+FLAG=$1
+
+while true; do
+	echo;echo "Select optional software for the ${FLAG} architecture :"
+	if [ "$FLAG" = "MC68010" ]; then
+        	echo "Networking" >> /tmp/EXTRACTLIST10
+	elif [ "$FLAG" = "MC68020" ]; then
+        	echo "Networking" >> /tmp/EXTRACTLIST20
+	fi
+	for i in ${OPTLIST}; do
+		case "$i" in
+			"ucb/dbx" )
+				KEY="Debugging" ;;
+			"stand/extract_diags" )
+				KEY="Stand_diag" ;;
+			"bin/f77" )
+				KEY="Fortran" ;;
+			"diag/sysdiag/sysdiag" )
+				KEY="Usr_diag" ;;
+			"lib/libcgi.a" )
+				KEY="Graphics" ;;
+			"lib/how_pc" )
+				KEY="Pascal" ;;
+			"lib/libc_p.a" )
+				KEY="Profiled" ;;
+			"src/sun/suntool/suntools.c" )
+				KEY="Suntools_source" ;;
+			"bin/troff" )
+				KEY="Text_processing" ;;
+			"etc/setup" )
+				KEY="Setup" ;;
+			"bin/lockscreen" )
+				KEY="Suntools_users" ;;
+			"lib/libsunwindow.a" )
+				KEY="Suntools_programmers" ;;
+			"bin/uucp" )
+				KEY="Uucp" ;;
+			"lib/vfontinfo" )
+				KEY="Vtroff" ;;
+			"man/man1/adb.1" )
+				KEY="Man" ;;
+			"5bin/dd" )
+				KEY="System_V" ;;
+			"demo/MAPS/map.1" )
+				KEY="Demo" ;;
+			"games/backgammon" )
+				KEY="Games" ;;
+		esac
+		IN="no"
+		if [ "$KEY" != "Stand_diag" ]; then
+			if [ -f /a/usr.${FLAG}/${i} ]; then
+				IN="yes"
+			elif [ -h /a/usr.${FLAG}/${i} ]; then
+				IN="yes"
+            		elif [ -f /a/usr/${i} -a "$OTHER" = "" ]; then
+				IN="yes"
+			elif [ -h /a/usr/${i} -a "$OTHER" = "" ]; then
+				IN="yes"
+			fi
+		elif [ "$KEY" = "Stand_diag" ]; then
+			if [ -f /a/pub.${FLAG}/${i} ]; then
+				IN="yes"
+			elif [ -h /a/pub.${FLAG}/${i} ]; then
+				IN="yes"
+			elif [ -f /a/pub/${i} -a "$OTHER" = "" ]; then
+				IN="yes"
+			elif [ -h /a/pub/${i} -a "$OTHER" = "" ]; then
+				IN="yes"
+			elif [ -f /a/usr/${i} -a "$OTHER" = "" ]; then
+				IN="yes"
+                	elif [ -h /a/usr/${i} -a "$OTHER" = "" ]; then
+				IN="yes"
+                        fi
+		fi
+            	if [ "$IN" = "no" ]; then
+                	while true; do
+                        	echo -n "Do you want to install "${KEY}" ? [y/n]: ";
+                        	read answer;
+                        	case "${answer}" in
+                        	y | yes )
+					IN="yes"
+                             		break ;;
+                        	n | no )
+					IN="no"
+                             		break ;;
+                        	* )
+                             		echo "Please answer yes or no." ;;
+                        	esac
+                	done
+	    	fi
+		if [ "$IN" = "yes" ]; then
+                        if [ "$FLAG" = "MC68010" ]; then
+                                echo "${KEY}" >> /tmp/EXTRACTLIST10
+                        elif [ "$FLAG" = "MC68020" ]; then
+                                echo "${KEY}" >> /tmp/EXTRACTLIST20
+                        fi
+		fi
+	done
+	if [ "$OTHER" != "" ]; then
+                if [ "${FLAG}" = "${OTHER}" ]; then
+                        break
+                else
+                        FLAG=${OTHER}
+                fi
+        else
+                break
+        fi
+done

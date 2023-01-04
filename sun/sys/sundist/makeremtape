@@ -1,0 +1,235 @@
+#! /bin/sh
+#	@(#)maketape	4.30	7/29/85
+#
+#	maketape remote-host type [sun2|sun3] [1|2|3]
+#
+cmdname=`basename $0`
+tapetype=`expr $2 : '\(..\).*'` 
+if [ "$tapetype" != "mt" -a "$tapetype" != "ar" -a "$tapetype" != "st" ]; then
+	echo ${cmdname}: missing or invalid tape type $tapetype
+	exit 2
+fi
+if [ "$4" = "3" -a "$tapetype" != ar -a "$tapetype" != st ]; then
+	echo ${cmdname}: ar or st only for tape \#3
+	exit 2
+fi
+if [ -n "$4" -a "$4" != 1 -a "$4" != 2 -a "$4" != 3 ]; then
+	echo ${cmdname}: invalid partial maketape specified $4
+	exit 2
+fi
+if [ `whoami` != root ]; then
+	echo ${cmdname}: must be run as root
+	exit 2
+fi
+#
+miniroot=xy2a
+case "$2" in
+    "mt" | "ar" | "xt" | "st" )
+	tape=/dev/nr${2}0 ;;
+    * )
+	tape=/dev/nr${2} ;;
+esac
+rootfs=xy2d
+usrfs=xy2f
+if [ -z "$3" ]
+then pagesize=2k
+else	
+case "$3" in
+    "sun2" )
+	pagesize=2k ;;
+    "sun3" )
+	pagesize=8k ;;
+    * )
+	pagesize=2k ;;
+esac
+fi
+minblksize=512
+minirootsize=6144
+#
+exclude_dir="/usr/src/sun/sys/dist/exclude.lists"
+root_exclude_flags="XXX"
+root_exclude_list="$exclude_dir/root.diag $exclude_dir/root.fortran \
+$exclude_dir/lost.found"
+usr_exclude_flags="XXXXXXXXXXXXXX"
+#
+# put fortran first so that it is next to root.fortran on tape
+#
+usr_exclude_list="\
+$exclude_dir/usr.fortran $exclude_dir/usr.diag $exclude_dir/usr.demo \
+$exclude_dir/usr.games $exclude_dir/usr.graphics $exclude_dir/usr.man \
+$exclude_dir/usr.news $exclude_dir/usr.pascal $exclude_dir/usr.profiled \
+$exclude_dir/usr.src $exclude_dir/usr.sunwindows $exclude_dir/usr.uucp \
+$exclude_dir/usr.vtroff $exclude_dir/lost.found"
+#
+if [ "$tapetype" = "ar" -o "$tapetype" = "st" ]; then
+	bs=200
+else
+	bs=20
+fi
+set -x
+#
+date
+#umount /dev/${usrfs}
+#umount /dev/${rootfs}
+#mount /dev/${rootfs} /proto
+#mount /dev/${usrfs} /proto/usr
+mount ${1}:/proto /proto
+mount ${1}:/proto/usr /proto/usr
+sync
+#
+if [ -z "$4" -o "$4" = 1 ]; then
+	mt -f $tape rew
+	cd /sys/dist
+	echo "Build 1st level boot block files"
+	: Tpboot is raw program image, with no a.out header
+	dd if=../sunstand/tpboot of=$tape bs=$pagesize conv=sync
+	: Copy 413 files to tape
+	: a.out header must be a separate record, of minblksize size
+	: program text must start with next record
+	file=/proto/stand/diag
+ 	tapefile $file
+	case $? in
+	  16 | 32 )
+	    pagesize=8k
+	    skip=1
+	    ibs=32 ;;
+	  0 | 1 )
+	    skip=1
+	    pagesize=2k
+	    ibs=32 ;;
+	  2 )
+	    skip=1
+	    pagesize=2k
+	    ibs=$pagesize ;;
+	  18 | 34 )
+	    skip=0
+	    pagesize=8k
+	    ibs=32 ;;
+	  17 | 33 )
+	    echo "Warning: NMAGIC files cannot be executed from tape"
+	    pagesize=8k
+	    skip=1
+	    ibs=32 ;;
+	  * )
+	    echo "Diag not an executable file"
+	    exit -1 ;;
+	esac
+	dd if=$file of=hold.file ibs=$ibs obs=$pagesize skip=$skip
+	(dd if=$file bs=$minblksize count=1 conv=sync; \
+	   dd if=hold.file bs=$pagesize conv=sync) > $tape
+
+	file=../stand/copy
+ 	tapefile $file
+	case $? in
+	  16 | 32 )
+	    pagesize=8k
+	    skip=1
+	    ibs=32 ;;
+	  0 | 1 )
+	    skip=1
+	    pagesize=2k
+	    ibs=32 ;;
+	  2 )
+	    skip=1
+	    pagesize=2k
+	    ibs=$pagesize ;;
+	  18 | 34 )
+	    skip=0
+	    pagesize=8k
+	    ibs=32 ;;
+	  17 | 33 )
+	    echo "Warning: NMAGIC files cannot be executed from tape"
+	    pagesize=8k
+	    skip=1
+	    ibs=32 ;;
+	  * )
+	    echo "Copy not an executable file"
+	    exit -1 ;;
+	esac
+	dd if=$file of=hold.file ibs=$ibs obs=$pagesize skip=$skip
+	(dd if=$file bs=$minblksize count=1 conv=sync; \
+	   dd if=hold.file bs=$pagesize conv=sync) > $tape
+	rm hold.file
+
+	echo "Add dump of mini-root file system"
+	rsh ${1} "dd if=/dev/${miniroot} bs=1b count=$minirootsize" | \
+	dd of=$tape ibs=1b obs=${bs}b count=$minirootsize
+#	dd if=/dev/${miniroot} of=$tape ibs=1b obs=${bs}b count=$minirootsize
+	dd if=Copyright of=$tape conv=sync
+	echo "Add tar image of real file system"
+	: unmount /proto/usr so that we can tar root without recursively
+	: descending into any of the directories on /proto/usr
+	umount /proto/usr
+#	umount /dev/${usrfs}
+	cd /proto
+	tar crvfb$root_exclude_flags $tape $bs $root_exclude_list .
+	mount ${1}:/proto/usr /proto/usr
+	cd /proto/usr
+	echo "Add tar image of /usr/{man, demo, games}"
+	tar crvfb $tape $bs `cat $exclude_dir/usr.man` 
+	tar crvfb $tape $bs `cat $exclude_dir/usr.demo` 
+	tar crvfb $tape $bs `cat $exclude_dir/usr.games` 
+	cd /sys/dist
+	dd if=Copyright of=$tape conv=sync
+	if [ `expr $2 : '\(..\).*'` = "mt" ]; then
+		cd /sys/dist
+		dd if=Copyright of=$tape conv=sync
+		echo "Add tar image of /usr"
+		cd /proto/usr
+		tar crvfb$usr_exclude_flags $tape $bs $usr_exclude_list .
+		cd /sys/dist
+		dd if=Copyright of=$tape conv=sync
+	fi
+	mt -f $tape rew
+	echo "Completed tape #1, remove tape"
+fi
+#
+if [ \( "$tapetype" = "ar" -o "$tapetype" = "st" \) -a \( -z "$4" -o "$4" = "2" \) ]; then
+	if [ -z "$4" ]; then
+		echo "load new tape, press RETURN"
+		read x
+	fi
+	mt -f $tape rew
+	cd /sys/dist
+	dd if=Copyright of=$tape conv=sync
+	echo "Add tar image of /usr"
+	cd /proto/usr
+	tar crvfb$usr_exclude_flags $tape $bs $usr_exclude_list .
+	cd /sys/dist
+	dd if=Copyright of=$tape conv=sync
+	mt -f $tape rew
+	echo "Completed tape #2, remove tape"
+fi
+#
+if [ -z "$4" -o  \( `expr $2 : '\(..\).*'` = "mt" -a "$4" = "2" \) \
+	 -o "$4" = "3" ]; then
+	if [ -z "$4" ]; then
+		echo "load new tape, press RETURN"
+		read x
+	fi
+	mt -f $tape rew
+	cd /sys/dist
+	dd if=Copyright of=$tape conv=sync
+	echo "Add tar image of various software categories"
+	cd /proto
+	for i in $root_exclude_list; do
+		if [ "$i" = "$exclude_dir/lost.found" ]; then
+			continue
+		fi
+		tar crvfb $tape $bs `cat $i`
+	done
+	cd /proto/usr
+	for i in $usr_exclude_list; do
+		if [ "$i" = "$exclude_dir/usr.man" -o \
+		     "$i" = "$exclude_dir/usr.demo" -o \
+		     "$i" = "$exclude_dir/usr.games" -o \
+		     "$i" = "$exclude_dir/lost.found" ]; then
+			continue
+		fi
+		tar crvfb $tape $bs `cat $i`
+	done
+	cd /sys/dist
+	dd if=Copyright of=$tape conv=sync
+	mt -f $tape rew
+	echo "Completed tape #3, remove tape"
+fi

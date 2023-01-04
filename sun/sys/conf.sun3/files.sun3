@@ -1,0 +1,109 @@
+pixrect/bw1_colormap.c	optional bwone win not-supported
+pixrect/bw1_rop.c	optional bwone win not-supported
+pixrect/cg1_colormap.c	optional cgone win not-supported
+pixrect/cg1_rop.c	optional cgone win not-supported
+pixrect/cg2_colormap.c	optional cgtwo win device-driver
+pixrect/cg2_rop.c	optional cgtwo win device-driver
+pixrect/cg4_colormap.c	optional cgfour device-driver
+pixrect/gp1_colormap.c	optional gpone win device-driver
+pixrect/gp1_kern_sync.s	optional gpone win device-driver
+pixrect/gp1_rop.c	optional gpone win device-driver
+pixrect/mem_colormap.c	optional win device-driver
+pixrect/mem_kern.c	optional win device-driver
+pixrect/mem_prs.c	optional win device-driver
+pixrect/mem_rop.c	optional win device-driver
+pixrect/pr_clip.c	optional win device-driver
+pixrect/pr_planegroups.c optional win device-driver
+pixrect/pr_reverse.c	optional win device-driver
+pixrect/pr_dblbuf.c	optional win device-driver
+sun/addupc.s		standard
+sun/conf.c		standard
+sun/cons.c		standard
+sun/consfb.c		standard device-driver
+sun/conskbd.c		standard
+sun/consms.c		optional ms
+sun/dkbad.c		standard
+sun/in_cksum.c		optional INET
+sun/mcount.s		optional profiling-routine
+sun/movc.s		standard
+sun/ocsum.s		standard
+sun/probe.c		standard
+sun/setjmp.s		standard
+sun/ufs_machdep.c	standard
+sun/ufs_nd.c		optional nd
+sun3/autoconf.c		standard device-driver
+sun3/clock.c		standard device-driver
+sun3/dbx_machdep.c	optional dbx symbolic-info
+sun3/kprof.s		optional profiling-routine
+sun3/locore.s		standard special
+sun3/machdep.c		standard
+sun3/map.s		standard
+sun3/mem.c		standard
+sun3/scb.s		standard
+sun3/trap.c		standard
+sun3/vax.s		standard
+sun3/vm_machdep.c	standard
+sundev/ar.c		optional ar not-supported
+sundev/bwone.c		optional bwone not-supported
+sundev/bwtwo.c		optional bwtwo device-driver
+sundev/cgone.c		optional cgone not-supported
+sundev/cgtwo.c		optional cgtwo device-driver
+sundev/cgfour.c		optional cgfour device-driver
+sundev/dbx_sundev.c	optional dbx symbolic-info
+sundev/des.c		optional des device-driver
+sundev/fbutil.c		optional win device-driver
+sundev/fpa.c		optional fpa device-driver
+sundev/gpone.c		optional gpone device-driver
+sundev/ip.c		optional ip not-supported
+sundev/kbd.c		optional kb
+sundev/keytables.c	optional kb
+sundev/kg.c		optional kg device-driver
+sundev/mb.c		standard device-driver
+sundev/ms.c		optional ms 
+sundev/mti.c		optional mti device-driver
+sundev/mti_conf.c	optional mti device-driver
+sundev/pc.c		optional pc device-driver
+sundev/pc_conf.c	optional pc device-driver
+sundev/pi.c		optional pi not-supported
+sundev/ropc.c		optional ropc not-supported
+sundev/sc.c		optional sc device-driver
+sundev/sc_conf.c	standard device-driver
+sundev/sd.c		optional sd device-driver
+sundev/sf.c		optional sf device-driver
+sundev/si.c		optional si device-driver
+sundev/sky.c		optional sky not-supported
+sundev/st.c		optional st device-driver
+sundev/tm.c		optional mt device-driver
+sundev/tod.c		optional tod not-supported
+sundev/vp.c		optional vp device-driver
+sundev/vpc.c		optional vpc device-driver
+sundev/vuid_queue.c	optional kb
+sundev/vuid_store.c	optional win device-driver
+sundev/xt.c		optional xt device-driver
+sundev/xy.c		optional xy device-driver
+sundev/xy_conf.c	optional xy device-driver
+sundev/zs_asm.s		optional zs device-driver
+sundev/zs_async.c	optional zs device-driver
+sundev/zs_common.c	optional zs device-driver
+sundev/zs_proto.c	optional zs device-driver
+sunif/dbx_sunif.c	optional dbx INET symbolic-info
+sunif/if_ec.c		optional ec INET device-driver
+sunif/if_en.c		optional en INET device-driver
+sunif/if_ie.c		optional ie INET device-driver
+sunif/if_le.c		optional le INET device-driver
+sunif/if_me.c		optional pc INET device-driver
+sunif/if_subr.c		optional ether INET
+sunwindow/rect.c	optional win device-driver
+sunwindow/rectlist.c	optional win device-driver
+sunwindowdev/dtopnub.c	optional dtop device-driver
+sunwindowdev/win.c	optional win device-driver
+sunwindowdev/win_syscall.c	optional win device-driver
+sunwindowdev/wincms.c	optional win device-driver
+sunwindowdev/windt.c	optional win device-driver
+sunwindowdev/winioctl.c	optional win device-driver
+sunwindowdev/winlock.c	optional win device-driver
+sunwindowdev/winshared.c	optional win device-driver
+sunwindowdev/wintree.c	optional win device-driver
+sunwindowdev/ws.c	optional dtop device-driver
+sunwindowdev/ws_dispense.c	optional win device-driver
+sunwindowdev/ws_interrupt.c	optional win device-driver

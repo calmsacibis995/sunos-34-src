@@ -1,0 +1,790 @@
+.\" static char     sccsid[] = "@(#)vmad.diag.msun 1.1 9/25/86 Copyright Sun Micro";
+.\" @(#) usrtemplate.msun 1.2 3/21/85
+.\" 
+.\" USER'S DOCUMENT Template for the Diagnostic Department. 
+.\" 
+.\" Comment lines begin with .\" and are ignored by the formaters.
+.\" 
+.\" Instruction lines begin with .\" I: and may require input. 
+.\" 
+.\" ******************** beginning of Title Page ***********************
+.LP
+.B
+.ps 14
+.nf
+S U N  Microsystems
+.sp 16
+.ce 100
+.ps 20
+.\"
+.\" I: The Major Title of the document is to replace "Major Title" 
+.\" I: below.  If the Major Title requires two lines, (1) follow the 
+.\" I: first line of the title with a line containing ".sp 2" and (2) 
+.\" I: another line containing the second line of the title.
+.\"
+Sun-2 VME-Multibus Adapter Board Diagnostic
+.sp 3
+.ps 20
+User's Document
+.sp 14
+.ps 14
+.\"
+.\" I: The author's name is to replace "Author" below.  If there are
+.\" I: multiple authors, for each additional author, (1) add a line 
+.\" I: containing ".sp 1" (2) followed by a line containing the 
+.\" I: author's name.  Be aware that if there are many authors, the 
+.\" I: title page may become the title pageS.  Therefore, the title 
+.\" I: page may need to be reformatted.
+.\"
+Reza Rahsaz
+.sp 2
+\*(DY
+.sp 2
+.\"
+.\" I: The appropriate revision letter replaces "A" below.
+.\"
+Revision A
+.ce 0
+.fi
+.\" *********************** end of Title Page **************************
+.\" 
+.\" 
+.\" ******************** beginning of document *************************
+.R
+.bp 1
+.ps 12
+.\"
+.\" I: The Major Title of the document is to replace "Major Title" in 
+.\" I: the two lines below.
+.\"
+.EH 'S U N  Microsystems''Sun-2 VME-Multibus Adapter Board Diagnostic'
+.OH 'S U N  Microsystems''Sun-2 VME-Multibus Adapter Board Diagnostic'
+.\" 
+.\" I: The appropriate revision letter replaces "A" in the two lines 
+.\" I: below.
+.\" 
+.EF '\*(DY'Revision A'page \\\\n(PN'
+.OF '\*(DY'Revision A'page \\\\n(PN'
+.P1
+.H 1 "Preface"
+.PP
+.\" 
+.\" I: A brief description of the contents of the document replaces
+.\" I: "Preface" below.  The Preface can take on the form of a 
+.\" I: restatement and/or clarification of the title of the document.
+.\" I: For example:
+.\"         The User's Document associated with the Sun-2/120' Video
+.\"     Board Diagnostic is presented.
+.\"
+This document presents the Sun-2 VME-Multibus Adapter Board Diagnostic.
+.H 2 "Purpose"
+.PP
+.\" 
+.\" I: The purpose of the document replaces "Purpose" below.  What 
+.\" I: knowledge will the reader gain by reading this document?
+.\" I: For example:
+.\"         It is the intention of this document to inform the reader
+.\"    how to use the Sun-2/120' Video Board Diagnostic.
+.\"
+It is the intention of this document to give the user the knowledge
+of how to use the diagnostic to test and debug the VME-Multibus Adapter boards.
+.H 2 "Audience"
+.PP
+.\" 
+.\" I: The audience replaces "Audience" below.  Who should read this 
+.\" I: document and why should they read it?  What prior knowledge, 
+.\" I: if any, is the reader assumed to have?
+.\" I: For example:
+.\"         Members of any of the following five departments may find 
+.\"    this document of interest for various reasons: (1) Design 
+.\"    Engineering, (2) Manufacturing, (3) Field Service, (4) 
+.\"    Diagnostics and (5) Documentation.  
+.\"         Using the Sun-2/120' Video Board Diagnostic, the Design 
+.\"    Engineer(s) of the Sun-2/120' Video Board will be able to confirm
+.\"    the correctness of their design.  Manufacturing and Field Service
+.\"    personnel will use the Sun-2/120' Video Board Diagnostic for 
+.\"    testing and/or trouble shooting purposes.  Member(s) of the 
+.\"    Diagnostic department will review the design of the Sun-2/120' 
+.\"    Video Board Diagnostic based on this document.  Finally, 
+.\"    Documentation will use this document as a basis for developing 
+.\"    the User's Guide which will be shipped with the product itself.
+.\"         At a minimum, the reader is assumed to have some 
+.\"    understanding of the function of the Sun-2/120' Video Board.  An
+.\"    excellent preface to this document is "Theory of Operation 
+.\"    Manual for the Sun-2/120' Video Board". 
+.\"
+Members of any of the following four departments may find
+this document of interest for various reasons: (1) Manufacturing, (2)
+Field Service, (3) Diagnostics and (4) Documentation.
+.PP
+Manufacturing and Field Service personnel will use the Sun-2 
+VME-Multibus Adapter diagnostic for testing and/or trouble shooting purposes.
+Member(s) of the Diagnostic department will review the design of this
+diagnostic based on this document. Finally, Documentation will use this
+document as a basis for developing the User's Guide which will be shipped 
+with the product itself.
+.PP
+The reader of this document assumed to have some knowledge of 
+understanding Sun-2 VME-Multibus Adapter Board, and SCSI board together
+with a general knowledge of Sun-2/160, and/or Sun-2/50 machines. The user
+is strongly adviced to review the Engineering Manual for the Sun-2 VME-
+Multibus Adapter Board and related sources.
+.H 1 "Revision History"
+.LP
+.\"
+.\" I: The appropriate date (MDY form) replaces "Month Day, Year" below.
+.\" I: If this is the first release of the document, replace 
+.\" I: "Month Day, Year" below with \*(DY and the date will 
+.\" I: automatically be added.  "Initial release of this document" can 
+.\" I: be replaced if so desired.
+.\"
+Revision A     \*(DY		Initial release of this document.
+.\"
+.\" I: For each additional revision, (1) add a line containing ".LP".
+.\" I: Then, (2) add a line containing "Revision x     MD,Y     Comment"
+.\" I: where "x" is replaced by the appropriate revision letter 
+.\" I: (B,C,D,...), "MD,Y" is replaced by the appropriate date and
+.\" I: "Comment" is replaced by a brief comment indicating what changes
+.\" I: were made in the revision.
+.\" I: SUGGESTION: Put the entries in alphabetical order by revision.
+.\" I: For example:
+.\"    .LP
+.\"    Revision B     November 9, 1984     Reorganized the document.
+.\"
+.H 1 "Glossary"
+.PP
+The term \fIstation\fR and \fImachine\fR denotes a Sun-2 50/160 work station.
+.PP
+The term \fITester Board\fR is used for  the Modified Sun SCSI Board.
+.PP
+The term \fIProgram\fR, \fIDiagnostic\fR means the VME-Multibus Adapter Diagnostic.
+.\"
+.\" I: For each term, (1) add a line containing ".LP".  Then (2)
+.\" I: add a line containing "term  -  definition of term" where "term"
+.\" I: is replaced by the appropriate to-be-defined term and 
+.\" I: "definition of term" is replaced by the definition of the term. 
+.\" I: SUGGESTION: Put the terms in alphabetical order.
+.\" I: For example:
+.\"    .LP
+.\"    FRU  -  Field Replaceable Unit.
+.\"
+.bp
+.H 1 "Introduction"
+.PP
+.\"
+.\" I: The Introduction section is to replace "Introduction" below.
+.\" I: The Introduction will introduce the "tool" that this User's 
+.\" I: Document is being written for.  That is, state the name of the 
+.\" I: "tool" and briefly state what its function will be.  This is also 
+.\" I: the appropriate place to state the history of the project itself 
+.\" I: if you should desire.  Each paragraph is to be preceded by a line
+.\" I:  containing ".PP".
+.\"
+The VME-Multibus Adapter Board Diagnostic is a tool to test 
+the functionality of the VME-Multibus Adapter Board and debug if it is
+necessary. All functions of the board are tested through the use of the
+Tester Board. By including easy to use scope tests, the user will be 
+able to locate any problems.
+.H 1 "Requirements"
+.PP
+The VME-Multibus Adapter Diagnostic runs on SUN-2 50/160 machines.
+.H 2 "Hardware Requirements"
+.PP
+The following is the list of components required to run the
+diagnostic:
+.br
+A test station containing:
+.(l
+   - either a Model 50 or 160 Sun Workstation
+   - a modified SCSI board(tester board)
+   - a means of booting the diagnostic, and
+   - a monitor.
+.)l
+.br
+The monitor may either be a ``\fIdumb terminal\fR'' or a Sun monitor,
+video board, and keyboard.
+.\".H 2 "Software Requirements"
+.\".PP
+.\".H 2 "Firmware Requirements"
+.\".PP
+.H 1 "General Information"
+.PP
+This Diagnostic will not run on sun-2/100/120, or any other Sun Work Station
+that does not support VME Bus. Before plugging the VME-Multibus adapter
+and Tester Board, make sure that all switch settings on both boards
+are correct. Refer to the switch setting sheet at the end of this manual.
+.H 2 "Hardware-Related Information"
+.PP
+There are 12 DIP switches on the VME-Multibus Adapter Board. DIP 9, and 10 
+are not used. Note that if the 
+Interrupt Vector PROM is installed on the board, all the switch sections
+in DIP 12 must be set to OFF. For a more detailled explanation about switches, 
+please refer to ''\fIEngineering Manual for the Sun-2 VME-Multibus adapter
+Board\fR''.
+.PP
+.H 2 "Software-Related Information"
+The VME-Multibus Adapter Diagnostic is a stand-alone program and
+will not run under Unix. For accurate result, do a hardware reset(K2) or
+power off and on before booting the diagnostic.
+.PP
+.H 1 "Operating Instructions"
+.PP
+Configure your station as explained above and follow the steps
+in the next section.
+.H 2 "Loading And Starting"
+.br
+	>K2
+.br
+	>boot stand/vmad.diag
+.sp
+.sp
+For a detailed explanation on boot procedure from different devices, refer
+to \fI"Sun Workstation CPU PROM Monitor"\fR manual.
+.H 2 "User Interface"
+The VME-Multibus Adapter Diagnostic is user friendly and gives the user 
+ultimate control over the test. It is totally menu driven and the menus 
+are present on the screen from the beginning of the test until the end.
+It manages the screen
+efficiently, so that there is no screen roll-over or any messages on 
+the screen that
+are not relevant at the time. In case of some scope loops, the menu is 
+taken away for user convenience in analyzing the problem. As soon as the user
+is done with such a scope loop, the screen will be redrawn and the test can
+be continued.
+.pp
+Throughout the test, the user has the option of using the special
+control keys to stop or pause the normal process.
+These special keys will be on the top right hand corner of the screen.
+The special keys and their actions are:
+.br
+    KEY                  ACTION
+.br
+  _________            ______________________
+.br
+  CONTROL C       abort the current test and go back to menu
+.br
+  CONTROL S       stop looping
+.br
+  CONTROL Q       continue looping
+.br
+  CONTROL X       quit program
+.br
+  CONTROL F       turn on/off help option
+.sp
+.PP
+If the help option is turned on, the program will print a brief explanation of
+each test as it is being executed. The "help" option is available in manual and
+debug mode.
+.PP
+The user interface will inform the user of what is going on at any given time.
+It tells what mode is active, what test or loop test is being executed,
+and prints the loop number.
+.PP
+In the case of an error it prints the error message and other useful
+information such as expected and erroneous conditions. 
+.bp
+.PP
+There are three menus, MODE, TEST, and DEBUG. Each time the user will be asked
+to choose a selection out of these menus by the phrase 
+\fI"which one ?"\fR on the screen. The Mode Menu is:
+.br
+.sp2
+
+	Mode Menu
+.br
+     0 -- Automatic
+.br
+     1 -- Manual
+.br
+     2 -- Debug
+.br
+.sp2
+If mode 0 (Automatic) is chosen, the test will continue executing all tests
+in the menu. If the test fails, it prints \fI"the test failed"\fR and an error message, then 
+returns back to the Mode Menu for another selection. If the test passed,
+it prints the \fI"VME ADAPTER DIAGNOSTIC COMPLETED...NO ERROR"\fR message and asks the user if she/he wants to
+run again and the number of times to run. If the user chooses to not run the test
+again the diagnostic will exit.
+.PP
+If mode 1 (Manual) is selected, the Test Menu will appear on the screen
+and the user is asked for a test selection. The Test Menu consists of seven
+tests. After the selection, the program prompts \fI"enter the number of times
+to run"\fR. Then the diagnostic starts executing that test and prints the loop number.
+At the end, a message \fI"test passed"\fR or \fI"test failed"\fR will be printed
+if the test was or was not successful.
+.br
+The Test Menu looks like the following:
+.br
+.sp2
+        Test Menu
+.br
+     0 -- Time Out 
+.br
+     1 -- Data Path
+.br
+     2 -- Bus Arbitration
+.br
+     3 -- Interrupt
+.br
+     4 -- Byte DMA
+.br
+     5 -- Word DMA
+.br
+     6 -- All
+.br
+.sp2
+.pp
+After a test is done it returns to the same level menu and asks for a 
+selection again. The user can go back to Mode Menu by hitting the
+RETURN key while the program is prompting \fI"which one ?"\fR. 
+.PP
+If mode 2 (Debug) is selected, the program will print the Debug Menu on
+the screen and ask for a selection. the Debug Menu consists of seven 
+useful scope loops for debugging the board. The scope tests will run
+forever and can be stopped by one of the control keys mentioned 
+above. The Debug Menu is given below.
+.br
+.sp2
+        Debug Menu
+.br
+     0 -- Probe Board
+.br
+     1 -- Reset Board
+.br
+     2 -- Interrupt
+.br
+     3 -- DMA Write
+.br
+     4 -- DMA Read
+.br
+     5 -- Verify Data Reg
+.br
+     6 -- Verify Count Reg
+.PP
+An example of the screen display when the user has chosen manual mode
+is shown below:
+.sp1
+.TS
+center doublebox tab(#);
+c s s
+lp9 lp9 lp9
+c 
+c
+c c  c
+c s s.
+SUN's VME-MULTIBUS ADAPTER Board Diagnostic  Rev 1.1 6/18/85
+T{
+        Mode Menu
+.br
+     0 -- Automatic
+.br
+     1 -- Manual
+.br
+     2 -- Debug
+T}#T{
+        Test Menu
+.br
+     0 -- Time Out
+.br
+     1 -- Data Path
+.br
+     2 -- Bus Arbitration
+.br
+     3 -- Interrupt
+.br
+     4 -- Byte DMA
+.br
+     5 -- Word DMA
+.br
+     6 -- All
+.sp
+.br
+      Which one ?
+T}#T{
+        Special Keys:
+.br
+     ^C abort test
+.br
+     ^S stop  loop
+.br
+     ^Q continue
+.br
+     ^X quit program
+.br
+     ^F on/off help
+T}
+.sp3
+YOU ARE RUNNING::
+.br
+  MANUAL mode:
+.sp1
+    #    #Help option is off
+*********************** MESSAGE AREA **********************
+.sp4
+.TE
+.sp2
+.PP
+.H 3 "Command Line"
+The only commands to the program are through the use of control keys which 
+will tell the program to take some action. In fact there is no
+command line for this program. All inputs to the program are given by 
+answering to the questions that the program asks from the user. If the input 
+from the user is incorrect, a message indicating this fact will be printed and
+it asks the question again.
+.PP
+.H 3 "Modes"
+There are three modes available to operate the VME-Multibus Adapter 
+Diagnostic. Automatic, Manual, and Debug modes will give the user the ability 
+of running the test in a mode which is appropriate. The Automatic Mode
+is a kind of go/nogo test and could be repeated for multiple times. 
+Manual mode can help the user narrow down the problem. And finally,
+the Debug Mode is used to find the actual problem, of course, a scope
+is necessary to analyze the problem.
+.PP
+.H 3 "Parameters"
+All numbers given by the user are handled in decimal. Data patterns
+for writing into registers while running Debug Mode are treated as hex digits.
+The patterns can be any size but only 1-4 hex digits are significant.
+.PP
+.H 3 "Tools"
+The following paragraphs explain in brief the available debug tools provided
+in this diagnostic.
+.H 4 "Probe Tool"
+.PP
+This debug tool will loop on accesses the data register. The routine 
+will catch bus errors and will not time out. The user can abort this debug 
+loop by entering one of the control keys.
+.H 4 "Reset Tool"
+.PP
+This debug tool will loop on reseting the VME-multibus Adapter Board.
+Bus errors will 
+not cause the program to abort abnormally. A reset is done by writing
+a 1 to the reset bit on the control register and the register should read 
+0x100 after a successful reset. The user can stop the loop 
+by entering one of the control keys.
+.H 4 "Interrupt Tool"
+.PP
+This debug loop will continuously tries to interrupt the board. By 
+lowering the interrupt priority of the CPU, the program  makes sure that
+the interrupt actually happens. It does not check for the interrupt
+vector number of the current interrupt. This check is done in Interrupt
+Test in Manual and Automatic mode. This test is only for checking the 
+interrupt lines on the board. The 
+interrupt service routine will do nothing but return to the caller.
+The user can stop the loop by entering the control key.
+.H 4 "Byte/Word DMA Tool" 
+.PP
+This debug tool will continuously transfer the user specified number of
+bytes/words until user stops the loop with a control key. Each time it 
+will DMA the number of bytes/words and start over and over. The 
+user has the opportunity of checking the read/write DMA strobes and 
+the data/address lines as well. The data is not checked for reliability.
+This is done in the DMA Test.
+.PP
+.H 3 "Tests"
+There are six tests present in this diagnostic that could be run while
+Automatic or Manual mode is active. Each test prints the \fI"TEST PASSED"\fR
+or \fI"TEST FAILED"\fR message on the screen and returns to the same level
+menu afterward. Read the brief explanation of each test in the following
+paragraphs.
+.PP
+.H 4 "Time Out Test"
+This test checks for address lines by writing/reading the 
+data reg. The data is not checked for reliability. 
+Also, it addresses an address that is not in the range of 
+the board to check if time out occurs or not. The bus error
+handler routine is setup and exchanged with the system's so that
+the appropriate error message is reported and the program will not
+abort because of the bus error.
+.PP
+.H 4 "Data Path Test"
+This test is done by writing bit patterns to the data and 
+count registers and reading them back for comparison. All 16 bits 
+are tested for the correctness. In case of error, the error message
+will be printed and the actual, and expected values will follow.
+.PP
+.H 4 "Bus arbitration Test"
+This test writes bits in control register and reads them back to check 
+to see if right thing happens. It also resets the board and checks 
+the control register to see if it reads as 0x1100. In case of error, the user will be
+notified and the actual and expected values will also be printed.
+.PP
+.H 4 "Interrupt test"
+This test checks the functionality of the interrupt mechanism and checks 
+whether the correct interrupt vector is addressed or not. In the 
+correct case, the interrupt vector # 72 (0x48) must be addressed.
+An interrupt service routine is provided for this purpose.
+If the interrupt does not happen at all or the wrong interrupt vector
+is being addressed, an error message will indicate this matter.
+.PP
+.H 4 "Byte DMA Test"
+This routine was designed to check the DMA circuitry. First it does DMA
+in byte mode one byte with one DMA transfer and  
+checks for validity of transferred data. It 
+also checks for correct byte addressing by examining the bytes
+just before and after the transaction byte. Then if the test 
+was successful, it transfers 256 bytes in one 
+DMA transfer. In case of error, the appropriate error message will
+appear on the screen and gives the actual and expected values.
+.PP
+.H 4 "Word DMA Test"
+This test will check the DMA circuitry in word mode by writing 
+256 words of 0's to the CPU memory that has been set to 
+all 1's. All 256 words will be transferred at the same time. 
+Then it will check for values other than 0's. If the 
+test fails, the tool program could be used to try different patterns other 
+than all 0's or all 1's.
+.\".PP
+.\".H 3 "Sequencing"
+.PP
+.H 3 "Defaults"
+The following defaults are assumed when the diagnostic starts to run:
+.br
+       The help option is set off,
+.br
+       When it is asking for a selection, a RETURN by itself, will pop up the menu,
+.br
+       All numbers given by the user must be in decimal,
+.br
+       All patterns given by the user must be in hex.
+.PP
+.H 1 "Error Handling"
+The VME-Multibus Adapter Diagnostic was designed to catch all possible
+errors that might occur during the test. System bus error and timeout
+errors also are honored and the appropriate error message will notify
+the user of errors. The program will stay alive after the error
+condition and be ready to process other selections. The error messages are
+self explanatory. All error messages 
+will display the error and the actual and expected values if applicable.
+.PP
+.H 2 "Error Messages "
+The following are the list of error messages that will be displayed during the
+test. In these messages 'T' is the name of the particular test, and 'X' is a
+hex value.
+.sp
+ * bus err occured while testing 'T'
+.sp
+ * dma time out occured while testing dma
+.br
+ the DMA count reg read 'X'      should read 'X'
+.br
+ the DMA address reg is 'X'
+.sp
+ * reset board failed
+.br
+ the control reg reads 'X'      should read 'X'
+.sp
+ * intr signal is not passed to adapter board
+.br
+ the control reg reads 'X'
+.sp
+ * wrong intr vector is used
+.br
+ the interrupt vector 'X'  must be used, check DIP 12
+.sp
+ * data miss compare
+.br
+ wrote 'X' to reg         read back 'X'
+.sp
+ * byte packing error occurred during dma transfer
+.br
+ the incorrect byte address was passed by the adapter
+.PP
+.H 2 "Failure Analysis"
+The easy to use debug(scope loop) tools give the user the chance to analyze 
+the failure in an efficient way. These tools will loop on the problem
+forever unless stopped or aborted by the user. The program will continue
+after the user chooses to abort the scope loop, therefore eliminating
+the need to reload the diagnostic after scope loops.
+.\".PP
+.\".H 2 "Field Replaceable Units"
+.PP
+.H 1 "Recommended Test Procedure"
+The recommended test flow is as follows: 
+.br
+	a - Setup the required hardware  
+.br
+	b - Insert VME-Multibus Adapter Board and Tester board in machine
+.br
+	c - Power on the machine
+.br
+	d - Boot the VME-Multibuss Adapter Diagnostic
+.br
+	e - Select Automatic mode
+.br
+	f - If the test passed go to step k
+.br
+	g - Select Manual mode and run the failed test several times
+.br
+	h - Select Debug mode and run the appropriate tool to analyze 
+.br
+	    the failure.
+.br
+	i - Stop the loop and select other scope loops until you find
+.br
+	    the cause of the failure
+.br
+	j - Go to step l
+.br
+	k - Run the test 5 times
+.br
+	l - Abort the program by ^x (CONTROL X)
+.br
+	m - Power off the machine
+.br
+	n - Go to step b, if more boards to test.
+.\".PP
+.\".H 1 "Future Considerations"
+.H 1 "Summary"
+The VME-Multibus Adapter Diagnostic is a stand-alone, bootable-over
+the-net-program used for testing and troubleshooting of Sun-2 
+VME-Multibus Adapter Boards. It runs in all Sun-2 machines utilizing
+VME bus. The program is user friendly and easy to operate. It is
+menu driven and manages the screen in an attractive way so that the
+operator will not get tired of running the test numerous times. It
+gives the option of controlling the process and provides the user
+with self explanatory messages. Finally, it tests all aspects of the
+board for efficient testing.
+.PP
+.\"
+.\" I: A brief Summary of the document is to replace "Summary" below.
+.\"
+.H 1 "References"
+.\"
+.\" I: For each reference, (1) add a line containing ".LP".  Then (2)
+.\" I: add a line containing "title, Revision x, MD,Y, author." where
+.\" I: "title" is replaced by the title of the referenced document,
+.\" I: "x" is replaced by the appropriate revision of the document,
+.\" I: "MD,Y" is replaced by the date when the document was released and
+.\" I: "author" is replaced by the author of the document (if known).
+.\" I: SUGGESTION: Put the entries in alphabetical order by title.
+.\" I: For example:
+.\"    .LP
+.\"    Theory of Operation Manual for the Sun-2/120' Video Board, 
+.\"    Revision A, September 26, 1984.
+.\"
+.\" ********************** end of document *****************************
+.LP
+MC68000, 16/32-Bit Microprocessor Programmer's Reference Manual,
+Fourth edition.
+.LP
+Engineering Manual for the Sun-2 VME-Multibus Adapter Board,
+Revision 50, April 1, 1985.
+.LP
+How to Test VME-Multibus Adapter Board, by Mitch Bradley.
+.LP
+Sun SCSI Programmers' Manual, by Mitch Bradley
+April 4, 1984.
+.bp
+.H 1 "Switch Setting Worksheet"
+.PP
+DIP6
+.TS
+tab(%);
+lllllllll
+rrrrrrrrr.
+	%1%2%3%4%5%6%7%8
+	%ON%ON%OFF%OFF%OFF%OFF%OFF%OFF
+.TE
+.PP
+DIP8
+.TS
+tab(%);
+lllllllll
+rrrrrrrrr.
+	%1%2%3%4%5%6%7%8
+	%ON%ON%ON%ON%ON%ON%ON%ON
+.TE	
+.PP
+DIP5
+.TS
+tab(%);
+lllllllll
+rrrrrrrrr.
+        %1%2%3%4%5%6%7%8
+	%ON%ON%OFF%OFF%OFF%OFF%OFF%OFF
+.TE
+.PP
+DIP7
+.TS
+tab(%);
+lllllllll
+rrrrrrrrr.
+        %1%2%3%4%5%6%7%8
+	%ON%ON%OFF%ON%OFF%ON%ON%ON
+.TE
+.PP
+DIP2
+.TS
+tab(%);
+lllllllll
+rrrrrrrrr.
+        %1%2%3%4%5%6%7%8
+	%OFF%OFF%OFF%OFF%OFF%OFF%OFF%OFF
+.TE
+.PP 
+DIP4 
+.TS 
+tab(%); 
+lllllllll 
+rrrrrrrrr. 
+        %1%2%3%4%5%6%7%8 
+        %OFF%OFF%OFF%OFF%OFF%OFF%OFF%OFF
+.TE
+.PP
+DIP1
+.TS
+tab(%);
+lllllllll
+rrrrrrrrr.
+        %1%2%3%4%5%6%7%8        
+        %ON%ON%ON%ON%ON%ON%ON%ON       
+.TE
+.PP
+DIP3
+.TS
+tab(%);
+lllllllll
+rrrrrrrrr.
+        %1%2%3%4%5%6%7%8        
+        %ON%ON%ON%ON%ON%ON%ON%ON       
+.TE
+.PP 
+DIP11 
+.TS 
+tab(%); 
+lllllllll 
+rrrrrrrrr. 
+        %1%2%3%4%5%6%7%8 
+        %OFF%OFF%OFF%OFF%X%X%X%X 
+.TE
+.PP 
+DIP12 
+.TS 
+tab(%); 
+lllllllll 
+rrrrrrrrr. 
+        %1%2%3%4%5%6%7%8
+	%ON%ON%ON%OFF%ON%ON%OFF%ON
+.TE
+.bp
+The 'X' means don't care. The switch setting mentioned, will set the:
+.br
+        memory space size  to  16k
+.br
+        memory base address to 0x280000
+.br
+        No Multibus I/O Space
+.br
+        20-bit Multibus DMA addressing
+.br
+        Interrupt Vector to 0x48
+.sp2
+.PP
+Set the three switches on the Tester Board(Modified SCSI) as follow:
+.br
+	U305    6 ON, all others OFF
+.br
+	U315    2 ON, all others OFF
+.br
+	U312    6 ON, all others OFF

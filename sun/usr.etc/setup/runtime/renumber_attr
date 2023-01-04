@@ -1,0 +1,29 @@
+#! /bin/sh
+
+#
+# @(#)renumber_attr 1.1 86/09/25
+#
+# automatically assign numbers to lines of the form: 
+#               name = SETUP_ATTR(type, N),
+#
+# reads from stdin, writes to stdout
+#
+ 
+TMP=/tmp/renumber$$
+HEAD="X\([ 	]*[a-zA-Z_]*[ 	]*=[ 	]*SETUP_ATTR([a-zA-Z_]*,[ 	]*\)"
+TAIL="X[ 	]*[a-zA-Z_]*[ 	]*=[ 	]*SETUP_ATTR([a-zA-Z_]*,[ 	]*[0-9]*\(.*\)\\Y"
+CNT=1 
+
+sed 's/\(.*\)/X\1\\Y/' > ${TMP}
+
+while read LINE; do
+        HEADLINE=`expr match "${LINE}" "${HEAD}"`
+        if [ -z "${HEADLINE}" ]; then 
+		expr match "${LINE}" "X\(.*\)\\Y"
+        else 
+                TAILINE=`expr match "${LINE}" "${TAIL}"`
+                echo "${HEADLINE}${CNT}${TAILINE}" 
+                CNT=`expr ${CNT} + 1` 
+        fi 
+done < ${TMP}
+rm ${TMP}

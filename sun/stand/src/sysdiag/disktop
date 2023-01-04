@@ -1,0 +1,371 @@
+#! /bin/csh -f
+#
+#       @(#)disktop 1.1 9/25/86 Copyright 1985 Sun Micro
+#
+#
+set mode
+onintr finit1
+set path=($path $SYSDIAG_DIRECTORY)
+@ pass = 1
+@ errors = 0
+@ error_limit = 5
+set test_args
+set shoebox
+if ($?SHOEBOX_TEST) set shoebox = "shoebox "
+
+if ($?RUN_ON_ERROR) then
+  if ($RUN_ON_ERROR == enabled) then
+     set run_on_error
+  endif
+endif
+foreach arg ($argv)
+  if ($arg == auto || $arg == select || $arg == verify || $arg == clean || $arg == list) then
+    set mode = $arg
+  else if ($arg == test) then
+    set testing
+  else if ($arg == cf) then
+    set make_core_file
+  else 
+    set test_args = ($test_args $arg)
+  endif
+  if ($arg == d) set debug
+  if ($arg == re) set run_on_error
+end
+
+if ($mode == '') then
+  if ($?SYSDIAG_MODE) then
+    set mode = $SYSDIAG_MODE
+  endif 
+endif
+
+if (!($mode == list || $mode == clean) || $?debug) echo 'disktop: '$shoebox''$mode' mode.'
+
+if ($TERM != sun && -e $SD_LOG_DIRECTORY/disktop_selected && !($mode == list || $mode == clean)) then
+  set use_disk = (`cat $SD_LOG_DIRECTORY/disktop_selected`)
+  if ($?debug) echo Disks in select file - $use_disk
+  rm -f $SD_LOG_DIRECTORY/disktop_selected
+else
+
+  if (!($mode == list || $mode == clean) || $?debug) then
+    echo "disktop: Probing for disks ..."
+  endif
+
+  if ($?testing) then
+     set disks = (none ndp0)
+     set disks = (none ndp0 ndp0)
+     set disks = (none ndp0 nd0 ndp0)
+     set disks = (none nd0)
+  else
+    set disks= (none)
+
+    if ($?SHOEBOX_TEST) then
+#                               probe for shoebox sd's (scsi disks)
+      foreach i (1 2 3 4 5 6 7)
+        if (-e /dev/rsd${i}c) then
+#        if (-e rsd${i}c) then
+                set disks=($disks "sd${i}")
+        endif
+      end
+    else
+#                               probe for sd's (scsi disks)
+      foreach i (0 1 2 3)
+        if (-e /dev/rsd${i}c) then
+#        if (-e rsd${i}c) then
+                set disks=($disks "sd${i}")
+        endif
+      end
+#                               probe for xd's (xylogics)
+      foreach i (0 1 2 3)
+        if (-e /dev/rxd${i}c) then
+#        if (-e rxd${i}c) then
+                set disks=($disks "xd${i}")
+        endif
+      end
+#                               probe for xy's (xylogics)
+      foreach i (0 1 2 3)
+        if (-e /dev/rxy${i}c) then
+#        if (-e rxy${i}c) then
+                set disks=($disks "xy${i}")
+        endif
+      end
+    endif #if ($?SHOEBOX_TEST)
+  endif
+
+  if ($#disks != 1) then
+    if (!($mode == list || $mode == clean) || $?debug) then
+      echo disktop: Disks found - $disks[2-$#disks]
+    endif
+  endif
+
+  if ($mode == verify) then
+      if ($#disks == 1) echo disktop: No disks found, no tests to run.
+      exit
+  else
+
+      set disks=($disks[2-$#disks])
+
+      @ n=1
+      set use_disk = "k"
+      while($n <= $#disks)
+        if ($mode == select) then
+                set r
+                while ("$r" != y && "$r" != n)
+                  echo -n "disktop: Test "$disks[$n]" ? "
+                  set k = $<
+                  set r = ($k)
+                end
+                if ($r == y) then
+                        set use_disk = ($use_disk $disks[$n])
+                endif
+        else
+                        set use_disk = ($use_disk $disks[$n])
+        endif
+        @ n++
+      end
+
+      if ($#use_disk == 1) then
+        if (!($mode == list || $mode == clean) || $?debug) then
+	  echo disktop: No disks found, no tests to run.
+	endif
+        if ($TERM == sun) then
+          exec /bin/csh
+        else exit
+        endif
+      endif
+      set use_disk = ($use_disk[2-$#use_disk])
+  endif
+
+  if ($mode == select && $TERM != sun) then
+    echo $use_disk >! $SD_LOG_DIRECTORY/disktop_selected
+    exit(1)                    # exit = run test
+  endif
+
+endif    #if ($TERM != sun && -e $SD_LOG_DIRECTORY/disktop_selected)
+
+if (!($mode == list || $mode == clean)) then
+  set logname=`nextlog disktop`
+  set made_dirs
+  set using_dirs
+  set return = 0
+  set start_logged
+  echo disktop: Started on $use_disk. `date` | tee $logname
+
+  while (1)
+    set made_dirs
+    set using_dirs
+    foreach drive ($use_disk)
+      set k = `df | egrep $drive | awk '{print $6, $4}'`
+      if ("$k" == '') then
+        echo disktop: UNIX '"df"' command failed on $drive. `date` | tee -a $logname
+        goto finit1
+      endif
+      @ i = 1
+      set space = 0
+      set dir = none
+
+      while ("$dir" == none)
+        while ($i <= $#k)
+          @ ii = $i + 1
+          if ($k[$ii] > $space) then
+            set dir = $k[$i]
+            set space = $k[$ii]
+            if ("$dir" == "/" && $space > 770) break
+          endif
+          @ i = $i + 2
+        end
+
+        if ("$dir" == none) then
+	  echo disktop: No writable directories on $drive. `date` | \
+		        tee -a $logname 
+	  break
+        endif
+
+        if ("$dir" == "/") then
+          set dir = /tmp
+          set nonomatch
+          rm -f /tmp/tmpdisk1.*
+          rm -f /tmp/tmpdisk2.*
+          unset nonomatch
+        else if ("$dir" == "/usr") then
+          set dir = /usr/tmp
+          set nonomatch
+          rm -f /usr/tmp/tmpdisk1.*
+          rm -f /usr/tmp/tmpdisk2.*
+          unset nonomatch
+        else
+          set dir = $dir\/tmp-disktop-sd
+          if (-e $dir) then
+            rm -fr $dir
+          endif
+          if ($?debug) then
+            mkdir $dir
+	    set mkdir_status = $status
+          else
+            mkdir $dir >& /dev/null
+	    set mkdir_status = $status
+          endif
+          if ($mkdir_status == 0) then
+            chmod 777 $dir
+            set made_dirs = ($made_dirs $dir)
+          else
+	    set dir = none
+          endif
+        endif
+      end
+
+      if ("$dir" != none) then
+        set using_dirs = ($using_dirs $dir)
+        setenv DIR_$drive $dir
+        setenv SPACE_$drive $space
+          if ($?debug) then
+          eval echo `echo '$'drive dir = '$'DIR_$drive, space = '$'SPACE_$drive`
+        endif
+      endif
+
+      if ($drive == nd0) setenv SPACE_$drive 100
+
+    end
+
+    if ($?debug) then
+      echo made directory = $made_dirs
+      echo using directories = $using_dirs
+    endif
+
+    if ("$using_dirs" == '') goto finit1
+
+     if ($?debug) then
+#       printenv
+       echo disk sd $test_args
+     endif
+
+#     ~fjones/src/sysdiag/disk sd $test_args
+     disk sd $test_args
+
+     set return=$status
+     if ($?debug) echo disk return status was $return.
+
+     if ($?make_core_file) cp /dev/null core
+     if (-e core) then
+       set corename=`nextlog core`
+       mv core $corename
+       echo disktop: Corefile moved to "'$corename'". `date` | tee -a $logname
+     endif
+
+     if (!($?run_on_error) || $return == 0 || $return == 20) then
+       goto finit1
+     else
+       @ errors++
+       echo disktop: Pass $pass, errors $errors. `date` | tee -a $logname
+       if ($errors >= $error_limit) then
+	 echo disktop: Error limit exceeded. `date` | tee -a $logname
+	 goto finit1
+       endif
+       set return = 0
+       @ pass++
+     endif
+  end
+
+finit1:
+
+  if ($?start_logged) then
+
+    if (!($return == 0 || $return == 20)) then
+      echo disktop: Terminated abnormally. `date` | tee -a $logname
+    else 
+      if (!($?run_on_error)) then
+        echo disktop: Stopped. `date` | tee -a $logname
+      endif
+    endif
+    if ($?run_on_error) then
+      echo disktop: Stopped, pass $pass, errors $errors. `date` \
+		    | tee -a $logname
+    endif
+
+    if ($return != 30) then
+      foreach dir ($using_dirs)
+        if ("$dir" == "/tmp") then
+          set nonomatch
+          rm -f /tmp/tmpdisk1.*
+          rm -f /tmp/tmpdisk2.*
+          unset nonomatch
+        else if ("$dir" == "/usr/tmp") then
+          set nonomatch
+          rm -f /usr/tmp/tmpdisk1.*
+          rm -f /usr/tmp/tmpdisk2.*
+          unset nonomatch
+        endif
+      end
+
+      foreach dir ($made_dirs)
+        if (-e $dir) then
+          rm -fr $dir
+          if ($?debug) echo rm -fr $dir
+        endif
+      end
+    endif
+
+    foreach drive ($use_disk)
+      unsetenv DIR_$drive
+      unsetenv SPACE_$drive
+    end
+
+  endif
+  if (!($mode == list || $mode == clean)) then
+    if ($TERM == sun) exec /bin/csh
+  endif
+
+else
+
+  foreach drive ($use_disk)
+    set k = `df | egrep $drive | awk '{print $6, $4}'`
+    if ("$k" == '' && $?debug) then
+      echo ' '
+      echo disktop: UNIX '"dk"' command failed on $drive.
+    endif
+
+    if ("$k" != '') then
+      @ i = 1
+
+      while ($i <= $#k)
+        set dir = $k[$i]
+        @ i = $i + 2
+        if ("$dir" == "/") then
+          set dir = /tmp
+          if ($mode == list) then
+	    echo ' '
+	    echo -n $dir' - '
+            ls -l $dir
+	  else
+	    set nonomatch
+	    rm -f /tmp/tmpdisk1.*
+	    rm -f /tmp/tmpdisk2.*
+	    unset nonomatch
+	  endif
+        else if ("$dir" == "/usr") then
+          set dir = /usr/tmp
+          if ($mode == list) then
+	    echo ' '
+	    echo -n $dir' - '
+            ls -l $dir
+	  else
+	    set nonomatch
+	    rm -f /usr/tmp/tmpdisk1.*
+	    rm -f /usr/tmp/tmpdisk2.*
+	    unset nonomatch
+	  endif
+        else
+          set dir = $dir\/tmp-disktop-sd
+          if (-e $dir) then
+            if ($mode == list) then
+	      echo ' '
+	      echo -n $dir' -  '
+              ls -l $dir
+	    else
+	      rm -fr $dir
+	    endif
+          endif
+        endif
+      end
+    endif
+  end
+endif

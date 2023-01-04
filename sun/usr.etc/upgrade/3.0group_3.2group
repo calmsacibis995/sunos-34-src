@@ -1,0 +1,17 @@
+# !/bin/sh
+#
+#	Script to convert 3.0fcs group to 3.2fcs group
+#
+#       @(#)  3.0group_3.2group 1.1 86/09/25
+#
+#       Copyright (c) 1986 by Sun Microsystems, Inc.
+#
+
+ed $1 <<NEW
+/+:/
+i
+kmem:*:2:
+.
+w
+q
+NEW

@@ -1,0 +1,42 @@
+#
+# Diskless Sun-3/110
+#
+machine		"sun3"
+cpu		"SUN3_110"	# (Sun-3/110 cpu)
+ident		"ND110"
+timezone	8 dst
+maxusers	4
+options		INET
+options		SYSACCT
+options		QUOTA
+options		NFS
+options		NIT
+
+config		vmunix		root on nd
+
+pseudo-device	pty
+pseudo-device	ether
+pseudo-device	loop
+pseudo-device	nd
+pseudo-device	win128
+pseudo-device	dtop4
+pseudo-device	ms3
+pseudo-device	kb3
+
+# connections for machine type 4 (SUN3_110)
+controller	virtual 4 at nexus ?
+controller	obmem 4 at nexus ?
+controller	obio 4 at nexus ?
+controller	vme16d16 4 at nexus ?
+controller	vme24d16 4 at nexus ?
+controller	vme32d16 4 at nexus ?
+controller	vme16d32 4 at nexus ?
+controller	vme24d32 4 at nexus ?
+controller	vme32d32 4 at nexus ?
+
+device		zs0 at obio ? csr 0x20000 flags 3 priority 3
+device		zs1 at obio ? csr 0x00000 flags 0x103 priority 3
+device		ie0 at obio ? csr 0xc0000 priority 3
+device		cgfour0 at obmem 4 csr 0xff000000 priority 4
+device		bwtwo0 at obmem 4 csr 0xff000000
+device		des0 at obio ? csr 0x1c0000

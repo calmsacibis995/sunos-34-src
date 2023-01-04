@@ -1,0 +1,481 @@
+.de SX		\" call 'so' something else so derof
+.so \\$1
+..
+.\" .SX /usr/lib/tmac/tmac.e
+.po 1.5i
+.nr PO 1.5i
+.hy 14		\" don't hyphenate in bad places
+.pn 1		\" start page number at 'A'
+.af % A
+.ds PN "\\\\n%
+.nr sf 3	\" set section headings in bold face
+.nr si 2	\" indent nested sections 2 spaces
+.de $0		\" macro to enter section heading in to table of contents
+.(x C
+.if (\\$3=1) .sp
+\\$2   \\$1
+.)x \\*(PN
+..
+.de [R		\" routine declaration
+.ds RC \\$1
+.sp
+.ne 10
+.(l L
+.fi
+.na
+..
+.de *Q
+.ds RM \\$1 \\$2
+\\*(RM
+..
+.de *R
+.ds RN \\$1
+.(x R
+\\*(RN - \\*(RC
+.)x
+\\$1
+..
+.de {R
+\\*(RN
+.nf
+.ad
+..
+.de [R
+.)l
+..
+.de }R
+..
+.de {E			\" possible errors sub-section
+.lp
+Possible errors:
+.nr ps 0n
+.LB \\(bu
+..
+.de }E
+.LE
+.nr ps 1n
+.lp
+..
+.de WP
+.lp
+\fb***\fp
+..
+.de IP
+.ip "\fB\\$1\fP"
+..
+.de EB
+.sp -1
+.nf
+\L'|\\$1-1'\h'-1n'\1'\\n(.lu'\h-1n'\L'-1\\$1+1'\1-\\ln(.lu'
+.fi
+..
+.nr ii 5
+.nr hm 3v
+.nr tm 6v
+.nr fm 4v
+.nr bm 7v
+.de $h
+.tl 'APPROVAL SECTION''\*(PN'
+..
+.de $f
+.tl '\*(td''DO NOT COPY'
+.tl 'SUN MICROSYSTEMS INC''COMPANY CONFIDENTIAL'
+..
+.bp
+.sp
+.ce 2
+\fBE X T E R N A L  S P E C I F I C A T I O N
+(User Perspective)
+.sp
+.\" Fill in you project's name in place of the dot below and elsewhere
+.\" in this file.
+TITLE	     : 	color.diag External Specification\fR
+.sp
+AUTHOR	     :	Bernard Bove
+.sp
+REPORT NO.   :  900-1007-01
+.sp
+REVISION NO. :	A @(#) color.diag.txt 1.1 9/25/86
+.sp
+DATE         : \*(td	\"td=printing date if reformated
+.sp 2
+.(l L
+APPROVALS    :						DATE
+.de SG			\" Macro to define signiture lines
+.ip "\\$1" 20n		\" Position and signiture line
+------------------------------------------------------------
+.br
+\\$2			\" Name Underneath
+..
+.SG "Originator" "Bernard Bove"
+.SG "Department Manager" "Eddie Leung"
+.SG "Department Manager" "Daryle Schei"
+.SG "V. P." "Scott McNealy"
+.)l
+.bp
+.(l L
+.ce
+Document Review Form
+.lp
+Please make note and initial on this page all corrections and/or
+proposed amendments by page number and/or section number.
+.sp
+.ce
+---------------------------------------------
+Recommendations, Differences, Construction Errors, and comments:
+.sp 36
+.ce 2
+---------------------------------------------
+Typographical Errors:
+.sp 4
+.ce 2
+---------------------------------------------
+Attach additional sheet(s) as needed.
+.)l
+.\" redefine headers for the body of the document
+.de $h
+.tl 'Color.Diag EXTERNAL SPECIFICATION'''
+.tl '(User\'s Perspective)''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fB. EXTERNAL SPECIFICATION\fR
+.sh 1 "INTRODUCTION"
+.sh 2 "Purpose"
+.lp
+The purpose of this document is to describe the color video board diagnostic
+program designed and developed by Peter Costello.  This diagnostic is
+to serve as the primary tool in determining the functionality of Sun's
+color video board. 
+.\"	1.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 2 "Applicable Documents"
+.lp
+For further information on the \fISun Color Video Board\fR please
+see
+.(l
+\fISun Color Video Board
+User's Manual
+PM: 800-0398\fR
+.)l
+.\"	1.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.\".sh 2 "Definitional Conventions"
+.\"	1.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.\".sh 3 "Notations"
+.\"	1.3.1
+.\".sh 3 "Syntax"
+.\"	1.3.2
+.\".sh 3 "Terminology"
+.\"	1.3.3
+.sp 2
+.sh 1 "SYSTEM OVERVIEW"
+.\"	2.
+.sh 2 "General Description"
+.lp
+The program \fIcolor.diag\fR is a diagnostic program dedicated totally
+for testing the Sun Color Video Board.
+.\"	2.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 2 "Features"
+.lp
+The program \fIcolor.diag\fR is capable of performing 
+.(l
+incoming inspection on multiple boards,
+burn-in test, and
+system test.  
+.)l
+In addition, \fIcolor.diag\fR provides component test facilities
+for chip or component debugging.
+.\"	2.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 2 "Required Configuration"
+.lp
+The incoming test inspection of Sun Color Video Board requires a Sun system 
+containing
+.np
+a monitor (360-0484),
+.np
+a video board (501-0059),
+.np
+a processor board (501-0001-01),
+.np
+up to twelve Sun Color Video boards (501-0461-01) and
+.np
+optional cabling to connect color boards to optional (530-0495-01 & 530-0492-01)
+.np
+color monitor(s) (360-0595-01).
+.lp
+\fIcolor.diag\fR is a bootable program only, therefore it requires some means of
+booting.
+.\"	2.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 2 "Error Handling"
+.lp
+Error messages are displayed upon discovery.
+.\"	2.4
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.\".sh 2 "General Performance Characteristics"
+.\"	2.5
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.\".sh 2 "Planned Extensions"
+.\"	2.5
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.\".sh 2 "Limitations"
+.\"	2.7
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sp 2
+.\" Replace the dot below with the name of the major component you are
+.\" describing.  Repeat the entire section for each of your major components.
+.\" The subsections below are some of the ones that may be applicable.
+.\" Delete the ones that do not apply, and add new ones as necessary.
+.bp
+.sh 1 "color.diag SPECIFICATION"
+.sh 2 "User Interface"
+.lp
+The operator/tester is required to set switches and insert board(s) into
+card cage of test system.  The operator is familiar with booting diagnostics
+and noting messages appearing upon the screen.
+.\"	3.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 2 "Input/Output"
+.\"	3.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 2 "Operation"
+.lp
+\fIcolor.diag\fR may be ran with or without a color monitor.  At sometime
+\fBbefore its shipment to customer it should be tested with a color monitor.\fR
+.np
+The color video board has four jumper \fIbergs\fR which need to set prior
+to insertion into card cage.  For purpose of common reference bergs are
+counted from left to right with left most berg location specified as 1.  
+Set the jumpers as specified below.  \fBThese
+are not final configuration jumper settings.\fR
+.sp
+.TS
+box tab(;);
+cfB s s s s s
+c | c s s s | c 
+c | c | c | c | c | c.
+Sun Color Video Board
+_
+Board;Jumper Location;MultiBus Mem Addr
+\^;_;_;_;_;\^;\^
+\^;J1;J2;J3;J4;\^;\^
+_
+0;All;6-7-8 jumped;6;jumped;0x1E0000
+_
+1;All;3 6-7-8 jumped;6;jumped;0x1E4000
+_
+2;All;4 6-7-8 jumped;6;jumped;0x1E8000
+_
+3;All;3-4 6-7-8 jumped;6;jumped;0x1EC000
+.TE
+.sp
+If there is a monitor attached connect the \fIsync, blue, green, and red\fR
+internal cables to the board to be observed.
+.np
+Insert the color video board(s) into the card cage at any slot \fBnot\fR 
+having a \fBP2\fR connector.
+.np
+Boot \fIcolor.diag\fR.
+.np
+Upon booting, color.diag attempts to locate all color boards configured to the
+system.  Cross check the address displayed against board setting(s) utilized
+from above.  If there are any differences, power down system, check jumpers,
+reinsert board, power up, and again boot \fIcolor.diag.\fR  If there is still a
+problem set aside board in question for further test and component replacement.
+.np
+\fIcolor.diag\fR nexts request whether to proceed with an automatic or manual
+test of the board(s) configured on the system.  Respond with an \fBa\fR.
+.np
+From this point on \fIcolor.diag\fR performs an extensive set of diagnostics
+on all boards configured.  The diagnostic loops continuously.  Allow
+four passes.
+.sp
+Should an error occur the board does not pass incoming inspection (or
+system integration test).  Send the board to MRB.
+.np
+If the color board is connected to a color monitor then the operator
+is directed to observe that at the completion of a pass the diagnostic
+displays the \fIprime\fR colors on the monitor and holds them there for
+seven seconds.
+.sp
+\fIcidag\fR displays red on the left third, green in the center third,
+and blue on the right.  If these colors do not appear check cabling. If
+cabling does not fix the problem the board is to be rejected.
+.np
+Upon the completion of four passes, the test is complete.
+.\"	3.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 2 "Error Handling"
+.lp
+\fIcolor.diag\fR performs extensive checks and tests upon the color board,
+below is a description of the tests performed and the possible error
+message(s) that can be generated during the test.
+.sh 3 "Testing Function Register"
+.lp
+All possible values are written to and read from the function register.
+An error occurring during this test appears as follows:
+.(l
+\fBDevice #\fId\fB @\fIx\fB Wrote \fIvalu1\fB to Function Reg. Read \fIvalu2\fR
+.)l
+d - specifies the board causing the error, x is the board's multibus
+address, valu1 and valu2 are the hex values written and read respectively.
+.sh 3 "Testing Mask Register"
+.lp
+All possible values are written to and read from the mask register.
+An error occurring during this test appears as follows:
+.(l
+\fBDevice #\fId\fB @\fIx\fB Wrote \fIvalu1\fB to Mask Reg. Read \fIvalu2\fR
+.)l
+d - specifies the board causing the error, x is the board's multibus
+address, valu1 and valu2 are the hex values written and read respectively.
+.sh 3 "Testing Status Register"
+.lp
+Interrupts are disabled and all possible values are written to and read 
+from the status register.
+An error occurring during this test appears as follows:
+.(l
+\fBDevice #\fId\fB @\fIx\fB Wrote \fIvalu1\fB to Status Reg. Read \fIvalu2\fR
+.)l
+d - specifies the board causing the error, x is the board's multibus
+address, valu1 and valu2 are the hex values written and read respectively.
+.sh 3 "Testing Interrupt Logic"
+.lp
+The software controlled vertical retrace interrupt is enabled, and the 
+diagnostic waits on an retrace interrupt.  If an interrupt  doe not occur the 
+following message is displayed:
+.(l
+\fBDevice #\fId\fB @\fIx\fB No interrupt received when expected.\fR
+.)l
+d - specifies the board causing the error, x is the board's multibus
+address.
+.sh 3 "Testing Address Registers"
+.lp
+The two X-address registers and the two Y-address registers are tested
+via setting the address and reading it back for all possible locations.
+Error(s) occurring during this test appear as follows:
+.(l
+\fBDevice #\fId\fB @\fIx\fB Wrote X-Address \fIvalu1\fB Set i Read \fIvalu2\fR
+\fBDevice #\fId\fB @\fIx\fB Wrote Y-Address \fIvalu1\fB Set i Read \fIvalu2\fR
+.)l
+d - specifies the board causing the error, x is the boards multibus
+address, valu1 and valu2 are the hex values written and read respectively,
+and i is the x-y address pair under test (0 or 1).
+.sh 3 "Testing Color Map"
+.lp
+These tests include first writing out the "check box" image to the monitor,
+which contains all possible color combinations (256), then performs a
+constant data check on the color map buffers.  Finally it performs the
+old check board test (\fIid est\fR writing inverted data to alternate
+locations, then every second location, etc.).
+An error occurring during these tests appear as follows:
+.(l
+\fBDevice \fId\fB @\fIx\fB Error s Color Map \fIi\fB Color \fIvalu1\fB.
+ Wr: \fIvalu2\fB RD: \fIvalu3.\fR
+.)l
+d - specifies the board causing the error, x is the boards multibus
+address, s is \fBgreen, red, or blue\fR, i is one of the four color
+maps available (0 through 3), valu1 is the color index (0 through 255),
+valu2 and valu3 are the hex values for what was written and what was
+read respectively.
+.sh 3 "Testing Function Unit"
+.lp
+These tests include placing various data patterns against various function
+values and checking on the corresponding result placed in the frame buffer.
+If the expected transformation does not take place then the following
+error message is displayed:
+.(l
+\fBDevice \fId\fB @\fIx\fB Function Unit write \fIs\fB.
+              Wrote: \fIvalu1\fB Read: \fIvalu2.\fR
+.)l
+d - specifies the board causing the error, x is the boards multibus
+address, s is a function from the set of {\fBSource Data, Zeros, Ones,
+Inverted Source Data, Old Data Inverted, Mask, or Inverted Mask\fR}, 
+valu1 and valu2 are the hex values for what was written and what was
+read respectively.
+.sh 3 "Testing Frame Buffer Memory"
+.lp
+These tests include the regular memory test routines (id est constant
+data check, address line check, and the \fIchecker board check\fR. 
+An error occurring during these tests appear as follows:
+.(l
+\fBDevice \fId\fB @\fIx\fB s Test X = \fIi\fB Y = \fIj\fB.
+              Wr: \fIvalu1\fB Rd: \fIvalu2.\fR
+.)l
+d - specifies the board causing the error, x is the boards multibus
+address, s is memory test from the set of {\fBConstant Data, 
+Address, Checker\fR}, i and j are the x and y locations respectively,
+valu1 and valu2 are the hex values for what was written and what was
+read respectively.
+.sh 3 "Testing 5-Pixel-Wide Mode"
+.lp
+This tests the "paint" provided by the Sun Color Video Board.
+The background area is set to one color and then painted over.
+Frame buffer locations are examined to ensure the paint to affect.
+An error occurring during these tests appear as follows:
+.(l
+\fBDevice \fId\fB @\fIx\fB Paint-Mode Error Y = 0. Wrote = \fIvalu1\fB to \fIvalu2\fB with \fIvalu3.\fR
+	     Read valu4 at X = valu5
+	     Wrote paint-mode pixel at Xaddr = valu6
+.)l
+d - specifies the board causing the error, x is the boards multibus
+address, valu1 and valu2 are the x coordinates (in hex) of where valu3 was
+written respectively.  valu4 is the incorrect value read at location valu5.
+valu6 is where the paint started.
+.\"	3.4
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.\".sh 2 "Performance"
+.\"	3.5
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.\" Redefine headers for the appendix.
+.\".ds PN "A-\\\\n%
+.\".de $h
+.\".tl '. APPENDIX''\*(PN'
+.\"..
+.\".pn 1	\" restart page numbering beginning with 'A-1'
+.\".af % 1
+.\".bp	\" NOW we can begin the new page
+.\".ce
+.\"\fBAPPENDIX\fR
+.\".sh 1 "APPENDIX SECTION"
+.\".ds PN "I-\\\\n%	\" redefine headers for the index.
+.\".de $h
+.\".tl '. INDEX''\*(PN'
+.\"..
+.\".pn 1
+.\".af % 1
+.\".bp
+.\".ce
+.\"\fBINDEX\fR
+.\".sh 1 "INDEX SECTION"
+.\".ds PN "\\\\n%
+.de $h
+.tl 'TABLE OF CONTENTS''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fBTABLE OF CONTENTS\fR
+.sp 3
+.xp C

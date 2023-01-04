@@ -1,0 +1,64 @@
+# !/bin/sh
+#
+#	Script to convert 3.0fcs ttys to 3.2fcs ttys
+#
+#       @(#)  3.0ttys_3.2ttys 1.1 86/09/25 
+#
+#       Copyright (c) 1986 by Sun Microsystems, Inc.
+#
+
+ed $1 <<NEW
+/ttypf/
+a
+02ttyq0
+02ttyq1
+02ttyq2
+02ttyq3
+02ttyq4
+02ttyq5
+02ttyq6
+02ttyq7
+02ttyq8
+02ttyq9
+02ttyqa
+02ttyqb
+02ttyqc
+02ttyqd
+02ttyqe
+02ttyqf
+02ttyr0
+02ttyr1
+02ttyr2
+02ttyr3
+02ttyr4
+02ttyr5
+02ttyr6
+02ttyr7
+02ttyr8
+02ttyr9
+02ttyra
+02ttyrb
+02ttyrc
+02ttyrd
+02ttyre
+02ttyrf
+02ttys0
+02ttys1
+02ttys2
+02ttys3
+02ttys4
+02ttys5
+02ttys6
+02ttys7
+02ttys8
+02ttys9
+02ttysa
+02ttysb
+02ttysc
+02ttysd
+02ttyse
+02ttysf
+.
+w
+q
+NEW

@@ -1,0 +1,24 @@
+# !/bin/sh
+#
+#	Script to merge changes in 3.2pilot rc.local to 3.2beta rc.local
+#
+#       @(#) mergerclocal 1.1 86/09/25
+#
+
+ed $1 <<NEW
+/UCB/
+s/1.40 86\/\05\/\01/1.41 86\/\05\/\27/
+/ypserv/
+i
+if [ -f /usr/etc/in.named -a -f /etc/named.boot ]; then
+	/usr/etc/named; echo -n ' named'			>/dev/console
+fi
+.
+/ypbind/
+-1
+i
+#	/usr/etc/ypserv -i; echo -n ' ypserv'			>/dev/console
+.
+w
+q
+NEW

@@ -1,0 +1,2444 @@
+.\" @(#)video120.diag.msun 1.1 86/09/25 SMI;
+.LP
+.ds c control register
+.ds vm video memory
+.ds s serial communication controller
+.ds vb Sun-2/120 Video Board
+.ds vd Sun-2/120 Video Board Diagnostic
+.B
+.ps 14
+.nf
+Sun  Microsystems
+.sp 16
+.ce 100
+.ps 20
+\*(vd
+.sp 3
+.ps 20
+User's Document
+.sp 14
+.ps 14
+Tom Kraus
+.sp 2
+June 4, 1985
+.sp 2
+Revision A
+.ce 0
+.fi
+.R
+.bp 1
+.ps 12
+.EH 'Sun  Microsystems''\*(vd'
+.OH 'Sun  Microsystems''\*(vd'
+.EF 'June 4, 1985'Revision A'page \\\\n(PN'
+.OF 'June 4, 1985'Revision A'page \\\\n(PN'
+.P1
+.AM
+.EQ
+delim $$
+.EN
+.H 1 "Preface"
+.PP
+The User's Document associated with the \*(vd is presented.
+.H 2 "Purpose"
+.PP
+It is the intention of this document to inform the reader
+how to use the \*(vd.
+The command line syntax for each menu option (test) is presented and explained.
+.H 2 "Audience"
+.PP
+Members of any of the following five departments may find 
+this document of interest for various reasons: (1) Design 
+Engineering, (2) Manufacturing, (3) Field Service, (4) 
+Diagnostics and (5) Documentation.  
+.PP
+Using the Sun-2/120' Video Board Diagnostic, the Design 
+Engineer(s) of the Sun-2/120' Video Board can confirm
+the correctness of their design.  Manufacturing and Field Service
+personnel can use the Sun-2/120' Video Board Diagnostic for 
+testing and/or trouble shooting purposes.  Member(s) of the 
+Diagnostic department can review the design of the Sun-2/120' 
+Video Board Diagnostic based on this document.  Finally, 
+Documentation can use this document as a basis for developing 
+the User's Guide which is shipped with the product itself.
+.PP
+At a minimum, the reader is assumed to have some 
+understanding of the function of the Sun-2/120' Video Board.  An
+excellent preface to this document is "Theory of Operation 
+Manual for the Sun-2/120' Video Board". 
+Another relevant document is titled "Sun-2/120 Video Board Diagnostic
+Design Document".
+.H 1 "Revision History"
+.LP
+Revision A     June 4, 1985     Initial release of this document.
+.H 1 "Glossary"
+.LP
+CPU  -  Central Processing Unit
+.LP
+FRU  -  Field Replaceable Unit
+.LP
+ROM  -  Read Only Memory
+.LP
+SCC  -  Serial Communication Controller
+.LP
+SCSI  -  Small Computer System Interface
+.H 1 "Introduction"
+.PP
+The \*(vb is the display subsystem for the Sun-2 products 
+which use Multibus.
+It has a serial interface with the monitor, keyboard and mouse in
+addition to a parallel interface with the CPU board.
+As a part of the video board, a \*c enables several
+advanced features such as copy mode and interrupts.
+.PP
+The \*(vd was designed to test the \*(vb.
+The \*(vb consists of the following three 
+sections: (1) the \*c, (2) \*s and (3) \*(vm.
+All three sections of the \*(vb can be tested by the \*(vd.
+.H 1 "Problem Specification"
+.PP
+Generally speaking, the objective of the \*(vd to ensure that
+the \*(vb works correctly.
+In this case, "works correctly" implies that the \*(vb functions
+as stated in the "Theory of Operation Manual for the \*(vb".
+.PP
+Again, the three functional sections of the \*(vb
+are the \*c, \*s and \*(vm.
+The \*(vd tests all three of these functional sections.
+.PP
+In particular, the \fImemorability\fP\| and \fIfunctionality\fP\|
+of the \*(vb's \*c are tested.
+The \fIfunctionality\fP\| of the \*s is checked.
+Finally, the \*(vd tests the \fImemorability\fP\| of \*(vm.
+.H 1 "Requirements"
+.PP
+In order to run the \*(vd, the following 
+hardware, software and firmware requirements 
+must be met.
+.H 2 "Hardware Requirements"
+.PP
+The minimum hardware configuration required is listed below.
+.sp 1
+.RS
+.IP 1.
+A Sun-2/120 multibus hardware cage.
+.IP 2.
+A Sun-2/120 power supply.
+.IP 3.
+A Sun-2/120 CPU Board.
+.IP 4.
+A Sun-2/120 Memory Board.
+.IP 5.
+A Sun-2/120 Video Board.
+.IP 6.
+A dumb terminal (TeleVideo, Wyse, etc.), attached to one 
+of the CPU serial ports, is required for board test (not system test).
+.IP 7.
+A boot device (i.e. local disk, local tape or remote disk via ethernet).
+.IP 8.
+A Sun-2/120 Video Monitor.
+.RE
+.sp 1
+.H 2 "Software Requirements"
+.PP
+An executable version of the \*(vd is to be used for testing and/or
+trouble shooting of the \*(vb.
+The name of the relevant executable file is: "video120.diag".
+.H 2 "Firmware Requirements"
+.PP
+The standard power-up diagnostic/monitor/boot ROM is needed.
+The power-up diagnostic performs a limited "crawl out" test.
+It is also used to load and begin execution of the \*(vd.
+.H 1 "Operating Instructions"
+.PP
+The sections below describe how to load and operate the \*(vd.
+Specifically, instructions for loading and beginning execution of the
+\*(vd are covered in the section titled:  "Loading And Starting".
+Operating instructions are discussed in the section 
+titled:  "The User Interface".
+.H 2 "Loading And Starting"
+.PP
+The following steps must be followed in the order listed below to run
+the \*(vd.
+.RS
+.IP 1.
+Turn on the system.
+.IP 2.
+After the system has been turned on, the power-up ROM diagnostics perform
+a "crawl out" test of the system before automatically booting UNIX.
+Since the \*(vd is a stand alone diagnostic, UNIX should not be booted.
+The user should, therefore, terminate the process of booting UNIX.
+If the user is interacting with the Sun-2 console, 
+this can be done by typing "L1-a".
+That is, hold down the "L1" key while pressing the "a" key.
+On the other hand, if the user is interacting with the \*(vd via
+a dumb terminal, the booting of UNIX can be terminated by pressing
+the "break" key.
+.IP 3.
+In order to reset the memory maps to their initial state, the following
+two keys should be typed prior to pressing the "return" key:  "k1".
+Notice that the \*(vd cannot be booted correctly if this reset step is
+skipped.
+.IP 4.
+At this point the \*(vd can be loaded and its execution started.
+The three ways to load the \*(vd are listed below.
+.RS
+.IP A.
+Assuming that the executable version of the \*(vd, "video120.diag", resides
+on the machines \fIlocal disk\fP\| in directory "/pub/stand" or "/stand", the
+diagnostic can be loaded by typing the following command line before pressing
+the "return" key.
+.br
+.sp 1
+.DS I 10
+"b stand/video120.diag"
+.DE
+.IP B.
+If the \*(vd resides on a \fIremote disk\fP\|, it can be loaded via
+ethernet.
+Assuming that the network file server has a partition reserved for the
+system being tested (i.e. the system under test is a client of the file 
+server) and that "video120.diag" resides in the file server's 
+directory "/pub/stand", the \*(vd can be loaded by entering 
+the following command line before pressing the "return" key.
+.br
+.sp 1
+.DS I 10
+"b ec(,<file_server_host_net_number>)stand/video120.diag" 
+.DE
+.IP C.
+Finally, the \*(vd can be loaded from \fIlocal tape\fP\|.
+Assuming that the tape contains a bootable image of "video120.diag", the
+three command lines listed below can be used to load the \*(vd.
+The user is required to press the "return" key after entering one of the
+command lines.
+.RS
+.IP 1)
+If "video120.diag" resides on a SCSI tape, use the command line listed below.
+.br
+.sp 1
+.DS I 15
+"b st()"
+.DE
+.IP 2)
+If "video120.diag" resides on an archive 
+tape, use the following command line.
+.br
+.sp 1
+.DS I 15
+"b ar()"
+.DE
+.IP 3)
+If "video120.diag" resides on a tape master, 
+use the command line listed below.
+.br
+.sp 1
+.DS I 15
+"b mt()"
+.DE
+.RE
+.RE
+.RE
+.H 2 "The User Interface"
+.PP
+The four menus of the \*(vd's user interface are presented below.
+Initially, the "main menu" is discussed in the section titled 
+"The Main Menu".
+Secondly, the "control register menu" is presented in the section titled
+"The Control Register".
+Thirdly,  the "serial communication controller menu" is 
+explained in the section titled "The Serial Communication Controller".
+Finally, the "video memory menu" is discussed in the section titled
+"The Video Memory".
+.H 3 "The Main Menu"
+.PP
+The Main Menu, shown below, has a total of
+eleven options.
+These options are discussed following the display of the "main menu".
+Keep in mind that typing the character corresponding to an option 
+\fIselects\fP\| that option, 
+while pressing the "return" key after the option was selected
+\fIinvokes\fP\| the option.
+.br
+.sp 1
+Where it is appropriate, the time required to run a test is displayed
+on the menu.
+For example, the time required to run the default test sequence is 2 minutes
+and 4 seconds.
+This information is shown on the menu in the following shorthand 
+form:  "2 m 4 s".
+The "m" stands for minutes while, the "s" corresponds to seconds.
+.sp 2
+.KS
+.TS
+center box expand tab (#);
+l.
+.sp 2
+Sun-2/120 Video Board Diagnostic            REV 1.1 6/27/85            Main Menu
+.sp 2
+.T&
+a.
+c  -  Control Register Menu
+.sp 1
+s  -  Serial Communication Controller Menu
+.sp 1
+v  -  Video Memory Menu
+.sp 1
+d  -  Default Test Sequence\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\02 m \04 s
+.sp 1
+a  -  Execute All Tests\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\014 m 20 s
+.sp 1
+M  -  Print Error Messages?
+.sp 1
+K  -  Check Parity?
+.sp 1
+l  -  Loop
+.sp 1
+e  -  Error Log Display
+.sp 1
+h  -  Help
+.sp 1
+q  -  Quit
+.sp 2
+.T&
+l.
+Command ==>
+.sp 2
+.TE
+.KE
+.RS
+.IP 1.
+Option "c" on the "main menu" is a navigational command.
+If option "c" is selected, a submenu containing all of the \*c
+tests  appears.
+The "control register menu" is discussed later in the section titled 
+"The Control Register".
+The command line syntax for option "c" is shown next.
+.DS I 10
+"c"
+.DE
+Option "c" does not accept any arguments.
+.IP 2.
+Option "s" on the "main menu" is also a navigational command.
+If option "s" is chosen, a submenu containing the tests
+specific to the \*s  appears.
+The "serial communication controller menu" 
+is presented 
+below in the section titled "The Serial Communication Controller".
+The command line syntax for option "s" is shown next.
+.DS I 10
+"s"
+.DE
+Like option "c", option "s" does not accept any arguments.
+.IP 3.
+Option "v" on the "main menu" is still another navigational command.
+If option "v" is selected, a submenu containing all of the \*(vm
+tests  appears.
+The "video memory menu" is covered later in 
+the section titled "The Video Memory".
+The command line syntax for option "v" is shown next.
+.DS I 10
+"v"
+.DE
+Again, like options "c" and "s", option "v" does not accept any arguments.
+.IP 4.
+Selecting option "d" on the "main menu" initiates the default test sequence.
+The default test is a "quick and dirty" test.
+It performs minimal testing of \fIall\fP\| parts
+of the three functional sections of the \*(vd.
+Option "d" does \fInot\fP\|, however, perform 
+an exhaustive test of the \*(vb.
+Not all of the baud rates are used in testing the serial communication 
+controller and only one video memory test is performed.
+The amount of time required to run the default test 
+is approximately:  2 minutes and 4 seconds.
+Specifically, the tests listed below are performed by the default test option.
+.RS
+.IP A.
+"Memory Test Of The Control Register"  -  Described in the section titled
+"The Control Register".
+.IP B.
+"Screen (Display) Enable/Disable Test"  -  Described in the section titled
+"The Control Register".
+.IP C.
+"Copy Enable/Disable Test"  -  Described in the section titled
+"The Control Register".
+.IP D.
+"Interrupt Enable/Disable Test"  -  Described in the section titled
+"The Control Register".
+.IP E.
+"Jumper Test"  -  Described in the section titled 
+"The Control Register".
+.IP F.
+"Serial Communication Controller Test" at a "slow" 
+baud rate (300)  -   Described in the section titled 
+"The Serial Communication Controller".
+.IP G.
+"Serial Communication Controller Test" at a "fast" 
+baud rate (9600)  -   Described in the section titled 
+"The Serial Communication Controller".
+.IP H.
+"Constant Pattern Test" in byte mode (write and read bytes)  -  Described
+in the section titled "The Video Memory".
+.IP I.
+"Constant Pattern Test" in word mode (write and read words)  -  Described
+in the section titled "The Video Memory".
+.RE
+.br 
+.sp 1
+The command line syntax for option "d" is shown next.
+.DS I 10
+"d"
+.DE
+Option "d" does not accept any arguments.
+.IP 5.
+If option "a" on the "main menu" is chosen, \fBall\fP\| \*(vb tests
+are executed in sequence.
+The amount of time required to run all tests
+is approximately:  14 minutes and 20 seconds.
+Specifically, the tests listed below are performed by the "a" option.
+.RS
+.IP A.
+"Memory Test Of The Control Register"  -  Described in the section titled
+"The Control Register".
+.IP B.
+"Screen (Display) Enable/Disable Test"  -  Described in the section titled
+"The Control Register".
+.IP C.
+"Copy Enable/Disable Test"  -  Described in the section titled
+"The Control Register".
+.IP D.
+"Interrupt Enable/Disable Test"  -  Described in the section titled
+"The Control Register".
+.IP E.
+"Jumper Test"  -  Described in the section titled
+"The Control Register".
+.IP F.
+"Serial Communication Controller Test" at baud rate 
+300  -   Described in the section titled 
+"The Serial Communication Controller".
+.IP G.
+"Serial Communication Controller Test" at baud rate 
+600  -   Described in the section titled 
+"The Serial Communication Controller".
+.IP H.
+"Serial Communication Controller Test" at baud rate 
+1200  -   Described in the section titled 
+"The Serial Communication Controller".
+.IP I.
+"Serial Communication Controller Test" at baud rate 
+2400  -   Described in the section titled 
+"The Serial Communication Controller".
+.IP J.
+"Serial Communication Controller Test" at baud rate 
+4800  -   Described in the section titled 
+"The Serial Communication Controller".
+.IP K.
+"Serial Communication Controller Test" at baud rate 
+9600  -   Described in the section titled 
+"The Serial Communication Controller".
+.IP L.
+"Serial Communication Controller Test" at baud rate 
+19200  -   Described in the section titled 
+"The Serial Communication Controller".
+.IP M.
+"Serial Communication Controller Test" at baud rate 
+38400  -   Described in the section titled 
+"The Serial Communication Controller".
+.IP N.
+"Serial Communication Controller Test" at baud rate 
+76800  -   Described in the section titled 
+"The Serial Communication Controller".
+.IP O.
+"Address Test" in word mode (write and read words)  -  Described
+in the section titled "The Video Memory".
+.IP P.
+"Constant Pattern Test" in word mode (write and read words)  -  Described
+in the section titled "The Video Memory".
+.IP Q.
+"Random Pattern Test" in word mode (write and read words)  -  Described
+in the section titled "The Video Memory".
+.IP R.
+"Uniqueness Test" in word mode (write and read words)  -  Described
+in the section titled "The Video Memory".
+.IP S.
+"Checker Pattern Test" in word mode (write and read words)  -  Described
+in the section titled "The Video Memory".
+.IP T.
+"Address Test" in byte mode (write and read bytes)  -  Described
+in the section titled "The Video Memory".
+.IP U.
+"Constant Pattern Test" in byte mode (write and read bytes)  -  Described
+in the section titled "The Video Memory".
+.IP V.
+"Random Pattern Test" in byte mode (write and read bytes)  -  Described
+in the section titled "The Video Memory".
+.IP W.
+"Uniqueness Test" in byte mode (write and read bytes)  -  Described
+in the section titled "The Video Memory".
+.IP X.
+"Checker Pattern Test" in byte mode (write and read bytes)  -  Described
+in the section titled "The Video Memory".
+.RE
+.br
+.sp 1
+The command line syntax for option "a" is shown next.
+.DS I 10
+"a"
+.DE
+Option "a" does not accept any arguments.
+.IP 6.
+Option "M" on the "main menu" specifies whether or not messages are displayed
+on the screen.
+The command line for setting the message-mode-flag is displayed next.
+.DS I 10
+"M [0 | 1]"
+.DE
+The brackets ("[" "]") denote that the argument
+is \fIoptional\fP\| (not required).
+The character "|" is a shorthand notation for the English word "or".
+These two conventions are used throughout the \*(vd.
+.br
+.sp 1
+Option "M" accepts one argument which can have one of two
+possible values ("0" or "1").
+If the user enters "M 0" on the command line, message mode is turned 
+\fIoff\fP\| (silent mode).
+On the other hand, if the user types "M 1" on the command line, message mode
+is turned \fIon\fP\| (verbose mode).
+It should be noted that, 
+if the user simply enters "M" on the command line, message mode
+is turned on.
+By default, message mode is on.
+.IP 7.
+Option "K" on the "main menu"
+specifies whether or not \fIparity checking\fP\| is performed.
+\fIParity generation\fP\| is always on.
+The command line for setting the parity-checking-flag is displayed next.
+.DS I 10
+"K [0 | 1]"
+.DE
+Option "K" accepts one argument which can have one of two
+possible values ("0" or "1").
+If the user enters "K 0" on the command line, parity checking is 
+\fInot performed\fP\|.
+On the other hand, if the user types "K 1" on the command line, 
+parity checking \fIis executed\fP\|.
+It should be noted that, 
+if the user simply enters "K" on the command line, parity checking 
+is turned on.
+By default, parity checking is on.
+.IP 8.
+Option "l" (the letter ell) on the "main menu"
+gives the user the opportunity to specify the number of times a
+user-specified sequence of tests is to be executed.
+For example, terminating a command line containing
+one or more user-specified tests with "l 5" 
+executes all of the tests on that command line five times.
+The command line for the loop option is shown below.
+.DS I 10
+"l [loop_count]"
+.DE
+Option "l" accepts one command line argument.
+The "loop_count" argument is optional.
+Without it, the test(s) on the command line
+are performed \fIonce\fP\|.
+All command lines are executed once even if the "l" option does not
+appear at the end.
+Therefore, using the "l" option without an argument has \fIno affect\fP\|.
+.br
+.sp 1
+The "loop_count" argument specifies, in \fIdecimal\fP\|,
+the number of times that the command line sequence is 
+to be \fIexecuted\fP\|.
+The range of legal \fInumerical\fP\| values for the "loop_count" 
+argument is 1 to 2147483647 (0x7fffffff).
+However, if an asterisk (*) is entered as the "loop_count" argument,
+the given test sequence, theoretically, runs \fIforever\fP\|.
+With one exception, the  asterisk (*) 
+symbolizes "forever" throughout the \*(vd. 
+The only exception to this rule is explained in the section titled
+"The Serial Communication Controller".
+.br
+.sp 1
+At this point it is relevant to introduce a \fIspecial character\fP\|
+in the command line language.
+The ";" acts as a \fIseparator\fP\| between commands.
+For instance, let's assume that our goal is to run the default option
+on the "main menu" five times.
+In order to accomplish this, we can make use of the loop option 
+(option "l") as follows.
+.DS I 10
+"d ; l 5"
+.DE
+The "d" specifies that the default test sequence is to be run.
+The ";" separates the "d" command from the "l" command.
+The "l 5" indicates that the command line is to be executed five times.
+In short, the ";" must be used to separate commands.
+It is \fInot\fP\| used to separate a command from its argument(s) and
+it is \fInot\fP\| used to separate one argument from another.
+Using the ";" in this manner causes a syntax error.
+.br
+.sp 1
+One more (unfortunate) rule of the 
+command line language is worth mentioning here.
+Due to an implementation "error" in the Diagnostic stand-alone library, 
+all commands, arguments and ";"'s must be
+separated by, at least, one SPACE character.
+Thus, "d;l 5" is \fInot\fP\| a correct method of running the default test
+sequence five times.
+Instead, it causes a syntax error.
+.IP 9.
+Option "e" on the "main menu" displays an error log.
+More specifically, at a maximum, the first 100 errors messages of each type
+recorded by the \*(vd are printed on the screen.
+The command line syntax for option "e" is shown next.
+.DS I 10
+"e"
+.DE
+Option "e" does not accept any arguments.
+The user does, however, have the ability to suspend and restart the error log
+display as they see fit.
+Pressing any key, except "q", suspends the error log display until the user
+presses another key.
+If the user presses "q" at any time, the error log display
+is terminated.
+.IP 10.
+If option "h" on the "main menu" is chosen, 
+more detailed user instructions  appear on the screen.
+The command line syntax for option "h" is shown next.
+.DS I 10
+"h"
+.DE
+Option "h" does not accept any arguments.
+The "help" screen associated with the "main menu" is shown next.
+.sp 2
+.KS
+.TS
+center box expand tab (#);
+l.
+.sp 2
+Sun-2/120 Video Board Diagnostic            REV 1.1 6/27/85            Main Menu
+.sp 2
+.T&
+a.
+c  -  Control Register Menu\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0c
+.sp 1
+s  -  Serial Communication Controller Menu\0\0\0\0\0\0\0\0\0\0\0\0\0s
+.sp 1
+v  -  Video Memory Menu\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0v
+.sp 1
+d  -  Default Test Sequence\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\02 m \04 s\0\0d
+.sp 1
+a  -  Execute All Tests\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\014 m 20 s\0\0a
+.sp 1
+M  -  Print Error Messages?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0M [0 | 1]
+.sp 1
+K  -  Check Parity?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0K [0 | 1]
+.sp 1
+l  -  Loop\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0l [loop_count]
+.sp 1
+e  -  Error Log Display\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0e
+.sp 1
+h  -  Help\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0h
+.sp 1
+q  -  Quit\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0q
+.sp 2
+.T&
+l.
+Command ==>
+.sp 2
+.TE
+.KE
+.IP 11.
+Finally, option "q" on the "main menu" terminates the \*(vd.
+The command line syntax for option "q" is shown next.
+.DS I 10
+"q"
+.DE
+Option "q" does not accept any arguments.
+.RE
+.H 3 "The Control Register"
+.PP
+The \*c associated with the \*(vb holds a total of 16 bits.
+Generally speaking, the \*c is used to enable/disable various 
+functions, set the copy mode base address and monitor the vertical 
+interrupt status.
+The processor is able to read the contents of the entire \*c.
+It cannot, however, read the high or low byte of the \*c on an 
+individual basis.
+The processor is capable of writing to (1) the entire \*c, (2)
+the high byte of the \*c and (3) the low byte of
+the \*c \fIwith the following exceptions\fP\|.
+Bit 00 and bits 07-12 are not affected by the write
+operations.
+The \*c is located at address 0x781800 (7870464).
+A diagram of the \*c follows.
+.sp 2
+.KS
+.TS
+center tab (/) ;
+| c s s s s s s s | c s s s s s s s |
+| cfL | cfL | cfL | cfL | cfL | cfL | cfL | cfL | cfL | cfL | cfL | cfL | cfL | cfL | cfL | cfL |
+| c | c | c | c | c s s s | cfL | c s s s s s | cfL |
+| c | c | c | c | c s s s | cfL | cfL s s s s s | cfL | .
+.ps 9
+.vs 11
+High Byte/Low Byte
+.sp .1i
+_
+15/14/13/12/11/10/09/08/07/06/05/04/03/02/01/00
+_
+V/V/V/V////
+I/C/I/V////
+D/O/N/I/Configuration/0/CMBASE/0
+E/P/T/N////
+N/Y/E/T/Jumpers//17 - 22/
+/E/N/////
+/N//////
+///////
+_
+.T&
+c c c c c s s s c c s s s s s c .
+.ps 7
+.vs 9
+read/read/read/read/read only/read/read or write/read
+or/or/or/only//only//only
+write/write/write/////
+.TE
+.KE
+.sp 2
+.PP
+Two types of tests need to be performed on the \*c.
+The memorability of the \*c itself must be tested.
+In addition, the functionality
+of the \*c requires testing.
+.PP
+The Control Register Menu, shown below, has a total of
+fifteen options.
+These options are discussed following the display of the
+"control register menu".
+Again, be aware that typing the character corresponding to an option 
+\fIselects\fP\| that option, 
+while pressing the "return" key after the option was selected
+\fIinvokes\fP\| the option.
+.br
+.sp 1
+Where it is appropriate, the time required to run a test is displayed
+on the menu.
+For example, the time required to run the default test sequence is 52 seconds.
+This information is shown on the menu in the following shorthand 
+form:  "52 s".
+The "s" stands for seconds.
+.sp 2
+.KS
+.TS
+center box expand tab (#);
+l.
+.sp 
+Sun-2/120 Video Board Diagnostic      REV 1.1 6/27/85      Control Register Menu
+.sp 2
+.T&
+a.
+m  -  Memory Test Of Control Register\0\0\0\0\08 s
+.sp 1
+c  -  Copy Enable/Disable Test\0\0\0\0\0\0\0\0\0\0\0\017 s
+.sp 1
+M  -  Print Error Messages?
+.sp 1
+K  -  Check Parity?
+.sp 1
+W  -  Wait (Stop) On Error?
+.sp 1
+S  -  Scope Loop On Error?
+.sp 1
+s  -  Screen (Display) Enable/Disable Test\0\012 s
+.sp 1
+i  -  Interrupt Enable/Disable Test\0\0\0\0\0\0\0\0\05 s
+.sp 1
+j  -  Jumper Test\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\09 s
+.sp 1
+d  -  Default Control Register Test\0\0\0\0\0\0\0\0\052 s
+.sp 1
+l  -  Loop
+.sp 1
+e  -  Error Log Display
+.sp 1
+h  -  Help
+.sp 1
+p  -  Return To The Main Menu
+.sp 1
+q  -  Quit
+.sp 2
+.T&
+l.
+Command ==>
+.sp 2
+.TE
+.KE
+.RS
+.IP 1.
+The first option on the "control register menu", option "m" 
+performs the memorability test of the \*c.
+The goal of the memorability test is to ensure that whatever
+is written to the \*c is actually stored there.
+However, it is not possible to test the memorability of the entire
+\*c.
+In fact, the memorability of \fIonly bits 01-06\fP\| of the control
+register are tested.
+The following paragraph explains why.
+.br
+.sp 1
+To begin with, since bit 00 and bits 07-12 are not writable, 
+the memorability of these bits cannot be tested.
+Secondly, since bit 15 of the control register turns the screen on and off,
+\fIthe memorability of bit 15 is not tested\fP\|.
+The "Screen (Display) Enable/Disable Test", discussed later,
+indirectly tests the
+memorability of bit 15 of the control register.
+Thirdly, since bit 14 turns copy-mode on and off, 
+\fIthe memorability of bit 14 is not tested\fP\|.
+The "Copy Enable/Disable Test", discussed later, indirectly tests the
+memorability of bit 14 of the control register.
+Finally, since bit 13 of the \*c generates video board interrupts,
+\fIthe memorability of bit 13 is not tested\fP\|.
+The "Interrupt Enable/Disable Test", discussed later, indirectly tests the
+memorability of bits 12 and 13 of the control register.
+.br
+.sp 1
+The typical testing paradigm consists of the following steps.
+First of all, a value is written to the \*c, bit 00
+and bits 07-15 not included.
+In other words, only bits 01-06 are written to.
+Within certain constraints, 
+the user has the ability to specify which value(s)
+are written to the control register.
+Secondly, the contents of the \*c are read back.
+Thirdly, since bit 00 and bits 07-15 are not written to, a masking
+operation is required.
+Fourthly, the value read back from the \*c
+is compared to the expected value.
+Finally, a message is printed indicating the 
+success or failure of the test.
+.br
+.sp 1
+The command line syntax for the memorability test is: 
+.DS I 10
+"m [beg_val [end_val]] [inc] [count]".
+.DE
+Option "m" accepts as many as four arguments.
+The "beg_val" (beginning hexadecimal value), "end_val" 
+(ending hexadecimal value), "inc" (hexadecimal increment)
+and "count" (pass count) arguments are all optional.
+Arguments "beg_val", "end_val" and "inc" must be specified in hexadecimal
+while, argument "count" must be specified in decimal.
+Notice that, in order to use the "end_val" argument,
+the "beg_val" is also be required.
+That explains why the string 
+"[end_val]" is contained in the brackets surrounding "beg_val".
+.br
+.sp 1
+By default, the value of argument "beg_val" 
+is 0x00, while the value of argument "end_val" is 0x7f.
+The range of values is constrained by the fact that
+only bits 01-06 are tested.
+The user is, however, 
+able to request that any value between 0x00
+and 0x7f be assigned to the "beg_val" and 
+the "end_val" arguments.
+The only constraint is that
+.I
+the value of argument "beg_val" must be less than or equal to 
+the value of argument "end_val".
+.R
+.br
+.sp 1
+By default, the value of the "inc" argument is one (0x1).
+The "inc" argument  dictates the sequence of values
+which  are written to the \*c.
+For example, given a "beg_val" of 0x00,
+an "end_val" of 0x06 and an "inc" value
+of 0x02, the following four values would be written to
+bits 01-06 the \*c: 0x00, 0x01, 0x02 and 0x03.
+.br
+.sp 1
+The real power of having the "beg_val", "end_val" 
+and "inc" arguments  becomes evident when all three
+arguments are used in combination.
+In particular, it is possible to toggle (clear and set)
+any of the CMBASE (Copy Mode Base Address bits [bits 01-06]) 
+bits of the \*c
+without affecting the remaining bits of the \*c.
+Furthermore, a group of bits may be manipulated independently
+of the rest of the \*c.
+Specifying a "beg_val" of 0x00,
+an "end_val" of 0x7f and an "inc"
+of 0x01 attempts to write all possible addresses
+to the CMBASE (Copy Mode Base Address bits [bits 01-06]) 
+bits of the \*c.
+.br
+.sp 1
+The optional "count" argument  specifies the number of times which 
+the memorability test is performed.
+This argument is specified in \fIdecimal\fP\|.
+By default, the memorability test is  performed once.
+The range of legal \fInumerical\fP\| values for the "count" 
+argument is 1 to 2147483647 (0x7fffffff).
+However, if an asterisk (*) is entered as the count argument,
+the given test   runs \fIforever\fP\|.
+.br
+.sp 1
+At first glance, it may seem to be redundant to have a "count" argument
+for the memorability test in addition 
+to an "l" (loop) option, discussed later,
+on the "control register menu".
+However, there is a distinction.
+The "count" argument indicates the number of times that the memorability
+test is run.
+The "l" option indicates the number of times that the entire command line
+is executed.
+For example, the "l 10" option indicates that the following command line is
+to be executed ten times.
+.DS I 10
+"m 0x1 0xf 0x3 9 ; i ; j ; l 10"
+.DE
+For each of the ten invocations of the 
+above command line, the memorability test is to be run nine times
+(with a "beg_val" of 0x1, an "end_val" of 0xf and an "inc" of 0x3) while,
+the interrupt test (discussed later) and the jumper  test (discussed later)
+are to be run once.
+Thus, the memorability test would be run a total of ninety (90) times,
+rather than ten.
+.br
+.sp 1
+Another convention of the command line language should be made clear at
+this point.
+Let's say that we would like to run the memorability test seven times
+with the default values for the "beg_val", "end_val" and "inc" arguments.
+Simply entering "m 7" would \fInot\fP\| be sufficient.
+Such a command would run the memorability test once with the initial
+value of "beg_val" equal to seven (7).
+In order to accomplish our goal, the following command line should
+be entered.
+.DS I 10
+"m . . . 7"
+.DE
+The "." (period) is another special character 
+within the command line language.
+It causes the default value of an argument to be assigned to that argument.
+In a sense, the "." acts as a place holder.
+It informs the command line
+interpreter that the "7" is to be assigned to the "count"
+argument rather than to one of the other arguments.
+You can think of the "." as meaning DEFAULT.
+.br
+.sp 1
+Within reason, error checking is performed on the 
+command line arguments.
+Specifically, the following checks  are performed.
+.RS
+.IP A.
+The value of the "beg_val" is checked.
+.IP B.
+The value of the "end_val" is checked.
+.IP C.
+The value of the "inc" is  checked.
+.IP D.
+The value of the "count" is checked.
+.IP E.
+A check is performed to prevent overflow from occurring.
+.RE
+.IP 2.
+The second option on the Control Register Menu, option "c", executes the
+"Copy Enable/Disable Test". 
+This test  determines whether or not writing
+to a main memory shadow buffer also affects the \*(vm given the
+proper conditions.
+That is, whether or not the contents of the main memory shadow buffer
+are written to the \*(vm and, subsequently, are displayed on the screen
+given the proper conditions.
+.br
+.sp 1
+According to the "Theory of Operation Manual for the \*(vb", 
+the contents of the main memory shadow buffer are
+written to the \*(vm and, subsequently, are displayed on the screen
+if the following two conditions are met.
+.RS
+.IP A. 
+The address contained in bits 01-06 of the \*c
+must match the address on bus lines 17-22.
+.IP B.
+Bit 14 of the \*c must be set.
+.RE
+.br
+.sp 1
+Independent of whether or not the address contained in bits
+01-06 of the \*c matches the address on bus lines 17-22, the copy
+operation is not performed if bit 14 of the \*c is clear.
+Also, no communication between the video board and the CPU takes
+place if the address contained in bus lines 17-22 does not match the
+address in bits 01-06 of the \*c.
+.br
+.sp 1
+In particular, the following steps are performed
+when the Copy Enable/Disable Test is executed.
+.RS
+.IP A.
+Bit 14 of the \*c (VCOPYEN) is set.
+.IP B.
+The address of the first word in the 
+main memory shadow buffer
+is written to bits 01-06
+of the \*c (CMBASE bits:  Copy Mode Base Address bits).
+.IP C.
+A value is written to each word in the main memory
+shadow buffer.
+The contents of the main memory shadow buffer should consequently
+appear on the screen.
+The user  has the opportunity to specify the range of 
+values which
+are written to the main memory shadow buffer.
+.IP D.
+Bit 14 of the \*c is cleared.
+.IP E.
+The contents of the \*(vm and the main memory shadow buffer
+are compared.
+.IP F.
+The success or failure of the comparison operation is displayed on the screen.
+.RE
+.br
+.sp 1
+The command line syntax for the Copy Enable/Disable Test is:
+.DS I 10
+"c [beg_val [end_val]] [inc] [count]".
+.DE
+Option "c" accepts as many as four arguments.
+The "beg_val" (beginning hexadecimal value), "end_val" 
+(ending hexadecimal value), "inc" (hexadecimal increment)
+and "count" (pass count) arguments are all optional.
+Arguments "beg_val", "end_val" and "inc" must be specified in hexadecimal
+while, argument "count" must be specified in decimal.
+Notice that, in order to use the "end_val" argument,
+the "beg_val" is also required.
+That explains why the string 
+"[end_val]" is contained in the brackets surrounding "beg_val".
+.br
+.sp 1
+By default, the value of the "beg_val" argument
+is 0x0000, while the  value of the "end_val" argument is 0xffff.
+The range of values is constrained by the fact that there are
+only 16 bits in a word.
+The user can, however, 
+request that any value between 0x0000
+and 0xffff be assigned to the "beg_val" and 
+the "end_val" arguments.
+The only constraint is that 
+.I
+the "beg_val" must be less than or equal to 
+the "end_val".
+.R
+.br
+.sp 1
+By default, the value of the "inc" argument is one (0x1).
+The "inc" argument  dictates the sequence of values
+which are written to the \*c.
+For example, given a "beg_val" of 0x0000,
+an "end_val" of 0x0006 and an "inc" value
+of 0x0002, the following 
+sequence would be repeated throughout the main memory shadow buffer:
+"0x0000 0x0002 0x0004 0x0006".
+.br
+.sp 1
+The optional "count" argument  specifys the number of times which 
+the Copy Enable/Disable Test is performed.
+This argument is specified in \fIdecimal\fP\|.
+By default, the test is performed once.
+The range of legal \fInumerical\fP\| values for the "count" 
+argument is 1 to 2147483647 (0x7fffffff).
+However, if an asterisk (*) is entered as the count argument,
+the given test runs \fIforever\fP\|.
+.br
+.sp 1
+Although it may seem to be redundant to have a "count" argument
+for the Copy Enable/Disable Test 
+in addition to an "l" (loop) option, discussed later,
+on the "control register menu".
+There is a useful distinction, however.
+The "count" argument indicates the number of times that the 
+Copy Enable/Disable Test  is run.
+The "l" option indicates the number of times that the entire command line
+is executed.
+For example, the "l 10" option indicates that the following command line is
+to be executed ten times.
+.DS I 10
+"c 0x1 0xff 0x4 8 ; m . . . 3 ; l 10"
+.DE
+For each of the ten invocations of the 
+above command line, the Copy Enable/Disable Test 
+is to be run eight times
+(with a "beg_val" of 0x1, an "end_val" of 0xff and an "inc" of 0x4) while,
+the memorability test (discussed earlier)
+would be run three times.
+Thus, Copy Enable/Disable Test  would be run a total of eighty (80) times,
+rather than ten.
+.br
+.sp 1
+For the sake of an example, let's say that our goal is to run the
+Copy Enable/Disable Test twice with the default values for arguments
+"beg_val", "end_val" and "inc". 
+Entering "c 2" would \fInot\fP\| be sufficient.
+Such a command would run the Copy Enable/Disable Test
+once with the initial
+value of argument "beg_val" equal to two (2).
+In order to accomplish our goal, the following command line should
+be entered.
+.DS I 10
+"c . . . 2"
+.DE
+The "." (period) is  special character 
+within the command line language.
+Its affect is to assign the default value of an argument to that argument.
+Therefore, the "." acts as a sort of place holder.
+It informs the command line
+interpreter that the "2" is to be assigned to the "count"
+argument rather than to one of the other arguments.
+The "." means DEFAULT.
+.br
+.sp 1
+Within reason, error checking is performed on the 
+command line arguments.
+Specifically, the following checks are performed.
+.RS
+.IP A.
+The value of the "beg_val" is checked.
+.IP B.
+The value of the "end_val" is checked.
+.IP C.
+The value of the "inc" is  checked.
+.IP D.
+The value of the "count" is checked.
+.IP E.
+A check is performed to prevent overflow from occurring.
+.RE
+.sp 1
+.IP 3.
+The third option on the "control register menu",
+option "M", specifies whether or not messages are displayed
+on the screen.
+The command line for setting the message-mode-flag is displayed next.
+.DS I 10
+"M [1 | 0]"
+.DE
+Option "M" accepts one argument which can have one of two
+possible values ("0" or "1").
+If the user enters "M 0" on the command line, message mode is turned 
+\fIoff\fP\| (silent mode).
+On the other hand, if the user types "M 1" on the command line, message mode
+is turned \fIon\fP\| (verbose mode).
+It should be noted that, 
+if the user simply enters "M" on the command line, message mode
+is turned on.
+By default, message mode is on.
+.IP 4.
+The fourth option on the Control Register Menu, option "K",
+specifies whether or not \fIparity checking\fP\| is performed.
+\fIParity generation\fP\| is always on.
+The command line for setting the parity-checking-flag is displayed next.
+.DS I 10
+"K [0 | 1]"
+.DE
+Option "K" accepts one argument which can have one of two
+possible values ("0" or "1").
+If the user enters "K 0" on the command line, parity checking is 
+\fInot performed\fP\|.
+On the other hand, if the user types "K 1" on the command line, 
+parity checking \fIis executed\fP\|.
+It should be noted that, 
+if the user simply enters "K" on the command line, parity checking 
+is turned on.
+By default, parity checking is on.
+.IP 5.
+The fifth option on the Control Register Menu, 
+option "W" (wait/stop on error),
+specifies whether or not the program is temporarily suspended upon the
+occurrence of a \fImemory\fP\| data error (not all types of errors).
+The command line for setting the wait-on-error--flag is displayed next.
+.DS I 10
+"W [0 | 1]"
+.DE
+Option "W" accepts one argument which can have one of two
+possible values ("0" or "1").
+Entering "W 0" on the command line means that the program is not
+suspended after the occurrence of a \fImemory\fP\| data error.
+If "W 1" was entered on the command line
+prior to the occurrence of a \fImemory\fP\| data error,
+the program   waits until the user presses any key before continuing.
+It should be noted that, 
+if the user simply enters "W" on the command line, the wait-on-error-flag
+is turned off.
+By default, the wait-on-error-flag is off.
+.br
+.sp 1
+Given that the program is waiting for the user to press any key and the
+user presses "q" (a mnemonic for quit),
+the currently running  test is terminated.
+If, on the other hand,
+the user presses
+any other key, the memory test  continues with the next address.
+By default, the wait-on-error flag is off.
+.IP 4.
+The sixth option on the "control register menu", 
+option "S" (scope loop on error),
+determines whether or not the program enters
+a scope loop upon the occurrence of a \fImemory\fP\| data 
+error (not all types of errors).
+If the diagnostic enters a scope loop, it continues to write a value
+to the address in question and read back that value before comparing
+the expected and observed values (i.e the test performs write-read-compare
+cycles).
+The command line for setting the scope-loop-on-error--flag is displayed next.
+.DS I 10
+"S [0 | 1]"
+.DE
+Option "S" accepts one argument which can have one of two
+possible values ("0" or "1").
+Entering "S 0" on the command line means that the program does not
+enter a scope loop following the occurrence of a \fImemory\fP\| data error.
+If "S 1" is entered, the program does enter a scope loop
+following the occurrence of a \fImemory\fP\| data error.
+It should be noted that, 
+if the user simply enters "S" on the command line, the 
+scope-loop-on-error-flag is turned off.
+By default, the scope-loop-on-error flag is off.
+.br
+.sp 1
+The user is able to terminate a scope loop 
+\fIon a particular address\fP\| by pressing "n" (a mnemonic for next address).
+They can also  terminate the scope loop and the 
+currently running memory test by pressing "q" (a mnemonic for quit).
+.br
+.sp 1
+It should be noted that the user can turn both the wait-on-error-flag and
+the scope-loop-on-error-flag on simultaneously.
+Thus, it is possible to suspend the diagnostic after each
+write-read-compare cycle within the scope loop.
+Again, the user is able to terminate a scope loop 
+\fIon a particular address\fP\| by pressing "n" (a mnemonic for next address).
+They are also able to proceed from one write-read-compare cycle 
+to the next by pressing
+any character \fIexcept 'q' and 'n'\fP\|.
+Finally, the scope-loop, wait-on-error condition and the 
+currently running memory test 
+can be terminated by pressing "q" (a mnemonic for quit).
+By default, the scope-loop-on-error flag and the wait-on-error flag 
+are off.
+.IP 7.
+Option "s" on the Control Register Menu  initiates the 
+Screen (Display) Enable/Disable Test.
+This test aids the user in determining whether or the
+video display (screen) can be turned on and off.
+In particular, if bit 15 (VIDEN) of the \*c is set (equal to 1),
+the video display should be on (white with black characters).
+If bit 15 (VIDEN) of the \*c is clear (equal to 0), the video display
+should be off (black).
+.br
+.sp 1
+The Screen (Display) Enable/Disable Test
+turns the video display off and then back on.
+Unfortunately, the user is required to watch whether or not the
+video display flashes off and then back on.
+After the video display is turned back on, a statement  appears on the
+screen informing the user that the screen should have just blinked
+off and then back on.
+However, to eliminate the requirement of user input,
+the statement does NOT require a response.
+It simply remains on the screen for few seconds before 
+the \*(vd continues execution.
+.br
+.sp 1
+The command line syntax for the Screen (Display) Enable/Disable Test is: 
+.DS I 10
+"s [count]".
+.DE
+Option "s" accepts one  argument.
+The optional "count" argument  specifys the number of times which 
+the Screen (Display) Enable/Disable Test is performed.
+This argument is specified in \fIdecimal\fP\|.
+By default, the test is performed once.
+The range of legal \fInumerical\fP\| values for the "count" 
+argument is 1 to 2147483647 (0x7fffffff).
+However, if an asterisk (*) is entered as the count argument,
+the given test  runs \fIforever\fP\|.
+Error checking is performed on the value entered for the "count" argument.
+.IP 8.
+Chosing option "i" on the Control Register Menu  executes the
+Interrupt Enable/Disable Test.
+The Interrupt Enable/Disable Test  tests the 
+video board's ability to interrupt the CPU.
+.br
+.sp 1
+Specifically, the following steps are performed when the
+Interrupt Enable/Disable Test is initiated.
+To begin with, bit 13 of the \*c (VINTEN) is set.
+This should, in turn, cause a jump to an interrupt handler on the next
+vertical interval.
+That is, following the conclusion 
+of the current vertical interval, 
+execution of the interrupt routine should begin.
+The duration of a vertical interval is approximately one-seventieth
+of a second.
+The interrupt routine performs the following steps.
+.RS
+.IP A.
+One of the consequences of setting bit 13 of the \*c is that bit 12 of
+the \*c (VVINT) should also get set on the next vertical interval.
+That is to say, following the conclusion 
+of the current vertical interval, bit 12 of the \*c should get set.
+Therefore, the interrupt handler determines whether or not 
+bit 12 of the \*c is set.
+If it is not set, an error message to that affect is displayed.
+.IP B.
+Next, the interrupt routine  clears bit 13 of the \*c to disable
+the interrupt.
+.IP C.
+A check is made to ensure that bit 13 of the \*c is indeed cleared.
+.IP D.
+Again, because manipulation of bit 13 of the \*c should be reflected
+in bit 12 of the \*c on the next vertical interval, a check is
+made to determine whether or not bit 12 of the \*c is clear.
+Given that bit 12 of the \*c is not clear, an appropriate error
+message is displayed.
+.IP E.
+Finally, a global flag is set to indicate that the interrupt 
+routine was executed.
+.RE
+.br
+.sp 1
+Since it is not reasonable to assume that the video board's ability
+to interrupt the CPU is functional, the \*(vd  gives up waiting
+for the execution of the interrupt routine after a approximately
+one second.
+This eliminates an infinite loop in the case that the video
+board's interrupt facility is not working correctly.
+If the interrupt routine is not executed within the specified
+amount of time, an error message is printed on the screen.
+.br
+.sp 1
+The command line syntax for the Interrupt Enable/Disable Test is: 
+.DS I 10
+"i [count]".
+.DE
+Option "i" accepts one  argument.
+The optional "count" argument  specifys the number of times which 
+the Interrupt Enable/Disable Test is performed.
+This argument is specified in \fIdecimal\fP\|.
+By default, the test is performed once.
+The range of legal \fInumerical\fP\| values for the "count" 
+argument is 1 to 2147483647 (0x7fffffff).
+However, if an asterisk (*) is entered as the count argument,
+the given test  runs \fIforever\fP\|.
+Error checking is performed on the value entered for the "count" argument.
+.IP 9.
+If option "j" on the Control Register Menu is selected,
+the (Configuration) Jumper Test is initiated.
+Quite simply, the Jumper Test  displays the contents of 
+bits 08-11 of the \*c.
+The contents of the Configuration Jumper Bits are displayed in
+hexadecimal, decimal, octal and binary.
+.br
+.sp 1
+The command line for the (Configuration) Jumper Test is:
+.DS I 10
+"j [count]".
+.DE
+Option "j" accepts one  argument.
+The optional "count" argument  specifys the number of times which 
+the Jumper Test is performed.
+This argument is specified in \fIdecimal\fP\|.
+By default, the test is performed once.
+The range of legal \fInumerical\fP\| values for the "count" 
+argument is 1 to 2147483647 (0x7fffffff).
+However, if an asterisk (*) is entered as the count argument,
+the given test   runs \fIforever\fP\|.
+Error checking is performed on the value entered for the "count" argument.
+.IP 10.
+Selecting option "d" initiates the default \*c test.
+Since the five \*c tests run quickly,
+all five of them are include in the default \*c test sequence.
+Therefore, in this case, the default \*c test  exhaustively tests the \*c.
+The amount of time required to run the default \*c test 
+is approximately:  52 seconds.
+The five tests are listed next.
+.RS 
+.IP A.
+Memory Test Of The Control Register.
+.IP B.
+Screen (Display) Enable/Disable Test.
+.IP C.
+Copy Enable/Disable Test.
+.IP D.
+Interrupt Enable/Disable Test.
+.IP E.
+Jumper Test.
+.RE
+.br
+.sp 1
+The command line syntax for option "d" is shown next.
+.DS I 10
+"d"
+.DE
+Option "d" does not accept any arguments.
+.IP 11.
+Option "l" (the letter ell) on the "control register menu"
+gives the user the opportunity to specify the number of times a
+user-specified sequence of tests is to be executed.
+Terminating a command line containing
+one or more user-specified tests with "l 11", for example,
+executes all of the tests on that command line eleven times.
+The command line for the loop option is shown below.
+.DS I 10
+"l [loop_count]"
+.DE
+Option "l" accepts one command line argument.
+The "loop_count" argument is optional.
+Without it, the test(s) on the command line
+are performed \fIonce\fP\|.
+All command lines are executed once even if the "l" option does not
+appear at the end.
+Therefore, using the "l" option without an argument has \fIno affect\fP\|.
+.br
+.sp 1
+The "loop_count" argument specifies, in \fIdecimal\fP\|,
+the number of times that the command line sequence is 
+to be \fIexecuted\fP\|.
+The range of legal \fInumerical\fP\| values for the "loop_count" 
+argument is 1 to 2147483647 (0x7fffffff).
+However, if an asterisk (*) is entered as the "loop_count" argument,
+the given test sequence, theoretically, runs \fIforever\fP\|.
+With one exception, the  asterisk (*) 
+symbolizes "forever" throughout the \*(vd. 
+The only exception to this rule is explained in the section titled
+"The Serial Communication Controller".
+.br
+.sp 1
+The ";" is a \fIspecial character\fP\| in the command line language.
+It acts as a \fIseparator\fP\| between commands.
+If our goal is to run the default option
+on the "control register menu" five times, the loop option is useful.
+Rather than entering the "d" command five times (d ; d ; d ; d ; d),
+the following command can be used.
+.DS I 10
+"d ; l 5"
+.DE
+The "d" specifies that the default test sequence is to be run.
+The ";" separates the "d" command from the "l" command.
+The "l 5" indicates that the command line is to be executed five times.
+In short, the ";" must be used to separate commands.
+It is \fInot\fP\| used to separate a command from its argument(s) and
+it is \fInot\fP\| used to separate one argument from another.
+Using the ";" in this manner causes a syntax error.
+.br
+.sp 1
+Another (unfortunate) rule of the command line language is
+relevant here.
+Due to an implementation "error" in the Diagnostic stand-alone library, 
+all commands, arguments and ";"'s must be
+separated by, at least, one SPACE character.
+Thus, "d;l 5" is \fInot\fP\| a correct method of running the default test
+sequence five times.
+Instead, it causes a syntax error.
+.IP 12.
+Option "e" on the "control register menu"  displays an error log.
+Specifically, at a maximum, the first 100 error 
+messages of each type produced by the \*(vd are printed on the screen.
+Notice that these error messages may not 
+necessarily be related to the \*c.
+The command line syntax for option "e" is shown next.
+.DS I 10
+"e"
+.DE
+Option "e" does not accept any arguments.
+The user does, however, have the ability to suspend and restart the error log
+display as they see fit.
+Pressing any key, except "q", suspends the error log display until the user
+presses another key.
+If the user presses "q" at any time, the error log display
+is terminated.
+.IP 13.
+If option "h" on the "control register menu" is chosen, 
+more detailed user instructions  appear on the screen.
+The command line syntax for option "h" is shown next.
+.DS I 10
+"h"
+.DE
+Option "h" does not accept any arguments.
+The "help" screen associated with the "control register menu" is shown next.
+.sp 2
+.KS
+.TS
+center box expand tab (#);
+l.
+.sp 
+Sun-2/120 Video Board Diagnostic      REV 1.1 6/27/85      Control Register Menu
+.sp 2
+.T&
+a.
+m  -  Memory Test Of Control Register\0\0\0\0\08 s\0\0\0c [beg_val [end_val]] [inc] [count]
+.sp 1
+c  -  Copy Enable/Disable Test\0\0\0\0\0\0\0\0\0\0\0\017 s\0\0c [beg_val [end_val]] [inc] [count]
+.sp 1
+M  -  Print Error Messages?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0M [0 | 1]
+.sp 1
+K  -  Check Parity?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0K [0 | 1]
+.sp 1
+W  -  Wait (Stop) On Error?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0W [0 | 1]
+.sp 1
+S  -  Scope Loop On Error?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0S [0 | 1]
+.sp 1
+s  -  Screen (Display) Enable/Disable Test\0\012 s\0\0s [count]
+.sp 1
+i  -  Interrupt Enable/Disable Test\0\0\0\0\0\0\0\0\05 s\0\0\0i [count]
+.sp 1
+j  -  Jumper Test\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\09 s\0\0\0j [count]
+.sp 1
+d  -  Default Control Register Test\0\0\0\0\0\0\0\0\052 s\0\0d
+.sp 1
+l  -  Loop\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0l [loop_count]
+.sp 1
+e  -  Error Log Display\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0e
+.sp 1
+h  -  Help\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0h
+.sp 1
+p  -  Return To The Main Menu\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0p
+.sp 1
+q  -  Quit\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0q
+.sp 2
+.T&
+l.
+Command ==>
+.sp 2
+.TE
+.KE
+.IP 14.
+If option "p" on the Control Register Menu is executed,
+the Main Menu appears on the screen.
+In other words, option "p" returns to the Main Menu.
+This option allows the user the ability get back to the "main menu"
+in the case that they want to go to another submenu 
+(i.e.  The Video Memory Menu or The Serial Communication Controller Menu).
+The command line syntax for option "p" is shown next.
+.DS I 10
+"p"
+.DE
+Option "p" does not accept any arguments.
+.IP 15.
+Finally, option "q" on the "control register menu" terminates the \*(vd.
+The command line syntax for option "q" is shown next.
+.DS I 10
+"q"
+.DE
+Option "q" does not accept any arguments.
+.RE
+.H 3 "The Serial Communication Controller"
+.PP
+A Zilog 8530A \*s (SCC) is used to 
+communicate with the keyboard and the mouse.
+The \*s consists of two channels (channels A and B).
+Each channel consists of two 16 bit words.
+One word is for commands while, the other word is for data.
+.PP
+The starting address for the \*s is 0x780000. 
+Four contiguous words on the video board are reserved for the \*s. 
+The addresses of those four words 
+are 0x780000, 0x780002, 0x780004 
+and 0x780006.
+Words 0x780000 and 0x780002 correspond
+to Channel B of the \*s.
+Channel B of the \*s handles communication with the mouse.
+Words 0x780004 and 0x780006 correspond to Channel A
+of the \*s.
+Channel A of the \*s handles communication with the keyboard.
+This information is summarized in the following table.
+.sp 2
+.KS
+.TS
+center box tab (/) ;
+l | l s
+nfL | l l .
+.sp .1i
+ADDRESS:/FUNCTION:
+.sp .1i
+=
+.sp .1i
+0x780000/Channel B commands/(mouse)
+0x780002/Channel B data/(mouse)
+0x780004/Channel A commands/(keyboard)
+0x780006/Channel A data/(keyboard)
+.sp .1i
+.TE
+.KE
+.sp 2
+.PP
+The \*s is a byte-oriented device.
+Data is transferred only on the high 
+byte of the data words (data bits 08-15).  
+During a read operation, 
+the low byte contains the lower byte of the \*c.
+The contents of the lower byte during a write operation is 
+unimportant ("don't care").
+This information is summarized in the figure below.
+.sp 2
+.KS
+.FN "Serial Communication Controller"
+.TS
+center tab (/) ;
+| c s s s s s s s | c s s s s s s s |
+| cfL | cfL | cfL | cfL | cfL | cfL | cfL | cfL | cfL | cfL | cfL | cfL | cfL | cfL | cfL | cfL |
+| c s s s s s s s | c s s s s s s s | .
+High Byte/Low Byte
+.sp .1i
+_
+15/14/13/12/11/10/09/08/07/06/05/04/03/02/01/00
+_
+.sp
+SCC read or write data/write = do not care
+/read = lower byte of control register
+.TE
+.KE
+.sp 2
+.PP
+The Serial Communication Controller Menu,
+displayed below, has a total of nine options.
+These options are discussed following the display of the
+"serial communication controller menu".
+Recall that typing the character corresponding to an option 
+\fIselects\fP\| that option, 
+while pressing the "return" key after the option was selected
+\fIinvokes\fP\| the option.
+.br
+.sp 1
+Where it is appropriate, the time required to run a test is displayed
+on the menu.
+For example, the time required to run the default test sequence is 37 seconds.
+This information is shown on the menu in the following shorthand 
+form:  "37 s".
+The "m" stands for minutes while, the "s" corresponds to seconds.
+.sp 2
+.KS
+.TS
+center box expand tab (#);
+l.
+.sp 2
+Sun-2/120 Video Board Diagnostic   REV 1.1 6/27/85   Serial Com. Controller Menu
+.sp 2
+.T&
+a.
+s  -  Serial Communication Controller Test
+.sp 1
+d  -  Default Serial Communication Controller Test\0\0\0\0\0\0\0\037 s
+.sp 1
+M  -  Print Error Messages?
+.sp 1
+K  -  Check Parity?
+.sp 1
+l  -  Loop
+.sp 1
+e  -  Error Log Display
+.sp 1
+h  -  Help
+.sp 1
+p  -  Return To The Main Menu
+.sp 1
+q  -  Quit
+.sp 2
+.T&
+l.
+Command ==>
+.sp 2
+.TE
+.KE
+.RS
+.IP 1.
+The first option on the  Serial Communication Controller Menu, option "s",
+executes the internal loopback "Serial Communication Controller Test".
+This option  tests the interface to the \*s by attempting
+to write data to one channel and read it 
+back through that same channel.
+By default, all values between 0x00 and 0xff inclusive
+are written to Channel A, read back through Channel A and compared
+before a message indicating the success or failure of the test is
+printed.
+Next, all values between 0x00 and 0xff inclusive
+are written to Channel B, read back through Channel B and compared
+before a message indicating the success or failure of the test is
+printed.
+The range of values written to each channel is limited by the fact
+that the \*s is a byte oriented device and 
+that there are only 8 bits per byte.
+In short, both channels are tested with all possible data values.
+.br
+.sp 1
+The command line syntax for the "Serial Communication Controller Test" is:
+.DS I 10
+"s [baudrate] [count]".
+.DE
+Option "s" accepts a maximum of two arguments.
+The "baudrate" and "count" arguments are both optional.
+.br
+.sp 1
+Again, by default, the "Serial Communication Controller Test"
+writes all possible data values to both channels.
+In addition, 
+\fIif the user does not specify a baud rate on the command line\fP\|,
+baud rate 300 is used.
+The legal values for the "baudrate" argument are
+"300", "600", "1200", "2400", "4800", "9600", "19200", "38400",
+"76800", "." and "*".
+.br
+.sp 1
+The numeric baud rate values listed above are self explanatory.
+The final two baud rate values ("." and "*") are in need of explanation.
+Entering the value "." for the baud rate will execute the 
+"Serial Communication Controller Test" with the two default baud rates
+of 300 and 9600.
+Entering the value "*" for the baud rate will perform the
+"Serial Communication Controller Test" with all of the baud rates listed
+above.
+Therefore,  in this case, the asterisk (*) takes on the new meaning
+of \fIall\fP\| rather than \fIforever\fP\|.
+.br
+.sp 1
+The optional "count" argument  specifies the number of times which 
+the "Serial Communication Controller Test"  is performed.
+This argument is specified in \fIdecimal\fP\|.
+By default, the  "Serial Communication Controller Test"
+is  performed once.
+The range of legal \fInumerical\fP\| values for the "count" 
+argument is 1 to 2147483647 (0x7fffffff).
+However, if an asterisk (*) is entered as the count argument,
+the given test  runs \fIforever\fP\|.
+The discussion under the "m" option of the section titled 
+"The Control Register" explains the purpose of having 
+both the "count" argument and the loop option (option "l") presented below.
+.IP 2.
+Selecting option "d" on the "\*s menu"
+initiates the default \*s test sequence.
+The default test sequence is as  follows.
+All possible values (0x00 - 0xff) are written to Channel A and
+read back through Channel A before all possible values (0x00 - 0xff)
+are written to Channel B and read back through Channel B.
+These values are written to both channels at two baud rates.
+The first baud rate is 300 (slow) while, the second baud rate is
+9600 (fast).
+.br
+.sp 1
+The command line syntax for option "d" is shown next.
+.DS I 10
+"d"
+.DE
+Option "d" does not accept any arguments.
+.IP 3.
+The third option on the "\*s menu",
+option "M", specifies whether or not messages are displayed
+on the screen.
+The command line for setting the message-mode-flag is displayed next.
+.DS I 10
+"M [1 | 0]"
+.DE
+Option "M" accepts one argument which can have one of two
+possible values ("0" or "1").
+If the user enters "M 0" on the command line, message mode is turned 
+\fIoff\fP\| (silent mode).
+On the other hand, if the user types "M 1" on the command line, message mode
+is turned \fIon\fP\| (verbose mode).
+It should be noted that, 
+if the user simply enters "M" on the command line, message mode
+is turned on.
+By default, message mode is on.
+.IP 4.
+The fourth option on the "\*s menu", option "K",
+specifies whether or not \fIparity checking\fP\| is performed.
+\fIParity generation\fP\| is always on.
+The command line for setting the parity-checking-flag is displayed next.
+.DS I 10
+"K [0 | 1]"
+.DE
+Option "K" accepts one argument which can have one of two
+possible values ("0" or "1").
+If the user enters "K 0" on the command line, parity checking is 
+\fInot performed\fP\|.
+On the other hand, if the user types "K 1" on the command line, 
+parity checking \fIis executed\fP\|.
+It should be noted that, 
+if the user simply enters "K" on the command line, parity checking 
+is turned on.
+By default, parity checking is on.
+.IP 5.
+Option "l" (the letter ell) on the "\*s menu"
+gives the user the opportunity to specify the number of times a
+user-specified sequence of tests is to be executed.
+For example, terminating a command line containing
+one or more user-specified tests with "l 5" 
+executes all of the tests on that command line five times.
+The command line for the loop option is shown below.
+.DS I 10
+"l [loop_count]"
+.DE
+Option "l" accepts one command line argument.
+The "loop_count" argument is optional.
+Without it, the test(s) on the command line
+are performed \fIonce\fP\|.
+All command lines are executed once even if the "l" option does not
+appear at the end.
+Therefore, using the "l" option without an argument has \fIno affect\fP\|.
+.br
+.sp 1
+The "loop_count" argument specifies, in \fIdecimal\fP\|,
+the number of times that the command line sequence is 
+to be \fIexecuted\fP\|.
+The range of legal \fInumerical\fP\| values for the "loop_count" 
+argument is 1 to 2147483647 (0x7fffffff).
+However, if an asterisk (*) is entered as the "loop_count" argument,
+the given test sequence, theoretically, runs \fIforever\fP\|.
+The discussion under the "l" option of the section titled 
+"The Main Menu" provides additional details relevant to the usage
+of the loop option.
+.IP 6.
+Option "e" on the "\*s menu" displays an error log.
+More specifically, at a maximum, the first 100 errors messages of each type
+recorded by the \*(vd are printed on the screen.
+Notice that these errors may not be related to the \*s.
+The command line syntax for option "e" is shown next.
+.DS I 10
+"e"
+.DE
+Option "e" does not accept any arguments.
+The user does, however, have the ability to suspend and restart the error log
+display as they see fit.
+Pressing any key, except "q", suspends the error log display until the user
+presses another key.
+If the user presses "q" at any time, the error log display
+is terminated.
+.IP 7.
+If option "h" on the "\*s menu" is chosen, 
+more detailed user instructions  appear on the screen.
+The command line syntax for option "h" is shown next.
+.DS I 10
+"h"
+.DE
+Option "h" does not accept any arguments.
+The "help" screen associated with the "\*s menu" is shown next.
+.sp 2
+.KS
+.TS
+center box expand tab (#);
+l.
+.sp 2
+Sun-2/120 Video Board Diagnostic   REV 1.1 6/27/85   Serial Com. Controller Menu
+.sp 2
+.T&
+a.
+s  -  Serial Communication Controller Test\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0s [baudrate] [count]
+.sp 1
+d  -  Default Serial Communication Controller Test\0\0\0\0\0\0\037 s\0\0d
+.sp 1
+M  -  Print Error Messages?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0M [0 | 1]
+.sp 1
+K  -  Check Parity?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0K [0 | 1]
+.sp 1
+l  -  Loop\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0l [loop_count]
+.sp 1
+e  -  Error Log Display\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0e
+.sp 1
+h  -  Help\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0h
+.sp 1
+p  -  Return To The Main Menu\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0e
+.sp 1
+q  -  Quit\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0q
+.sp 2
+.T&
+l.
+Command ==>
+.sp 2
+.TE
+.KE
+.IP 8.
+If option "p" on the Serial Communication Controller Menu is executed,
+the Main Menu appears on the screen.
+In other words, option "p" returns to the Main Menu.
+This option allows the user the ability get back to the "main menu"
+in the case that they want to go to another submenu 
+(i.e.  The Video Memory Menu or The Control Register Menu).
+The command line syntax for option "p" is shown next.
+.DS I 10
+"p"
+.DE
+Option "p" does not accept any arguments.
+.IP 9.
+Finally, option "q" on the "\*s menu" terminates the \*(vd.
+The command line syntax for option "q" is shown next.
+.DS I 10
+"q"
+.DE
+Option "q" does not accept any arguments.
+.RE
+.H 3 "The Video Memory"
+.PP
+Addresses 0x700000 (7340032) through 0x71FFFE (7471102)
+encompass the \*(vm.
+In terms of writing, the processor can write bytes or words.
+The \*(vd's \*(vm tests  tests the processor's
+ability to write bytes and words.
+.PP
+The Video Memory Menu, presented next, has a total of sixteen options.
+The first five options on the menu  initiate a particular \*(vm test.
+Keep in mind that all five of these tests  execute the 
+following four steps: (1) write to the \*(vm, (2) read back the contents
+of the \*(vm, (3) compare the values read back with the expected value
+and (4) display a message indicating the success or 
+failure of the test.
+The major difference between the \*(vm tests is that each 
+writes a different type of data to the \*(vm.
+Recall that typing the character corresponding to an option 
+\fIselects\fP\| that option, 
+while pressing the "return" key after the option was selected
+\fIinvokes\fP\| the option.
+.br
+.sp 1
+Where it is appropriate, the time required to run a test is displayed
+on the menu.
+For example, the time required to run the "Checker Pattern Test"
+in \fIbyte\fP\| mode is 5 minutes and 58 seconds while, the time
+needed to complete the "Checker Pattern Test" in \fIword\fP\| mode is 2 
+minutes and 52 seconds.
+This information is shown on the menu in the following shorthand 
+form:  "b: 5 m 58 s, w: 2 m 52 s".
+The "b" stands for byte mode while, the "w" corresponds to word mode.
+As on other menus, "m" implies minutes while, "s" is a mnemonic for
+seconds.
+.sp 2
+.KS
+.TS
+center box expand tab (#);
+l.
+.sp 2
+Sun-2/120 Video Board Diagnostic        REV 1.1 6/27/85        Video Memory Menu
+.sp 2
+.T&
+a.
+a  -  Address Test\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0b: 51 s,\0\0\0\0\0w: 28 s
+.sp 1
+c  -  Constant Pattern Test\0\0\0\0\0\0\0b: 26 s,\0\0\0\0\0w: 15 s
+.sp 1
+r  -  Random Pattern Test\0\0\0\0\0\0\0\0b: 37 s,\0\0\0\0\0w: 21 s
+.sp 1
+u  -  Uniqueness Test\0\0\0\0\0\0\0\0\0\0\0\0\0b: 42 s,\0\0\0\0\0w: 23 s
+.sp 1
+x  -  Checker Pattern Test\0\0\0\0\0\0\0\0b: 5 m 58 s, w: 2 m 52 s
+.sp 1
+d  -  Default Video Memory Test\0\042 s
+.sp 1
+M  -  Print Error Messages?
+.sp 1
+B  -  Byte Or Word Mode?
+.sp 1
+K  -  Check Parity?
+.sp 1
+W  -  Wait (Stop) On Error?
+.sp 1
+S  -  Scope Loop On Error?
+.sp 1
+l  -  Loop
+.sp 1
+e  -  Error Log Display
+.sp 1
+h  -  Help
+.sp 1
+p  -  Return To The Main Menu
+.sp 1
+q  -  Quit
+.sp 2
+.T&
+l.
+Command ==>
+.sp 2
+.TE
+.KE
+.RS
+.IP 1.
+If option "a" on the "\*(vm menu" 
+is selected, the "Address Test" is invoked.
+The "Address Test"  actually performs two tests of the \*(vm.
+In the first test, the low order bits of a given address are
+written to the memory location corresponding to that address.
+In the second test, the ones complement of the low order bits of
+a given address are
+written to the memory location corresponding to that address.
+.br
+.sp 1
+The command line syntax for the "Address Test" is: 
+.DS I 10
+"a [count]".
+.DE
+Option "a" accepts a maximum of one argument.
+The optional "count" argument  specifies the number of times which 
+the "Address Test"  is performed.
+This argument is specified in \fIdecimal\fP\|.
+By default, the  "Address Test"
+is  performed once.
+The range of legal \fInumerical\fP\| values for the "count" 
+argument is 1 to 2147483647 (0x7fffffff).
+However, if an asterisk (*) is entered as the count argument,
+the given test runs \fIforever\fP\|.
+The discussion under the "m" option of the section titled 
+"The Control Register" explains the purpose of having 
+both the "count" argument and the loop option (option "l") presented later.
+Error checking is performed on the value entered for the "count" argument.
+.IP 2.
+If option "c"  on the "\*(vm menu" is chosen, 
+the "Constant Pattern Test" is performed.
+The "Constant Pattern Test" writes a constant pattern throughout \*(vm.
+The command line syntax for the "Constant Pattern Test" is:
+.DS I 10
+"c [pattern] [count]".
+.DE
+Option "c" accepts a maximum of two arguments.
+The "pattern" argument indicates 
+which \fIhexadecimal\fP\| value is to be written
+throughout \*(vm.
+If \fIbyte\fP\| mode is on, 
+the "Constant Pattern Test", by default, writes 0x55 to each 
+byte in the \*(vm.
+On the other hand, if \fIword\fP\| mode is on, 
+the "Constant Pattern Test", by default, writes 0x5555 to each 
+word in the \*(vm.
+The distinction between byte and word mode is covered below under option
+"B".
+Assuming that byte mode has been enabled, the legal range of values
+for the "pattern" argument is 0x00 through 0xff.
+The legal range of values for the "pattern" argument when word mode
+is active is 0x0000 through 0xffff.
+Error checking is performed on the value entered for the "pattern" argument.
+.br
+.sp 1
+The optional "count" argument  specifies the number of times which 
+the "Constant Pattern Test"  is performed.
+This argument is specified in \fIdecimal\fP\|.
+By default, the  "Constant Pattern Test"
+is  performed once.
+The range of legal \fInumerical\fP\| values for the "count" 
+argument is 1 to 2147483647 (0x7fffffff).
+However, if an asterisk (*) is entered as the count argument,
+the given test runs \fIforever\fP\|.
+The discussion under the "m" option of the section titled 
+"The Control Register" explains the purpose of having 
+both the "count" argument and the loop option (option "l") presented later.
+Error checking is performed on the value entered for the "count" argument.
+.IP 3.
+Selecting option "r" on the "video memory menu" 
+initiates the "Random Pattern Test".
+The "Random Pattern Test"  writes random numbers to the \*(vm based on
+a "seed" (a number used to generate the first random number).
+The command line syntax for the "Random Pattern Test" is:
+.DS I 10
+"r [seed] [count]".
+.DE
+Option "r" accepts a maximum of two arguments.
+The "seed" argument is the \fIdecimal\fP\| value that
+determines the sequence of random numbers which are written to \*(vm.
+By default, the seed is the decimal integer seven (7).
+The user can  specify any decimal value 
+between 0 and 2147483647 for the  seed.
+.br
+.sp 1
+The optional "count" argument  specifies the number of times which 
+the "Random Pattern Test"  is performed.
+This argument is specified in \fIdecimal\fP\|.
+By default, the  "Random Pattern Test"
+is  performed once.
+The range of legal \fInumerical\fP\| values for the "count" 
+argument is 1 to 2147483647 (0x7fffffff).
+However, if an asterisk (*) is entered as the count argument,
+the given test runs \fIforever\fP\|.
+The discussion under the "m" option of the section titled 
+"The Control Register" explains the purpose of having 
+both the "count" argument and the loop option (option "l") presented later.
+Error checking is performed on the value entered for the "count" argument.
+.IP 4.
+If option "u"  on the "video memory menu"
+is selected, the "Uniqueness Test" is carried out.
+The "Uniqueness Test" writes a series of unique numbers to the \*(vm.
+Given the \fIi-th\fP\| memory location  in the \*(vm, 
+the value that is written to that location is $i times constant$.
+The command line syntax for the "Uniqueness Test" is:
+.DS I 10
+"u [constant] [count]"
+.DE
+Option "u" accepts a maximum of two arguments.
+The "constant" argument is used in determining the values that
+get written to the \*(vm.
+The default value of the "constant" argument is one (1).
+The user is able to specify a different "constant", however.
+Assuming that \fIbyte\fP\| mode has been enabled, the 
+legal range of \fIdecimal\fP\| values
+for the "constant" argument is 0 through 255.
+The legal range of values for the "constant" argument when \fIword\fP\| mode
+is active is 0 through 65535.
+The distinction between byte and word mode is covered below under option
+"B".
+Error checking is performed on the value entered for the "constant" argument.
+.br
+.sp 1
+The optional "count" argument  specifies the number of times which 
+the "Uniqueness Test"  is performed.
+This argument is specified in \fIdecimal\fP\|.
+By default, the  "Uniqueness Test"
+is  performed once.
+The range of legal \fInumerical\fP\| values for the "count" 
+argument is 1 to 2147483647 (0x7fffffff).
+However, if an asterisk (*) is entered as the count argument,
+the given test runs \fIforever\fP\|.
+The discussion under the "m" option of the section titled 
+"The Control Register" explains the purpose of having 
+both the "count" argument and the loop option (option "l") presented later.
+Error checking is performed on the value entered for the "count" argument.
+.IP 5.
+Option "x" on the "video memory menu" invokes the "Checker Pattern Test".
+Like the "Address Test", the "Checker Pattern Test"
+actually perform multiples tests of the \*(vm.
+For the sake of notational convenience, let's introduce the following.
+Given a binary pattern $y$,
+let $y bar$ 
+be the ones complement
+of that binary pattern.
+For instance, if binary pattern $y$ is 0, 
+the ones complement of that pattern ($y bar$) is 1. 
+Initially, the "Checker Pattern Test"  writes the alternating sequence
+of "$y$ $y bar$" throughout the \*(vm.
+In the second pass, the "Checker Pattern Test" writes the alternating 
+sequence of "$y$ $y$ $y bar$ $y bar$" in
+the \*(vm.
+In the third pass, the "Checker Pattern Test" writes the 
+alternating sequence 
+of "$y$ $y$ $y$ $y bar$ $y bar$ $y bar$"
+throughout the \*(vm.
+This process continues until one half of the \*(vm is filled
+with $y$'s and the other half is filled with $y bar$'s.
+.br
+.sp 1
+The command line syntax for the "Checker Pattern Test" is:
+.DS I 10
+"x [pattern] [count]"
+.DE
+Option "x" accepts a maximum of two arguments.
+The "pattern" argument is used in determining the values that
+are written to the \*(vm.
+If \fIbyte\fP\| mode is on, 
+the default \fIhexadecimal\fP\| value of the "pattern" argument is  0xa0.
+On the other hand, if \fIword\fP\| mode is on, 
+the default \fIhexadecimal\fP\| value of the "pattern" argument is  0xa0a0.
+The distinction between byte and word mode is covered below under option
+"B".
+The user is able to specify a different "pattern", however.
+Assuming that byte mode has been enabled, the 
+legal range of \fIhexadecimal\fP\| values
+for the "constant" argument is 0x00 through 0xff.
+The legal range of values for the "pattern" argument when word mode
+is active is 0x0000 through 0xffff.
+Error checking is performed on the value entered for the "pattern" argument.
+.br
+.sp 1
+The optional "count" argument  specifies the number of times which 
+the "Checker Pattern Test"  is performed.
+This argument is specified in \fIdecimal\fP\|.
+By default, the  "Checker Pattern Test"
+is  performed once.
+The range of legal \fInumerical\fP\| values for the "count" 
+argument is 1 to 2147483647 (0x7fffffff).
+However, if an asterisk (*) is entered as the count argument,
+the given test runs \fIforever\fP\|.
+The discussion under the "m" option of the section titled 
+"The Control Register" explains the purpose of having 
+both the "count" argument and the loop option (option "l") presented later.
+Error checking is performed on the value entered for the "count" argument.
+.IP 6.
+Selecting option "d"  on the "video memory menu"
+initiates the default video memory test.
+The default video memory test executes the following two tests.
+.RS
+.IP A.
+The "Constant Pattern Test" in byte mode with pattern 0xa0.
+.IP B.
+The "Constant Pattern Test" in word mode with pattern 0xa0a0.
+.RE
+.br
+.sp 1
+The command line syntax for option "d" is shown next.
+.DS I 10
+"d"
+.DE
+Option "d" does not accept any arguments.
+.IP 7.
+The seventh option on the "\*(vm menu",
+option "M", specifies whether or not messages are displayed
+on the screen.
+The command line for setting the message-mode-flag is displayed next.
+.DS I 10
+"M [1 | 0]"
+.DE
+Option "M" accepts one argument which can have one of two
+possible values ("0" or "1").
+If the user enters "M 0" on the command line, message mode is turned 
+\fIoff\fP\| (silent mode).
+On the other hand, if the user types "M 1" on the command line, message mode
+is turned \fIon\fP\| (verbose mode).
+It should be noted that, 
+if the user simply enters "M" on the command line, message mode
+is turned on.
+By default, message mode is on.
+.IP 8.
+The eighth option on the Video Memory Menu,
+option "B", specifies whether the memory tests will be executed in
+byte mode or word mode.
+That is, whether the processor writes, reads and compares bytes or words.
+The command line for setting the byte-or-word-mode-flag is displayed next.
+.DS I 10
+"B [0 | 1]"
+.DE
+Option "B" accepts one argument which can have one of two
+possible values ("0" or "1").
+If the user enters "B 0" on the command line, byte mode is turned on.
+On the other hand, if the user types "B 1" on the command line, word mode
+is turned on.
+It should be noted that, 
+if the user simply enters "B" on the command line, word mode
+is turned on.
+By default, word mode is active.
+.IP 9.
+The ninth option on the "\*(vm menu", option "K",
+specifies whether or not \fIparity checking\fP\| is performed.
+\fIParity generation\fP\| is always on.
+The command line for setting the parity-checking-flag is displayed next.
+.DS I 10
+"K [0 | 1]"
+.DE
+Option "K" accepts one argument which can have one of two
+possible values ("0" or "1").
+If the user enters "K 0" on the command line, parity checking is 
+\fInot performed\fP\|.
+On the other hand, if the user types "K 1" on the command line, 
+parity checking \fIis executed\fP\|.
+It should be noted that, 
+if the user simply enters "K" on the command line, parity checking 
+is turned on.
+By default, parity checking is on.
+.IP 10.
+The tenth option on the Video Memory Menu, 
+option "W" (wait/stop on error),
+specifies whether or not the program is temporarily suspended upon the
+occurrence of a \fImemory\fP\| data error (not all types of errors).
+The command line for setting the wait-on-error--flag is displayed next.
+.DS I 10
+"W [0 | 1]"
+.DE
+Option "W" accepts one argument which can have one of two
+possible values ("0" or "1").
+Entering "W 0" on the command line means that the program is not
+suspended after the occurrence of a \fImemory\fP\| data error.
+If "W 1" was entered on the command line
+prior to the occurrence of a \fImemory\fP\| data error,
+the program   waits until the user presses any key before continuing.
+It should be noted that, 
+if the user simply enters "W" on the command line, the wait-on-error-flag
+is turned off.
+By default, the wait-on-error-flag is off.
+.br
+.sp 1
+Given that the program is waiting for the user to press any key and the
+user presses "q" (a mnemonic for quit),
+the currently running  test is terminated.
+If, on the other hand,
+the user presses
+any other key, the memory test  continues with the next address.
+By default, the wait-on-error flag is off.
+.IP 11.
+The eleventh option on the "\*(vm menu", 
+option "S" (scope loop on error),
+determines whether or not the program enters
+a scope loop upon the occurrence of a \fImemory\fP\| data 
+error (not all types of errors).
+If the diagnostic enters a scope loop, it continues to write a value
+to the address in question and read back that value before comparing
+the expected and observed values (i.e the test performs write-read-compare
+cycles).
+The command line for setting the scope-loop-on-error--flag is displayed next.
+.DS I 10
+"S [0 | 1]"
+.DE
+Option "S" accepts one argument which can have one of two
+possible values ("0" or "1").
+Entering "S 0" on the command line means that the program does not
+enter a scope loop following the occurrence of a \fImemory\fP\| data error.
+If "S 1" is entered, the program does enter a scope loop
+following the occurrence of a \fImemory\fP\| data error.
+It should be noted that, 
+if the user simply enters "S" on the command line, the 
+scope-loop-on-error-flag is turned off.
+By default, the scope-loop-on-error flag is off.
+.br
+.sp 1
+The user is able to terminate a scope loop 
+\fIon a particular address\fP\| by pressing "n" (a mnemonic for next address).
+They can also  terminate the scope loop and the 
+currently running memory test by pressing "q" (a mnemonic for quit).
+.br
+.sp 1
+It should be noted that the user can turn both the wait-on-error-flag and
+the scope-loop-on-error-flag on simultaneously.
+Thus, it is possible to suspend the diagnostic after each
+write-read-compare cycle within the scope loop.
+Again, the user is able to terminate a scope loop 
+\fIon a particular address\fP\| by pressing "n" (a mnemonic for next address).
+They are also able to proceed from one write-read-compare cycle 
+to the next by pressing
+any character \fIexcept 'q' and 'n'\fP\|.
+Finally, the scope-loop, wait-on-error condition and the 
+currently running memory test 
+can be terminated by pressing "q" (a mnemonic for quit).
+By default, the scope-loop-on-error flag and the wait-on-error flag 
+are off.
+.IP 12.
+Option "l" (the letter ell) on the "\*(vm menu"
+gives the user the opportunity to specify the number of times a
+user-specified sequence of tests is to be executed.
+For example, terminating a command line containing
+one or more user-specified tests with "l 5" 
+executes all of the tests on that command line five times.
+The command line for the loop option is shown below.
+.DS I 10
+"l [loop_count]"
+.DE
+Option "l" accepts one command line argument.
+The "loop_count" argument is optional.
+Without it, the test(s) on the command line
+are performed \fIonce\fP\|.
+All command lines are executed once even if the "l" option does not
+appear at the end.
+Therefore, using the "l" option without an argument has \fIno affect\fP\|.
+.br
+.sp 1
+The "loop_count" argument specifies, in \fIdecimal\fP\|,
+the number of times that the command line sequence is 
+to be \fIexecuted\fP\|.
+The range of legal \fInumerical\fP\| values for the "loop_count" 
+argument is 1 to 2147483647 (0x7fffffff).
+However, if an asterisk (*) is entered as the "loop_count" argument,
+the given test sequence, theoretically, runs \fIforever\fP\|.
+The discussion under the "l" option of the section titled 
+"The Main Menu" provides additional details relevant to the usage
+of the loop option.
+.IP 13.
+Option "e" on the "\*(vm menu" displays an error log.
+More specifically, at a maximum, the first 100 errors messages of each type
+recorded by the \*(vd are printed on the screen.
+The command line syntax for option "e" is shown next.
+.DS I 10
+"e"
+.DE
+Option "e" does not accept any arguments.
+The user does, however, have the ability to suspend and restart the error log
+display as they see fit.
+Pressing any key, except "q", suspends the error log display until the user
+presses another key.
+If the user presses "q" at any time, the error log display
+is terminated.
+.IP
+ 14.
+If option "h" on the "\*(vm menu" is chosen, 
+more detailed user instructions  appear on the screen.
+The command line syntax for option "h" is shown next.
+.DS I 10
+"h"
+.DE
+Option "h" does not accept any arguments.
+The "help" screen associated with the "\*s menu" is shown next.
+.sp 2
+.KS
+.TS
+center box expand tab (#);
+l.
+.sp 2
+Sun-2/120 Video Board Diagnostic        REV 1.1 6/27/85        Video Memory Menu
+.sp 2
+.T&
+a.
+a  -  Address Test\0\0\0\0\0\0\0\0\0\0\0\0\0\0b: 51 s,\0\0\0\0\0w: 28 s\0\0\0\0\0\0a [count]
+.sp 1
+c  -  Constant Pattern Test\0\0\0\0\0\0b: 26 s,\0\0\0\0\0w: 15 s\0\0\0\0\0\0c [pattern] [count]
+.sp 1
+r  -  Random Pattern Test\0\0\0\0\0\0\0b: 37 s,\0\0\0\0\0w: 21 s\0\0\0\0\0\0r [seed] [count]
+.sp 1
+u  -  Uniqueness Test\0\0\0\0\0\0\0\0\0\0\0\0b: 42 s,\0\0\0\0\0w: 23 s\0\0\0\0\0\0u [constant] [count]
+.sp 1
+x  -  Checker Pattern Test\0\0\0\0\0\0\0b: 5 m 58 s, w: 2 m 52 s\0\0x [pattern] [count]
+.sp 1
+d  -  Default Video Memory Test\0\042 s\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0d
+.sp 1
+M  -  Print Error Messages?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0M [0 | 1]
+.sp 1
+B  -  Byte Or Word Mode?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0B [0 | 1]
+.sp 1
+K  -  Check Parity?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0K [0 | 1]
+.sp 1
+W  -  Wait (Stop) On Error?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0W [0 | 1]
+.sp 1
+S  -  Scope Loop On Error?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0S [0 | 1]
+.sp 1
+l  -  Loop\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0l [loop_count]
+.sp 1
+e  -  Error Log Display\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0e
+.sp 1
+h  -  Help\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0h
+.sp 1
+p  -  Return To The Main Menu\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0p
+.sp 1
+q  -  Quit\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0q
+.sp 2
+.T&
+l.
+Command ==>
+.sp 2
+.TE
+.KE
+.IP 15.
+If option "p" on the Video Memory Menu is executed,
+the Main Menu appears on the screen.
+In other words, option "p" returns to the Main Menu.
+This option allows the user the ability get back to the "main menu"
+in the case that they want to go to another submenu 
+(i.e.  The Serial Communication Controller Menu or The Control Register Menu).
+The command line syntax for option "p" is shown next.
+.DS I 10
+"p"
+.DE
+Option "p" does not accept any arguments.
+.IP 16.
+Finally, option "q" on the "\*(vm menu" terminates the \*(vd.
+The command line syntax for option "q" is shown next.
+.DS I 10
+"q"
+.DE
+Option "q" does not accept any arguments.
+.RE
+.H 1 "Summary"
+.PP
+In conclusion, this document explained how the user loads and operates the
+\*(vd.
+The command line syntax for each and every menu option was presented.
+.H 1 "References"
+.LP
+Theory of Operation Manual for the \*(vb, Revision A, September 26, 1984.
+.LP
+The Sun-2/120' Video Board Diagnostic  Design Document, Revision C, 
+May 20, 1984
+.

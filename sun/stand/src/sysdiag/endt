@@ -1,0 +1,110 @@
+#/bin/csh -f
+#
+#       @(#)endt 1.1 9/25/86 Copyright 1985 Sun Micro
+#
+nice -20
+echo endt: Ending System Diagnostics tests.
+
+set k = ''
+if ($argv == d) then
+   set nonomatch
+   rm tmpfile*
+   ps -a > tmpfile1
+   set k=`egrep '\ vmem\ ' tmpfile1 | awk '{print $1}'`
+   echo endt: $k
+else
+   set k=`ps -a | egrep '\ vmem\ ' | awk '{print $1}'`
+endif
+kill -INT $k
+sleep 5
+
+set k = ''
+if ($argv == d) then
+   ps -a > tmpfile2
+   set k=`egrep '\ devtest\ ' tmpfile2 | awk '{print $1}'`
+   echo endt: $k
+else
+   set k=`ps -a | egrep '\ devtest\ ' | awk '{print $1}'`
+endif
+kill -INT $k
+sleep 5
+
+if ($IPC == yes) then  
+  set k = ''
+  if ($argv == d) then
+     ps -a > tmpfile2
+     set k=`egrep '\ ipctest\ ' tmpfile2 | awk '{print $1}'`
+     echo endt: ipctest $k
+  else
+     set k=`ps -a | egrep '\ ipctest\ ' | awk '{print $1}'`
+  endif
+  kill -INT $k
+  sleep 10
+endif
+  
+set k = ''
+if ($argv == d) then
+   ps -a > tmpfile2
+   set k=`egrep '\ devtest\ |\ sptest\ |\ c160\ |\ reply\ |\ fpatest\ |\ mc68881\ |\ softfp\ |\ dcptest\ ' tmpfile2 | awk '{print $1}'`
+   echo endt: $k
+else
+   set k=`ps -a | egrep '\ devtest\ |\ sptest\ |\ c160\ |\ reply\ |\ fpatest\ |\ mc68881\ |\ softfp\ |\ dcptest\ ' | awk '{print $1}'`
+endif
+kill -INT $k
+sleep 5
+
+if ($GRAPHICS_PROCESSOR == yes) then  
+  set k = ''
+  if ($argv == d) then
+     ps -a > tmpfile2
+     set k=`egrep '\ gpmtest\ ' tmpfile2 | awk '{print $1}'`
+     echo endt: $k
+  else
+     set k=`ps -a | egrep '\ gpmtest\ ' | awk '{print $1}'`
+  endif
+  kill -INT $k
+  sleep 5
+endif
+  
+set k = ''
+if ($argv == d) then
+   ps -ax > tmpfile3
+   set k=`egrep '\ ffpusr\ ' tmpfile3 | awk '{print $1}'`
+   echo endt: $k
+else
+   set k=`ps -ax | egrep '\ ffpusr\ ' | awk '{print $1}'`
+endif
+kill -TERM $k
+sleep 5
+
+set k = ''
+if ($argv == d) then
+   ps -ax > tmpfile4
+   set k=`egrep '\ gpmtest\ |\ sptest\ |\ dcptest\ |\ c160\ |\ reply\ |\ devtest\ |\ fpatest\ |\ mc68881\ |\ softfp\ |\ disk\ |\ pmem\ ' tmpfile4 | awk '{print $1}'`
+   echo endt: $k
+else
+   set k=`ps -a | egrep '\ gpmtest\ |\ sptest\ |\ dcptest\ |\ c160\ |\ reply\ |\ devtest\ |\ fpatest\ |\ mc68881\ |\ softfp\ |\ disk\ |\ pmem\ ' | awk '{print $1}'`
+endif
+kill -INT $k
+sleep 5
+
+set k = ''
+if($argv == d) then
+   ps -ax > tmpfile5 
+   set k=`egrep '\ vmem\ |\ ipctest\ |\ devtop\ |\ dev\ |\ gpmtest\ |\ sptest\ |\ dcptest\ |\ c160\ |\ reply\ |\ devtest\ |\ fpatest\ |\ mc68881\ |\ softfp\ |\ ffpusr\ |\ disk\ |\ disktop\ |\ memtop\ |\ pmem\ |\ ipctop\ ' tmpfile5 | awk '{print $1}'`
+   echo endt: $k
+else
+   set k=`ps -ax | egrep '\ vmem\ |\ ipctest\ |\ devtop\ |\ dev\ |\ gpmtest\ |\ sptest\ |\ dcptest\ |\ c160\ |\ reply\ |\ devtest\ |\ fpatest\ |\ mc68881\ |\ softfp\ |\ ffpusr\ |\ disk\ |\ disktop\ |\ memtop\ |\ pmem\ |\ ipctop\ ' | awk '{print $1}'`
+endif
+kill -TERM $k
+if ($argv == d) more tmpfile*
+
+echo Terminal version stopped. `date`  >> $SD_LOG_DIRECTORY/logtimes
+
+echo ' '
+echo '**********************************************************'
+echo '*                                                        *'
+echo '*    endt: Enter "exit" and press return to continue.    *'
+echo '*                                                        *'
+echo '**********************************************************'
+echo ' '

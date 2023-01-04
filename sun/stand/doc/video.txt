@@ -1,0 +1,729 @@
+.\"
+.\"	@(#)video.txt 1.1 9/25/86 Copyright (c) Sun Micro";
+.\"
+.de SX		\" call 'so' something else so derof
+.so \\$1
+..
+.\" .SX /usr/lib/tmac/tmac.e
+.po 1.5i
+.nr PO 1.5i
+.hy 14		\" don't hyphenate in bad places
+.pn 1		\" start page number at 'A'
+.af % A
+.ds PN "\\\\n%
+.nr sf 3	\" set section headings in bold face
+.nr si 2	\" indent nested sections 2 spaces
+.de $0		\" macro to enter section heading in to table of contents
+.(x C
+.if (\\$3=1) .sp
+\\$2   \\$1
+.)x \\*(PN
+..
+.de [R		\" routine declaration
+.ds RC \\$1
+.sp
+.ne 10
+.(l L
+.fi
+.na
+..
+.de *Q
+.ds RM \\$1 \\$2
+\\*(RM
+..
+.de *R
+.ds RN \\$1
+.(x R
+\\*(RN - \\*(RC
+.)x
+\\$1
+..
+.de {R
+\\*(RN
+.nf
+.ad
+..
+.de [R
+.)l
+..
+.de }R
+..
+.de {E			\" possible errors sub-section
+.lp
+Possible errors:
+.nr ps 0n
+.LB \\(bu
+..
+.de }E
+.LE
+.nr ps 1n
+.lp
+..
+.de WP
+.lp
+\fb***\fp
+..
+.de IP
+.ip "\fB\\$1\fP"
+..
+.de EB
+.sp -1
+.nf
+\L'|\\$1-1'\h'-1n'\1'\\n(.lu'\h-1n'\L'-1\\$1+1'\1-\\ln(.lu'
+.fi
+..
+.nr ii 5
+.nr hm 3v
+.nr tm 6v
+.nr fm 4v
+.nr bm 7v
+.de $h
+.tl 'APPROVAL SECTION''\*(PN'
+..
+.de $f
+.tl '\*(td''DO NOT COPY'
+.tl 'SUN MICROSYSTEMS INC''COMPANY CONFIDENTIAL'
+..
+.bp
+.sp
+.ce 2
+\fBE X T E R N A L  S P E C I F I C A T I O N
+(User Perspective)
+.sp
+.\" Fill in you project's name in place of the dot below and elsewhere
+.\" in this file.
+TITLE	     : 	Sun2 Multibus Video Diagnostic External Specification\fR
+.sp
+AUTHOR	     :	Bernard Bove
+.sp
+REPORT NO.   :	750-1004-01
+.sp
+REVISION NO. :	1.1 9/25/86 
+.sp
+DATE         : \*(td	\"td=printing date if reformated
+.sp 2
+.(l L
+APPROVALS    :						DATE
+.de SG			\" Macro to define signiture lines
+.ip "\\$1" 20n		\" Position and signiture line
+------------------------------------------------------------
+.br
+\\$2			\" Name Underneath
+..
+.SG "Originator" "Bernard Bove"
+.SG "Test Engineering"
+.SG "Manufacturing"
+.SG "Production"
+.SG "Quality Control"
+.)l
+.bp
+.(l L
+.ce
+Document Review Form
+.lp
+Please make note and initial on this page all corrections and/or
+proposed amendments by page number and/or section number.
+.sp
+.ce
+---------------------------------------------
+Recommendations, Differences, Construction Errors, and comments:
+.sp 36
+.ce 2
+---------------------------------------------
+Typographical Errors:
+.sp 4
+.ce 2
+---------------------------------------------
+Attach additional sheet(s) as needed.
+.)l
+.\" redefine headers for the body of the document
+.de $h
+.tl 'SUN 2 MULTIBUS VIDEO DIAGNOSTIC EXTERNAL SPECIFICATION ''
+.tl '(User\'s Perspective)''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fBVIDEO DIAGNOSTIC EXTERNAL SPECIFICATION\fR
+.sh 1 "INTRODUCTION"
+.sh 2 "Purpose"
+.lp
+\fIvideo\fR, the diagnostic,
+.np
+demonstrates correct functionality of the video board, and
+.np
+provides board level debug features, such that it is
+generally useful for board level repair.
+.\"	1.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 2 "Applicable Documents"
+.lp
+The following documents are useful in both understanding the diagnostic
+and the scsi board:
+.np
+\fISun-2 Video Board Engineering Manual\fR
+.np
+\fISun-2 Video Board User Manual
+.\"	1.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.\".sh 2 "Definitional Conventions"
+.\"	1.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.\".sh 3 "Notations"
+.\"	1.3.1
+.\".sh 3 "Syntax"
+.\"	1.3.2
+.\".sh 3 "Terminology"
+.\"	1.3.3
+.sp 2
+.sh 1 "SYSTEM OVERVIEW"
+.\"	2.
+.sh 2 "General Description"
+.lp
+The video diagnostic is a boot only diagnostic.  It is designed to specifically
+test the Sun 2 multibus video board.  It can be ran only with a 
+Sun 2 Processor Board.
+.\"	2.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 2 "Features"
+.lp
+The video diagnostic provides the following tests and features:
+.np
+Addressablity of all programmable portions of the board is validated.
+.np
+The video control register is validated with a write and read tests.
+.np
+Various memory diagnostics are performed on the `frame buffer memory'.
+.np
+Various tests validating the functionality of the video control register
+are performed including
+.(l
+a)	the copy feature, and
+b)	video interrupt.
+.)l
+.np
+The serial controller is tested by read and write tests to those registers
+allowing both read and write operations.
+.np
+The two I/O ports are tested using the local loop mode provided by the 
+controller.
+.np
+The two I/O ports are also tested using an external loop back cable ensuring
+functionality of the full data path on the board.
+.\"	2.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 2 "Required Configuration"
+.lp
+The following hardware is required for testing the video multibus
+boards:
+.np
+A test station containing 
+.(l
+(1)	a card-cage (PN: 340-0332),
+(2)	a power supply (PN: 300-0135-03), 
+(3)	a Sun 2 processor board (PN: 501-1007-01),
+(4)	one megabyte of memory (PN: 501-1013-01),
+(5)	a means of booting the video diagnostic,
+(6)	a Sun 2 console (PN: 540-1005-01, 540-1013-01),
+(7)	a `local loop back' cable, and
+(8)	a monitor.
+.)l
+The monitor may either be a ``\fIdumb terminal\fR'' or a Sun-1 monitor, 
+video board, and keyboard.
+.np
+A video cable connecting the video board to the Sun 2 console (PN: 530-1057-2,
+530-1058-01).
+.\"	2.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 2 "Error Handling"
+.lp
+Every effort has been made for fault conditions to enter ``\fIscope\fR''
+loops.  The operator has then the option of repeating a failed test or 
+continuing on to the next test.  
+.\"	2.4
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 2 "General Performance Characteristics"
+.lp
+The video diagnostic performs its tests of the video board in less than
+60 seconds.  The diagnostic is repeated upon completion.
+.\"	2.5
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.\".sh 2 "Planned Extensions"
+.\"	2.5
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.\".sh 2 "Limitations"
+.\"	2.7
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sp 2
+.\" Replace the dot below with the name of the major component you are
+.\" describing.  Repeat the entire section for each of your major components.
+.\" The subsections below are some of the ones that may be applicable.
+.\" Delete the ones that do not apply, and add new ones as necessary.
+.sh 1 "SUN 2 MULTIBUS VIDEO DIAGNOSTIC SPECIFICATION"
+.sh 2 "User Interface"
+.lp
+To perform the diagnostic the operator is expected to perform the following
+setup operations:
+.np
+Set the jumper switches on the video board as follows:
+.(l
+U116	6 jumped
+U117	4 jumped
+.)l
+.np
+Insert the video board under test into the card cage ensuring that it is
+on the same P2 bus as the processor board.
+.np
+Ensure the video cable is connected to both the video board and the Sun 2
+console.
+.np
+Ensure the local loop back cable is connected to both connectors on the video
+board.
+.np
+Power on the test station.
+.np
+Boot the video diagnostic.
+.\"	3.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 2 "Input/Output"
+.lp
+Diagnostic status and error messages are outputted to the dumb monitor (or
+Sun-1 monitor).  Input is received from the dumb monitor's keyboard.
+.sh 2 "Error Handling"
+.lp
+Should an error occur, the diagnostic loops on the offending action.  The
+operator may enter a CNTRL C (^C) and the diagnostic solicits whether
+to repeat the test causing the error or continue onto the next test.
+.\"	3.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 2 "Operation"
+.lp
+Described below are all the tests performed upon the video board, with special
+attention to areas where the diagnostic may hang.  Also included are all
+error messages that may be generated.
+.sh 3 "Setup"
+.lp
+Upon successful boot, the video diagnostis displays:
+.(l
+Multibus VIDEO DIAGNOSTIC Rev. 1.1 2/14/84
+.)l
+.lp
+The diagnostic then maps physical memory locations zero through one megabyte
+to virtual locations zero through one megabyte, and frame-buffer memory
+and 4 pages of I/O control space on the video board to virtual locations
+two megabyte  upwards.
+.lp
+Next the diagnostic sets up to catch any bus errors that may occur 
+unexpectedly during the execution of the diagnotic.  Should an unexpected
+bus error occur, the following error message is displayed:
+.(l
+BUS ERROR: \fIpage invalid
+	      p1 bus master
+	      protection error
+	      timeout error
+	      upper byte parity
+	      lower byte parity\fR
+.)l
+where one or more of the italicized words above may be displayed depending
+upon the contents of the bus error register.
+.lp
+Next the various tests continuously loop.
+.sh 3 "Touchy Feely of the Video Control Register"
+.lp
+Upon execution of this test, the diagnostic displays:
+.(l
+Testing Video Control Register
+.)l
+.lp
+In this test all possible values are written to the video control register.
+Portions of the video control register are tested separatly.  First the
+video enable bit is written with a 1, read, then written with a 0, and read.
+Should this fail the following error message is displayed:
+.(l
+Err Video enable bit W: %x R: %x
+.)l
+where %x's represent the value written and read.  The diagnostic then enters
+a scope loop writing and reading the video enable bit with the value that
+failed.
+.lp
+The next bit tested is the Copy enable bit.  Should it fail the following
+message is displayed:
+.(l
+Err Copy enable bit W: %x R: %x
+.)l
+The diagnostic then enters a scope loop writing and reading the 
+video enable bit with the value that failed.
+.lp
+Then the Interrupt enable bit is tested.  Shoud it fail the following
+message is displayed:
+.(l
+Err Interrupt enable bit W: %x R: %x
+.)l  
+The diagnostic then enters a scope loop writing and reading the 
+video enable bit with the value that failed.
+.lp
+Finally all possible values are written and read to the copy-base portion
+of the video control register.  Should a value not verify the following
+message is displayed:
+.(l
+Err Copybase W: %x R: %x
+.)l
+where %x's are the values written and read.  Next the  diagnostic loops
+forever writing the value, reading the value, and checking to see if
+the operator wants to abort (by entering a ^C).
+.lp
+At the conclusion of these tests the video control register is set such that
+the enable bit is set and all other bits are zero.
+.sh 3 "Frame Buffer Memory Tests"
+.lp
+The frame buffer memory tests are a collection of five constant data memory
+tests, an address line test, a random data test, two checker board tests,
+and a random address random data test.
+.lp
+Upon entry to the frame buffer memory tests the diagnostic displays:
+.(l
+Frame buffer memory tests
+.)l
+.lp
+Next it begins the constant data tests starting with the values 0, followed
+by 0xFFFF, 0xAAAA, 0x5555,  and finally 0xC7C7.  If there are no errors
+the display looks as follows:
+.(l
+Constant data with 0x0000 0xFFFF 0xAAAA 0x5555 0xC7C7
+.)l
+Should an error occur, the following error message is displayed:
+.(l
+constant error @ 0x%x obs(0x%x) exp(0x%x)
+.)l
+where the first 0x%x is the virtual address of the error, the value after
+``obs'' is the value read, the the value after ``exp'' was the value
+written.  Next the diagnostic enters a scope loop reading and writing
+the location which
+caused the error.  This loop may be aborted by entering a ^C.
+.lp
+Next an address line test is executed.   Upon the start of this test the 
+diagnostic displays:
+.(l
+Address line Test
+.)l
+The address line test consists of writing each short location of frame buffer
+memory with its address mod 0x1000 and then reading them back.  Should an error
+occur, the following message
+is displayed:
+.(l
+addr error @ 0x%x obs(0x%x) exp(0x%x)
+.)l
+where the first 0x%x is the virtual address of the error, the value after
+``obs'' is the value read, the the value after ``exp'' was the value
+written.  The diagnostic enters a scope loop reading and writing
+the location which
+caused the error.  This loop may be aborted by entering a ^C.
+.lp
+Next a random data test is executed.   Upon the start of this test the 
+diagnostic displays:
+.(l
+Random Data Test
+.)l
+The random data test consists of writing each short location of frame buffer
+memory with random data and reseeding the random number generator and reading
+back all locations of the frame buffer memory.  Should an error occur, the 
+following message
+is displayed:
+.(l
+rand0 error @ 0x%x obs(0x%x) exp(0x%x)
+.)l
+where the first 0x%x is the virtual address of the error, the value after
+``obs'' is the value read, the the value after ``exp'' was the value
+written.  The diagnostic enters a scope loop reading and writing
+the location which
+caused the error.  This loop may be aborted by entering a ^C.
+.lp
+Next two checker tests are executed.   Upon the start of this test the 
+diagnostic displays:
+.(l
+Checker Board Test with 0x5A5A ~
+.)l
+The checker board test consists of writing alternating short locations of the
+frame buffer memory with 0x5A5A and it ones compliment, then every two
+locations, four locations and so on.  Each pass is followed by a read
+phase verifying frame buffer locations.  
+Should an error occur, the following message is displayed:
+.(l
+checker error @ 0x%x obs(0x%x) exp(0x%x)
+.)l
+where the first 0x%x is the virtual address of the error, the value after
+``obs'' is the value read, the the value after ``exp'' was the value
+written.  The diagnostic enters a scope loop reading and writing
+the location which
+caused the error.  This loop may be aborted by entering a ^C.
+.lp
+The checker test is then called using the test value 0xAAAA.
+.lp
+The final memory diagnostic performed on the frame buffer memory is a
+random address random data test.  Upon the start of this test the diagnostic
+displays:
+.(l
+Random address/data Test
+.)l
+.lp
+As its name implies, all locations of the frame buffer memory are selected
+randomly receiving random data.  In the second pass, the random number generator
+is reseeded and all of frame buffer memory is verified.
+.lp
+Should an error occur, the following message is displayed:
+.(l
+rand1 error @ 0x%x obs(0x%x) exp(0x%x)
+.)l
+where the first 0x%x is the virtual address of the error, the value after
+``obs'' is the value read, the the value after ``exp'' was the value
+written.  The diagnostic enters a scope loop reading and writing
+the location which
+caused the error.  This loop may be aborted by entering a ^C.
+.sh 3 "Video Control Register Revisited"
+.lp
+In this visit to the video control register, the register is tested for
+functionality.  Upon entering this test, the diagnostic sets the video
+enable bit and the video copy bit, then displays:
+.(l
+Testing copy function
+.)l
+The copy function is tested by having the copy base range from 
+0x20000 to 0x100000, and performing an address line check writing
+to P2 memory and reading from frame buffer memory.
+.lp
+Should an error occur, the following message is displayed:
+.(l
+Error copy failed c_base: 0x%x vb_base: 0x%x wrote: 0x%x read: 0x%x
+.)l
+Where c_base is the P2 memory location being copied from, vb_base is the
+virtual address within the frame buffer being copied to (to calculate
+the physical location subtract 0x200000 from the vb_base address).
+The diagnostic then enters a loop reading and writing the location causing
+the error.  Should the contents of the frame buffer when checked again, 
+be the same, the following message is displayed:
+.(l
+Contents now the same?
+.)l
+The operator may abort the loop by entering a ^C.
+.lp
+Next the copy function is retested using the ones compliment of the long
+address.
+.lp
+The interrupt generation of the video board is next tested.  At the start of
+this test the following message is displayed:
+.(l
+Testing video interrupt
+.)l
+.lp
+During this test, interrupt level 4 is enabled and the video interrupt
+enable bit is set.  At this point the diagnostic enters a small idle loop
+waiting to be interrupted.  If the interrupt does not occur, the following
+message is displayed:
+.(l
+waiting on interrupt. . .
+.)l
+The diagnostic then loops waiting for the interrupt.  The operator may abort
+by entering a ^C.
+.lp
+If the interrupt does occur, interrupts are then disabled.
+.lp
+The last video control register test is a check on the video interrupt pending
+test.  Upon starting this test the following message is displayed:
+.(l
+Testing video interrupt set
+.)l
+This test depends upon the previous setting of the video interrupt enable bit
+being set, and the diagnostic merely checks to ensure
+that the video interrupt bit it set.  Should this not be the case, the
+following messages are displayed:
+.(l
+Error No interrupt pending signal
+.)l
+At which point the diagnostic loops on reading the video interrupt bit
+in the video control register.  The operator may abort from this loop
+by entering a ^C.
+.sh 3 "Serial Controller Check"
+.lp
+The last major set of tests are concerned with the serial controller.  The
+tests are grouped into read/write of those serial controller registers which
+can be written and read, a local loop back test, utilizing the serial 
+controller's internal local loop back capabilities, and finally an external
+loop back check, ensuring the functionality of the entire data path of the 
+serial controller.  Upon entering these tests the following message is 
+displayed:
+.(l
+Testing SCC controllers
+.)l
+.lp
+The first serial controller chip (scc) test is the testing of the write
+control register 2 (WR2).  At the start of this test the following message is
+displayed:
+.(l
+Testing interrupt vector WR2
+.)l
+In this test all possible values are written to WR2 and read
+back from RR2.  Should the values not be the same, then the
+following error message is displayed:
+.(l
+Error SCC addr: 0x%x reg: 2 W: 0x%x R: 0x%x
+.)l
+where the first 0x%x is the virtual address of the serial controller, the next 
+0x%x is the value written and the final 0x%x is the value read.
+The diagnostic then loops on writing and reading the serial controller
+register.  The operator may abort from this loop by entering a ^C.
+.lp
+Should a bus error occur during the writing and reading (with or with out
+any other error occurring) the following messsage is displayed:
+.(l
+Error during accesses to WR2
+.)l
+.lp
+The next scc test is the testing of the time constant registers (WR12/WR13).
+At the start of this test the following message is
+displayed:
+.(l
+Testing time constant register WR12/WR13
+.)l
+In this test all possible values are written to write register WR12 and WR13,
+and read back from RR12 and RR13.  Should the values not be the same, then the
+following error message is displayed:
+.(l
+Error SCC addr: 0x%x reg: %d W: 0x%x R: 0x%x
+.)l
+where the first 0x%x is the virtual address of the serial controller, the %d
+is either 12 or 13, the next 0x%x is the value written and the final 0x%x
+is the value read.
+The diagnostic then loops on writing and reading that serial controller 
+register.  The operator may abort from this loop by entering a ^C.
+.lp
+Should a bus error occur during the writing and reading (with or with out
+any other error occurring) the following messsage is displayed:
+.(l
+Error during accesses to WR12/WR13
+.)l
+.lp
+At this point the diagnostic prepares for the local loop back test.  In so
+doing, it initializes both ports on the serial controller.  Should a bus
+error occur, the following message is displayed:
+.(l
+Error during init of port %c
+.)l
+where %x is either A or B, depending on the port be initialized.
+.lp
+The next test is the local loop back mode test.  At the start of this test,
+the diagnostic displays the following message:
+.(l
+Testing local loop back for %c
+.)l
+where %c is either A or B.
+.lp
+In this test values from 0 to 0x7F are written and read in local loop back
+mode.  Two types of errors may occur; the first is a time out waiting for
+either write or read to come ready, and the second is a mismatch of data
+from that written and that read.  The time out error message appear as follows:
+.(l
+Error SCC \fItransmit/receive\fR time out
+.)l
+where only transmit or receive will appear depending upon the error type.
+.lp
+The error message for mismatched data is:
+.(l
+Error SCC loop test addr: %x W: 0x%x R: 0x%x
+.)l
+This error message occurs the first time the data is incorrect.  The diagnostic
+next tries to write and read the same value, should this fail, a dot will
+be printed indicating that subsequent retries are also failing.
+.lp
+Should a bus error occur during the testing of local loop back, the following
+message is displayed:
+.(l
+Error during local loop of port %c
+.)l
+where %x is either A or B.
+.lp
+The final test perform concerning the serial controller is the external loop
+back test.  At the start of this test, the following message is displayed:
+.(l
+Testing real loop back for %c
+.)l
+where %c is either A or B.
+.lp
+In this test values from 0 to 0x7F are written and read in local loop back
+mode.  Two types of errors may occur; the first is a time out waiting for
+either write or read to come ready, and the second is a mismatch of data
+from that written and that read.  The time out error message appear as follows:
+.(l
+Error SCC \fItransmit/receive\fR time out
+.)l
+where only transmit or receive will appear depending upon the error type.
+.lp
+The error message for mismatched data is:
+.(l
+Error SCC loop test addr: %x W: 0x%x R: 0x%x
+.)l
+This error message occurs the first time the data is incorrect.  The diagnostic
+next tries to write and read the same value, should this fail, a dot will
+be printed indicating that subsequent retries are also failing.
+.lp
+Should a bus error occur during the testing of local loop back, the following
+message is displayed:
+.(l
+Error during external loop of port %c
+.)l
+where %x is either A or B.
+.\"	3.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.\"	3.4
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.\".sh 2 "Performance"
+.\".lp
+.\"	3.5
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.\" Redefine headers for the appendix.
+.\".ds PN "A-\\\\n%
+.\".de $h
+.\".tl '. APPENDIX''\*(PN'
+.\"..
+.\".pn 1	\" restart page numbering beginning with 'A-1'
+.\".af % 1
+.\".bp	\" NOW we can begin the new page
+.\".ce
+.\"\fBAPPENDIX\fR
+.\".sh 1 "APPENDIX SECTION"
+.\".ds PN "I-\\\\n%	\" redefine headers for the index.
+.\".de $h
+.\".tl '. INDEX''\*(PN'
+.\"..
+.\".pn 1
+.\".af % 1
+.\".bp
+.\".ce
+.\"\fBINDEX\fR
+.\".sh 1 "INDEX SECTION"
+.ds PN "\\\\n%
+.de $h
+.tl 'TABLE OF CONTENTS''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fBTABLE OF CONTENTS\fR
+.sp 3
+.xp C

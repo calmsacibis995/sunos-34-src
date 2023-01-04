@@ -1,0 +1,8 @@
+shelltool       -Wp 265 267 -Ws 492 324 -WP -1 -1 -C "options"
+shelltool	-Wp 265 000 -Ws 757 267 -WP -1 -1 csh -c "perfmon free idle user system disk interrupt input output"
+shelltool	-Wp 000 000 -Ws 267 267 -WP -1 -1 csh -c "disktop"
+shelltool	-Wp 755 267 -Ws 267 533 -WP -1 -1 csh -c "devtop"
+shelltool       -Wp 265 591 -Ws 492 209 -WP -1 -1 csh -c "tapetop"
+clocktool	-Wp 820 000 -Ws 203 040 -WP 576 836 
+clocktool	-Wp 820 000 -Ws 203 040 -WP 512 836 -Wi
+shelltool	-Wp 000 267 -Ws 267 533 -WP -1 -1 csh -c "memtop"

@@ -1,0 +1,717 @@
+
+@(#)mem.diag.doc1.1 9/25/86 Copyright Sun Microsystems 1985
+
+120' Memory Diagnostic
+
+
+O. Preface
+
+1. purpose
+	to describe the features and user interface to the latest memory
+	diagnostic for the 120/170 product line
+2. audience
+	all users (internal) only including:
+		design engineers
+		manufacturing test technicians
+		field service technicians
+	also intended as a starting document for the technical writing group
+
+
+I. General Information
+
+1. intro
+	diagnostic tool
+	motivation
+	flexibility
+2. environment
+	this diag runs standalone
+	unix is not present within the system when diagnostic is running
+		hence the name standalone, this is necessary since unix
+		is rather picky about allowing free access to resources
+	all i/o support provided by the standalone libraries linked to the
+		diagnostic
+3. features - usefulness to engineer, manufacturing, field
+	flexibility for engineers (in terms of sequencing and parameterization)
+	default parameterization and sequencing for manufacturing (ie hit one
+		key to start recommended test auto sequencing and default
+		parameters)
+	both for the field (includes field service, customers, oems)
+
+
+II. Required Hardware
+
+min config of hardware is required to test memory boards as follows:
+	multibus card cage, power supply
+	processor board
+	memory board(s)
+	terminal	one of :  sun video console (need video bd),
+				  televideo-like terminal
+	boot device	one of :  local disk (need disk ctlr),
+				  local tape (need tape ctlr),
+				  remote disk via ethernet (need ethernet)
+
+	Note: this memory test runs out of ram and is not relocatable.  The
+		diag is loaded at location 0x4000 and occupies memory up to
+		0xa800.  So in the first meg of memory only addrs 0xa800-
+		0xfffff is tested.  For a board test station it is recommended
+		that a known good memory board is used and kept for the first
+		meg of memory, while the board under test should be configured
+		for the second (third and fourth) meg of memory.
+
+
+III. Required Software
+
+	standard power up diag / monitor / boot roms (firmware) as well as
+	the diagnostic itself : mem.120.diag
+
+
+IV. Overview
+	memory board organization (cross ref theory of ops)
+	a. board 1 megabyte = 0x100000 = 1048576 bytes
+	b. 8 rows	@ 0x20000 = 131072 bytes (128K)
+	physical rows are named 0 - 7 as follows
+	   row 0 : locations U1200 - U1218 } rows 0-1 addrs 0x00000 - 0x3ffff
+	   row 1 : locations U1220 - U1238 }
+	   row 2 : locations U1300 - U1218 } rows 2-3 addrs 0x40000 - 0x7ffff
+	   row 3 : locations U1320 - U1238 }
+	   row 4 : locations U1400 - U1218 } rows 4-5 addrs 0x80000 - 0xbffff
+	   row 5 : locations U1420 - U1238 }
+	   row 6 : locations U1500 - U1218 } rows 6-7 addrs 0xc0000 - 0xfffff
+	   row 7 : locations U1520 - U1238 }
+	note that addresses within a given row range don't stay within
+		physical row because of a9, but switch back and forth between
+		2 rows every 0x200 bytes (eg addrs 0x000-0x1ff in row 1,
+		addrs 0x200-0x3ff in row 0, 0x400-0x5ff in row 1, etc, addrs
+		0x40000-0x401ff in row 3, addrs 0x40200-0x403ff in row 2,
+		addrs 0x40400-0x405ff in row 3, etc)
+	c. 18 64Kx1 chips in each row for 16 bits (1 word or 2 bytes) + 2
+		 parity bits for upper/lower byte of each word
+	d. board select addr A20, A21, A22 compared with dip switch, memory
+		board can be configured for any one of the following address
+		 ranges:
+		0x000000 - 0x0fffff (switch 1 on, everything else off)
+		0x100000 - 0x1fffff (switch 2 on, everything else off)
+		0x200000 - 0x2fffff (switch 3 on, everything else off)
+		0x300000 - 0x3fffff (switch 4 on, everything else off)
+		0x400000 - 0x4fffff (switch 5 on, everything else off)
+		0x500000 - 0x5fffff (switch 6 on, everything else off)
+		0x600000 - 0x6fffff (switch 7 on, everything else off)
+		0x700000 - 0x7fffff (switch 8 on, everything else off)
+
+
+V. Memory Diagnostic Operating Instructions
+
+0. loading and starting
+	Turn on system, after power-on rom diags are run, system automatically
+	begins booting unix.  Break out of the boot and return to the rom
+	monitor by typing L1-a (hold down the L1 key while typing a) on the
+	sun2 console or by typing <break> on the televideo-type terminal.
+	At this point type k1 to the rom monitor to reset memory maps to
+	initial state.  We are now ready to boot the memory diagnostic.
+	Remember there are 3 ways of booting
+	a. from local disk
+		assuming the diagnostic 'mem.120.diag' exists on your local
+		disk in the /pub/stand (fileserver) or the /stand (standalone)
+		directory, the diagnostic is loaded by typing
+		> b stand/mem.120.diag
+		to the rom monitor prompt
+	b. from remote disk via ethernet
+		assuming the network fileserver has a partition reserved for
+		the system under test (ie it is a legitimate client) and that
+		the diagnostic exists in the /pub/stand on the fileserver, the
+		diag is loaded by typing
+		> b stand/mem.120.diag
+		to the rom monitor prompt
+		if the system under test is not a client of the fileserver
+		where the diagnostic lives in the /pub/stand directory, the
+		use the following boot command to the rom monitor
+		>b ec(,<fileserver_host_net_#>)stand/mem.120.diag
+	c. from tape (i've still got to verify this info)
+		assuming you have a tape with a bootable image of the memory
+		diagnostic on tape, use the following commands to the rom
+		monitor to load it.
+		b st()	<from scsi tape 1/4" cartridge>
+		b ar()	<from archive tape 1/4" cartridge>
+		b mt()	<from tape master 1/2" tape reel>
+
+	Note: No matter how the diagnostic is booted, once it is loaded, it
+	is automatically started.
+
+1. menu
+	The menu is displayed whenever a single <cr> is typed at the
+	command line prompt (which is the first thing one sees after
+	booting the diag).
+
+Command :	(this is the prompt)
+
+	(This is so you're not forced to wade thru a menu if you know what
+	you're doing.)
+
+	The menu is displayed as follows (everything between dashed lines):
+
+-----------------------------------------------------------------------------
+Sun 120' Memory Test REV 1.9 10/11/84
+
+Start of memory under test : 0xb800
+Size  of memory under test : 0x1f4800
+
+Command selections:
+
+A   -   set default address
+S   -   set default size
+f   -   fill memory
+d   -   display memory
+t   -   default test
+c   -   constant pattern test
+r   -   random pattern test
+a   -   address test
+u   -   uniqueness test	
+x   -   checker pattern test
+g   -   diagonal pattern test
+m   -   byte, word, long mode
+p   -   parity check
+w   -   wait on error
+s   -   scopeloop on error
+e   -   error message mode
+E   -   display error log
+l   -   loop
+h   -   help
+q   -   quit
+
+Command : 
+
+-----------------------------------------------------------------------------
+
+The following is displayed for "help". (type h at the command prompt)
+(everything between the ==s) :
+(Note the third column with the parameters required for each command indicated)
+
+=============================================================================
+
+A	set default address	A address
+S	set default size	S size
+f	fill memory          	f address size pattern
+d	display memory       	d address size
+t	default test       	t
+c	constant pattern test	c address size pattern passcnt
+r	random pattern test	r address size seed passcnt
+a	address test         	a address size passcnt
+u	uniqueness test		u address size incr passcnt
+x	checker pattern test	x address size pattern passcnt
+g	diagonal pattern test	g address size passcnt
+m	byte, word, long mode	m [0|1|2]
+p	parity check		p [0|1]
+w	wait on error		w [0|1]
+s	scopeloop on error	s [0|1]
+e	error message mode	e [0|1|2]
+E	display error log	E
+l	loop 			l loopcount
+h	help			h
+q	quit			q
+
+=============================================================================
+
+2. modes
+	before using tools provided by this diagnostic, and before running any
+	of the tests, there are several operating modes that should be
+	considered.  these modes are explained below:
+
+a. byte, word, long data mode
+
+	to set the mode to byte:			m 0
+	to set the mode to word:			m 1 (or just m)
+	to set the mode to long:			m 2
+	default :					m 1
+
+	applies to the following tests:
+	constant, random, address, uniqueness
+	also applies to the fill tool
+
+	in the initial state the data mode is set to word
+
+b. parity
+
+	to turn parity on:				p 1 (or just p)
+	to turn parity off:				p 0
+	default :					p 1
+
+	in the initial state parity checking is enabled
+
+c. errors : continue, wait or scopeloop
+	to wait (or stop) on error:			w 1
+	no wait						w 0
+	default :					w 0
+
+	to scopeloop on error:				s 1
+	no scopeloop:					s 0
+	default :					s 0
+
+	after on error has occurred with either of these modes on, the test
+	may be continued by typing any key.
+
+	scopeloop continually writes/reads the data causing the failure to
+	the address where the failure occurred (also taking into account the
+	byte, word, or long mode of the test)
+
+	with scopeloop on, when an error occurs (no matter what the error
+	message mode), the following is displayed:
+	 .. looping
+	(<obs>)+ *or* (<obs>)-
+	where <obs> is the observed value, and the + message is printed when
+	the observed value matches the expected value and the - message is
+	printed when the observed and expected values don't match.
+
+	in the initial state, wait on error off
+	in the initial state, scopeloop on error off
+
+d. error messages on or off
+	to print or display error messages:		e 1
+	to turn off all message output:			e 0
+	default :					e 1
+
+	error messages are printed in the initial state
+
+3. parameters
+	next consider some of the general rules about setting parameters
+	for the various tests provided by this diagnostic:
+
+a. address &
+b. size
+	All of the tools and the tests require address and size parameters.
+	(the address being the beginning address (low) of memory to be tested
+	and the size being the number of bytes in the block of memory to be
+	tested.) The address and size parameters are always specified in hex
+	notation. (eg 0x100000).  The size parameter always specifies a number
+	of bytes (no matter what the data mode - see further discussion under
+	modes - byte, word, long)).  If these parameters are not supplied (see
+	further discussion of this technique under the special notations
+	heading below) then the default address and size are used.  The
+	default address and size are the address and size printed at the head
+	of the menu, set up in the following ways:
+	1. at the beginning of the diag (right after boot) the page boundary
+	(pages are 2K = 0x800 bytes) following the end of the diagnostic
+	itself is taken to be the start address of memory under test, while
+	the size is taken to be the total memory size of the system
+	(determined and offered by the diag/mon/boot rom) minus the start
+	address.	*or*
+	2. the addr and size parameters may also be set using the commands
+	'A' and 'S'.
+c. passcnt
+	the passcnt parameter specifies how many times to run through the
+	test, before continuing on to the next test specified on the command
+	line or before prompting for another command.  it is always specified
+	in decimal and it is always the last parameter supplied to the tests.
+d. others
+	some of the tools and tests require an additional parameter that has
+	to do with the data used.  if present, these parameters are always
+	the 3rd paramter supplied.
+	pattern
+		the pattern parameter is the data to be written and read from
+		each memory location in the block of memory to be tested.  it
+		is always specified in hexadecimal notation.  the pattern
+		parameter is used in the following tools or utilities and
+		tests: fill, constant, checker
+	seed
+		the seed parameter is the seed used to generate the random
+		sequence of data for the random pattern test.  it is
+		always specified in decimal notation.
+	incr
+		the incr parameter is the increment used to generate a series
+		of numbers used in the uniqueness test.  the series is as
+		follows {n, 2n, 3n, 4n, ... } where n=incr.  it is always
+		specified in hexadecimal notation.
+e. special notations
+	separator	';'
+		the separator is used between commands at the command line
+		prompt.  it must be isolated on the line (ie surrounded by
+		spaces).  it is this feature that allows tests to be 
+		flexibly sequenced.  there is a further discussion on
+		sequencing below.
+
+		for example:
+		Command : c 8000 1000 aaaa 2 ; c 8000 1000 5555 2
+
+	default 	'.'
+		this symbol is used as a place holder to indicate default
+		values for some parameters while specifying others occurring
+		later in the command line.
+
+		for example:
+		Command : c . . aaaa 3
+
+	forever		'*'
+		forever is approximately infinty or 0xffffffff or
+		4294967295 (decimal) times.  use the forever symbol
+		for the passcnt parameter to loop on a single test
+		"forever".
+
+		for example:
+		Command : c 100000 100000 ffff *
+
+	null		<nothing>
+		null is simply nothingness if a parameter is not supplied
+		then the default values are used
+
+		for example:
+		Command : c 100000 100000
+		or simply
+		Command : c
+
+	Note : for more information on the default values see the section
+		on the specific test as well as the section on default
+		parameters below.
+
+4. tools
+	next the use of the tools, fill and display, is described.
+
+a. fill			f addr size pattern
+	The fill command allows one to fill a specified block of memory with
+	a specified pattern.  Memory can be filled with bytes, words, or long
+	words of the given data pattern depending on the setting of the data
+	mode of the diagnostic (see the discussion of modes - byte, word, long
+	below).  
+
+	example:
+	Command : f 80000 80000 0
+
+	Clears the 1/2 megabyte of memory at 0x80000 to 0.
+
+	defaults:
+	f daddr dsize ffffffff
+
+b. display		d addr size
+	The display command allows one to display a specified block of memory
+	on the console or terminal.  Data is always (no matter what the data
+	mode) read and displayed byte at a time.  Each line of the display
+	contains the hexadecimal address (always a multiple of 0x10 except
+	for the first line if the specified block doesn't begin on a multiple
+	of 0x10 boundary) followed by 16 bytes of data grouped in long words
+	(by 4s).  While there is no paging of the display, ^s pauses the
+	command and display for inspection of the data.  After a ^s, any key
+	typed causes the command and display to continue.  Any key other than
+	^s interrupts the command and returns (the user) to the command line
+	prompt.
+
+	example:
+	Command : d 100000 20
+
+	100000:   00 01 02 03   04 05 06 07   08 09 0a 0b   0c 0d 0e 0f
+	100010:   10 11 12 13   14 15 16 17   18 19 1a 1b   1c 1d 1e 1f
+
+	Displays 32 bytes of data starting at 0x100000 as shown.
+
+	defaults:
+	d daddr dsize
+
+5. tests
+	and finally the tests themselves :
+
+a. constant pattern	c addr size pattern passcnt
+	The constant pattern test tests the specified block of memory using the
+	specified data pattern.  First the memory block is filled with data,
+	then it is read back and compared with the specified data pattern.  If
+	the data read from an address location does not match the original
+	data pattern an error is flagged.  This test can be run in byte, word,
+	or long mode (see discussion under mode - byte, word, long).
+
+	example :
+	Command : c 100000 100000 aaaa 10
+
+	Tests the single megabyte of memory at 0x100000 using the data pattern
+	0xaaaa.  The test is repeated 10 times.
+
+	defaults:
+	c daddr dsize 55555555 1
+
+b. random pattern	r addr size seed passcnt
+	The random pattern test tests the specified block of memory using a
+	sequence of random numbers generated from the specified seed.  The
+	random number generator is the same as that in the 'C' run-time
+	libraries.  First the block of memroy is filled with data, the
+	random sequence is reseeded, and the data is then read back and
+	compared with data that was originally written.  If the data read
+	from an address location does not match the original data pattern
+	and error is flagged.  This test can be run in byte, word, or long
+	mode (see discussion under mode - byte, word, long).
+
+	example:
+	Command : r 10000 400 3 5
+
+	Tests the 1k block of memory at 0x10000 using a random series of
+	numbers seeded by the number 3 as data.  The test is repeated 5 times.
+
+	defaults:
+	r daddr dsize 7 1
+
+c. address		a addr size passcnt
+	The address test tests the specified block of memory using the low
+	order bits of the address of each location as data.  The number of
+	bits used depends on the data mode set up as this test can be run in
+	byte, word, or long mode (see discussion under mode - byte, word,
+	long).  There are two passes through the block of memory, the first
+	pass uses the lower address bits as is, the second pass uses the
+	complement of the lower address bits (see example for further
+	clarification).
+
+	example:
+	Command : a 100000 100000 1
+
+	Tests the 1m block of memory at 0x100000 using the low order bits
+	of the address of each location as data as well as the compliment
+	of those bits.  The test executed only one time.
+	For the sake of clarity, the series of numbers used as test data is
+	detailed below for this example for each of the modes:
+	byte
+		{00, 01, 02, 03, 04, ... } and
+			{ff, fe, fd, fc, fb, ... }
+	word
+		{0000, 0002, 0004, 0006, 0008, ... } and
+			{ffff, fffd, fffb, fff9, fff7, ... }
+	long
+		{00000000, 00000004, 00000008, 0000000c, ... } and
+			{ffffffff, fffffffb, fffffff7, fffffff3, ... }
+
+	defaults:
+	a daddr dsize 1
+
+d. uniqueness		u addr size incr passcnt
+	The test for address uniqueness tests the specified block of memory
+	using the sequence {incr, 2 * incr, 3 * incr, 4 * incr, ... } for
+	the test data.  This test can be run in byte, word, or long mode
+	(see discussion under mode - byte, word, long).
+
+	example:
+	Command : u c0000 40000 5 100
+
+	Tests the 1/4m block of memory at 0xc0000 using the series
+	{5, a, f, 14, ... } as data.  The test repeated 100 times.
+
+	defaults:
+	u daddr dsize 1 1
+
+e. checker		x addr size pattern passcnt
+	Checkertest writes patterns of pattern and pattern\ in a series of
+	write-read scans as follows:
+	Pass 0 writes every other word with the alternating patterns.
+	Pass 1 writes two words of each in sequence every four words.
+	Pass 2 writes four words of each in sequence every eight words.
+	And so on until the cell size is half the block size.
+
+	The checker test requires a number of write-read scans over the block
+	of memory under test (which explains why it takes so long to run!).
+	The data used is an alternating sequence of pattern and ~pattern (the
+	complement of pattern), and hence the name checker (short for checker
+	board).  The test scans are as follows:
+	the first scan writes alternating words of pattern and ~pattern
+	thruout the block of memory,
+	the second scan writes two words of pattern and two words of ~pattern
+	(ditto)
+	the third writes 4 words of pattern and 4 of ~pattern ""
+	the fourth 8 pattern then 8 ~pattern ""
+	and so on
+	the last scan will write size/2 words of pattern and size/2 words of
+	~pattern
+	(how do you explain that in words??)
+	(of course each write scan is followed by a read scan checking for the
+	pattern that was just written flagging errors where something else is
+	found)
+
+	the following equation applies:
+	size = 2 ^ n
+	where n is the number of scans required for this test
+
+	the size is assumed to be a power of 2
+
+	this test only runs in word mode
+
+	example:
+	Command : x 100000 100000 aaaa 10
+
+	Tests the 1m block of memory at 0x100000 using the patterns 0xaaaa
+	and 0x5555 in a checkerboard pattern as data.  The test repeated
+	10 times.
+
+	defaults:
+	x daddr dsize 5555 1
+
+f. diagonal		g addr size passcnt
+	The moving diagonal test requires a number of write-read scans through
+	the entire memory bank.  On the first scan, all bits are written to
+	DATA\.  The read scan verifies the correct operation of the array
+	under these conditions.  On each succedding scan, the position of the
+	diagonal of DATA is shifted until, on the last scan, it has occupied
+	every possible position in the array.  Each cell has once been the
+	only DATA cell in a row and column of DATA\. 
+
+	The diagonal test is actually a modified galpat test (hence the 'g'
+	to call up the command).  This test also requires a number of
+	write-read scans thru each bank (or row depending on karl's verbiage)
+	of the block of memory under test.  At the beginning of the test the
+	memory is initialized to 1's (every bit!).  Then the test proceeds in
+	the following sequence:
+	on the first scan a word of zeroes is written at particular locations
+	in memory causing a diagonal of 0's in each memory chip's memory array.
+	on each successive scan the diagonal is shifted until it has occupied
+	all of the diagonal positions of each memory chip's array.  in other
+	words each cell of the memory array has been the only 0 cell in a row
+	and column of the array.
+	each read scan checks for the diagonal of 0's in a field of 1's.
+
+	the size is assumed to be a multiple of 0x40000
+
+	this test only runs in word mode
+
+	example:
+	Command : g 100000 80000 1
+
+	Tests the 1/2m block of memory at 0x100000.  The test executed
+	only one time.
+
+	defaults:
+	g daddr dsize 1
+
+6. loops
+	syntax :					l loopcnt
+	(where loopcnt is a decinal number
+	 in the range 1 - 4294967295)
+	default :					l 4294967295
+
+7. default parameters
+
+	The default parameters for each of the commands are summarized below:
+
+	Command : A daddr
+	Command : S dsize
+
+	Command : f daddr dsize ffffffff
+	Command : d daddr dsize
+
+	Command : c daddr dsize 55555555 1
+	Command : g daddr dsize 1
+	Command : x daddr dsize 5555 1
+	Command : r daddr dsize 7 1
+	Command : a daddr dsize 1
+	Command : u daddr dsize 1 1
+
+	Command : m 1
+	Command : p 3
+	Command : w 0
+	Command : s 0
+	Command : e 1
+
+	Command : l 4294967295
+
+	Where daddr and dsize above are the default address and size parameters.
+	The current default address and size parameters are always printed at
+	the head of the menu and are set in the following ways:
+	1. at the beginning of the diag (right after boot) the page boundary
+	(pages are 2K = 0x800 bytes) following the end of the diagnostic
+	itself is taken to be the default address parameter, while
+	the default size parameter is taken to be the total memory size of
+	the system (determined and offered by the diag/mon/boot rom) minus
+	the default address.
+	-or-
+	2. the default addr and size parameters may also be set using the
+	commands 'A' and 'S'.
+
+	(for more info see the section on parameters, address and size above)
+
+8. default test sequence
+
+	type "t" to get the default test sequence as follows :
+
+	m 0			byte mode
+	c . . 0			constant pattern 00
+	c . . 55		constant pattern 55
+	c . . aa		constand pattern aa
+	c . . ff		constant pattern ff
+	a			address test
+	u . . 5			uniqueness test
+	r			random test
+	m 1			word mode
+	c . . 0			constant pattern 0000
+	c . . 5555		constant pattern 5555
+	c . . aaaa		constant pattern aaaa
+	c . . ffff		constant pattern ffff
+	a			address test
+	u . . 5			uniqueness test
+	r			random test
+	m 2			long mode
+	c . . 0			constant pattern 00000000
+	c . . 55555555		constant pattern 55555555
+	c . . aaaaaaaa		constant pattern aaaaaaaa
+	c . . ffffffff		constant pattern ffffffff
+	a			address test
+	u . . 5			uniqueness test
+	r			random test
+	m 1			mode word
+	x 100000		checker test
+	l *			loop on the above sequence "forever"
+
+	note : remember that the .'s above mean that the default address
+		and size are used (see discussion under parameters above)
+
+
+V. Error Message Interpretation
+
+1. bus errors and parity errors
+	Note that parity errors are just a special case of bus errors.
+	Bus errors are trapped and message is displayed as follows:
+
+	bus error: 0x<buserrorreg>
+	sr=<statusreg>  pc=<progctr>  vss=<vector&specstat>  @<addr>
+	<[VALID|INVALID] | BUSMASTER | PROTECTION | TIMEOUT |
+					 UPPER PARITY | LOWER PARITY>
+
+	The first line flags the error as a bus error and displays the
+	contents of the cpu bus error register.
+	The second line displays the information saved on the stack by the
+	68010 when it processes exceptions (bus errors).
+	Note that the last line is simply an english interpretation of the
+	bits in the bus error register.
+
+	Refer to both The Theory of Ops for the Sun-2/120 CPU as well as the
+	M68000 16/32-bit Microprocessor Programmer's Reference Manual (4th
+	edition) for more information on understanding the meaning of the
+	displayed information.
+
+2. data errors
+	Data compare errors are trapped and the message is displayed as
+	follows:
+
+	>> <testname> failed @ <addr> exp (<writedata>) obs (<readdata>)
+	>> failure in row <row#> : location U<location#>
+
+	Anomaly: Currently, if an error is detected, the memory location
+	where the error occurred is read twice (the first time when the error
+	is detected, the second time to pass the observed value to the
+	error handler).  The problem with this is that on the second read
+	the data read will occasionally match the expected value.
+	It is the second value read that is displayed in the error message.
+	This explains confusing error messages similar to the following:
+	constant pattern test failed @ 0x140000  exp (0x5555)  obs (0x5555)
+
+3. chip mapping
+	this diagnostic has the intelligence to report bad chip locations based
+	on addresses that fail with data errors (this is not done for parity
+	errors, since the failing address is not neccessarily latched by the
+	hardware).  Note that the chip locations are valid for the 120prime
+	cpu layout ONLY.
+
+4. error logging
+	Both bus errors as well as data errors are logged.  The first 100 of
+	each type are logged separately.  To display the error logs, type
+	E at the command line prompt.
+
+
+VII. Recommended Test Procedure
+
+	yet to be determined by TE
+
+1. testing the memory board circuits
+2. p2bus interface
+3. board select
+4. bank select
+5. memory array
+6. parity
+

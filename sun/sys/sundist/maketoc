@@ -1,0 +1,18 @@
+#! /bin/sh
+# @(#)maketoc 1.1 86/09/25 SMI;
+#
+
+for arch in MC68010 MC68020; do
+	for tapenum in 1 2 3 4 ; do
+		file=t.q.${arch}.${tapenum}
+		cp toc.quarter.template $file
+		chmod +w $file
+		edtoc $file ${arch} ${tapenum}
+	done
+	for tapenum in 1 2 3  ; do
+                file=t.h.${arch}.${tapenum}  
+                cp toc.half.template $file
+                chmod +w $file 
+                edtoc $file ${arch} ${tapenum} 
+        done  
+done

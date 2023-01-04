@@ -1,0 +1,9 @@
+dnl	@(#)m4.test4 1.1 86/09/24 SMI; from S5R2 1.2
+aaaaa
+divert(1)
+1111111
+divert
+divert(-1)
+undivert
+divert
+zzzzz

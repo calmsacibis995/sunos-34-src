@@ -1,0 +1,55 @@
+#! /bin/sh
+#
+# @(#) 3.3_Umaketape 1.1 86/09/25
+#
+# 3.3_Umaketape [st|ar|mt]
+#
+cmdname=`basename $0`
+if [ "$1" != "mt" -a "$1" != "ar" -a "$1" != "st" ]; then
+        echo ${cmdname}: missing or invalid tape type $1
+        exit 2
+fi
+if [ `whoami` != root ]; then
+        echo ${cmdname}: must be run as root
+        exit 2
+fi
+TAPE=/dev/nr${1}0
+PAGESIZE=8k
+MINIBLKSIZE=512
+if [ "$1" = "ar" -o "$1" = "st" ]; then
+	BS=126
+else
+	BS=20
+fi
+set -x
+#
+date
+sync
+mt -f ${TAPE} rew
+
+cd /sys/dist
+echo "Build 1st level boot block files"
+: Tpboot is raw program image, with no a.out header
+dd if=../sunstand/tpboot of=${TAPE} bs=${PAGESIZE} conv=sync
+: Copy 413 files to tape
+: new location for Copyright
+dd if=Copyright of=${TAPE} conv=sync
+: TOC goes here
+dd if=/rel/sir_patch/toc of=${TAPE} conv=sync
+: a.out header must be a separate record, of minblksize size
+: program text must start with next record
+file=/rel/sir_patch/obj/stand/diag
+dd if=$file of=hold.file ibs=32 obs=${PAGESIZE} skip=1
+(dd if=$file bs=${MINIBLKSIZE} count=1 conv=sync; \
+	dd if=hold.file bs=${PAGESIZE} conv=sync) > ${TAPE}
+
+cd /rel/sir_patch
+tar cvfb ${TAPE} ${BS} sir_upgrade sir_ranlib
+cd /rel/sir_patch/obj
+tar cvfb ${TAPE} ${BS}
+cd /rel/sir_patch/misc
+tar cvfb ${TAPE} ${BS}
+cd /sys/dist
+dd if=Copyright of=${TAPE} conv=sync
+echo "Done, rewind ..."
+mt -f ${TAPE} rew

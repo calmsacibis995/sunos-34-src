@@ -1,0 +1,18 @@
+#
+#	@(#)rootmenu	1.1 86/09/25 SMI
+#
+#	suntools root menu
+#
+"ShellTool"		shelltool
+"CommandTool"		cmdtool
+"MailTool"		mailtool
+"TextEditor"		textedit
+"DefaultsEditor"	defaultsedit
+"IconEditor"		iconedit
+"DbxTool"		dbxtool
+"PerfMeter"		perfmeter
+"GraphicsTool"		gfxtool
+"Console"		cmdtool -C
+"Lock Screen"		lockscreen
+"Redisplay All"		REFRESH
+"Exit Suntools"		EXIT

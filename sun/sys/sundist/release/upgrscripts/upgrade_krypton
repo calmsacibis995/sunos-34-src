@@ -1,0 +1,235 @@
+#! /bin/sh
+#
+#
+#	upgrade_krypton upgrade a diskfull standalone from Krypton's /proto
+#
+#	must be run from miniroot running on the machine to be upgraded 
+#
+#
+if rsh krypton -n date >/dev/null
+then
+        :
+else
+        echo "can't talk to krypton, get help!"
+        exit 1
+fi
+#
+echo -n "Do you want to upgrade only the files on the root filesystem? [y/n]: ";
+read ANSWER;
+case "${ANSWER}" in
+        y | yes)
+                ROOT_ONLY="true"
+                ;;
+        *)
+                ROOT_ONLY="false"
+                ;;
+esac
+#
+echo -n "Hostname for your machine? ";
+read h;
+echo -n "Root disk partition? (e.g. xy0a): ";
+read rdisk;
+if [ "${ROOT_ONLY}" = "false" ]; then
+	echo -n "User disk partition? (e.g. xy0g): ";
+	read udisk;
+fi
+echo "hostname: " ${h} " root disk: " ${rdisk} " user disk: " $udisk;
+#
+echo -n "Hit return to continue, ^C to exit ";
+read x;
+echo -n "Do you want the tar commands to be verbose? [y/n]: ";
+read ANSWER;
+case "${ANSWER}" in
+        y | yes)
+                VERBOSE="v"
+                ;;
+        *)
+                VERBOSE=""
+                ;;
+esac
+#
+OPTIONAL="usr.demo usr.diag usr.fortran usr.games usr.graphics usr.man \
+usr.debug usr.net usr.setup usr.vsys usr.text \
+usr.pascal usr.profiled usr.src usr.sunview_users usr.sunview_prog  \
+usr.uucp usr.vtroff"
+EXCLUDE_DIR="/usr/src/sun/sys/sundist/exclude.lists"
+EXCLUDE_FLAGS=""
+EXCLUDE_LIST=""
+#
+if [ "${ROOT_ONLY}" = "false" ]; then
+	for ITEM in ${OPTIONAL}; do
+		while : ; do
+			echo -n "Do you want to install \"${ITEM}\"? [y/n]: ";
+			read ANSWER;
+			case "${ANSWER}" in
+			y | yes)
+				break
+				;;
+			n | no)
+				EXCLUDE_FLAGS="${EXCLUDE_FLAGS}X"
+				EXCLUDE_LIST="${EXCLUDE_LIST} ${EXCLUDE_DIR}/${ITEM}"
+				break
+				;;
+			esac
+		done
+	done
+fi
+#
+echo "make /dev entries"
+cd /dev
+rd=`expr $rdisk : '\([a-z][a-z][0-9]\)[a-z]'`
+MAKEDEV $rd
+if [ "${ROOT_ONLY}" = "false" ]; then
+	ud=`expr $udisk : '\([a-z][a-z][0-9]\)[a-z]'`
+	if [ $rd != $ud ]; then
+		MAKEDEV $ud
+	fi
+fi
+#
+echo "checking filesystems"
+fsck -p /dev/r${rdisk}
+if [ "${ROOT_ONLY}" = "false" ]; then
+	fsck -p /dev/r${udisk}
+fi
+#
+if mount /dev/${rdisk} /a
+then
+	if [ "${ROOT_ONLY}" = "false" ]; then
+		if mount /dev/${udisk} /a/usr
+		then
+			:
+		else
+			echo "can't mount /dev/${udisk}, get help!"
+			exit 1
+		fi
+	fi
+else
+	echo "can't mount /dev/${rdisk}, get help!"
+	exit 1
+fi
+domain="wseng.sun.com"
+#
+cd /a
+SAVEFILES=usr/tmp/savefiles 
+PRIVATE=""
+(echo > ${SAVEFILES}) > /dev/null 2>&1 
+if [ -f "${SAVEFILES}" ]; then
+        rm -f ${SAVEFILES}
+else
+        SAVEFILES=private/usr/tmp/savefiles
+	PRIVATE="/private"
+        (echo > ${SAVEFILES}) > /dev/null 2>&1
+        if [ -f "${SAVEFILES}" ]; then
+                rm -f ${SAVEFILES}
+        else
+                echo "Unable to create savefile for tar of private files."
+                exit 1 
+        fi
+fi
+#
+cd /a
+echo "saving machine-specific files in ${SAVEFILES}"
+if [ ! -f etc/savefiles ]
+then
+	cat << EOF  >etc/savefiles
+/etc/dumpdates
+/etc/passwd
+/etc/group
+/etc/fstab
+/etc/ttys
+/etc/ttytype
+/etc/hosts
+/etc/hosts.equiv
+/etc/printcap
+/etc/termcap
+/etc/services
+/etc/exports
+/usr/lib/crontab
+/usr/lib/aliases
+EOF
+fi
+tar c${VERBOSE}f ${SAVEFILES} etc/savefiles \
+	`cat etc/savefiles | sed -e 's:^/::' | grep -v rc.local`
+#
+if [ "${ROOT_ONLY}" = "false" ]; then
+	echo "remove old directories in /usr"
+	cd /a/usr
+	for i in bin demo diag etc games include lib man mdec sccs src sys ucb;
+	do
+		rm -fr $i
+	done
+	#
+	# just in case they have one from the old structure
+	rm -fr suntool
+	#
+	echo "getting new files from krypton - /usr first"
+	cd /a/usr
+	rsh krypton -n \
+    	"cd /proto/usr; tar cf${EXCLUDE_FLAGS} - ${EXCLUDE_LIST} ." | \
+    	tar xpBf${VERBOSE} -
+	#
+	echo "installing new sendmail configuration file"
+	rm -f lib/sendmail.cf
+	cp lib/sendmail.subsidiary.cf lib/sendmail.cf
+	cp /dev/null lib/mailhosts
+	#
+	sync
+fi
+#
+cd /a
+echo "remove old stuff from /"
+rm -fr bin boot etc lib stand sys
+echo "get new files from krypton - root"
+rsh krypton -n \
+  "cd /proto; tar cf - .??* bin boot dev/MAKEDEV etc lib stand/diag vmunix" | \
+  tar xpBf${VERBOSE} -
+ln -s usr/sys /a/sys
+sync
+#
+echo "make /dev entries"
+(cd dev; MAKEDEV std)
+#
+echo "restoring saved files"
+tar xpf${VERBOSE} ${SAVEFILES}
+sync
+#
+echo "setting hostname in rc.boot"
+ed - /a/etc/rc.boot <<END
+/hostname/s/=[^=]*$/=${h}/
+w
+q
+END
+echo "setting domainname in rc.local"
+ed - /a/etc/rc.local <<END2
+/domainname/s/ [^ ]*$/ ${domain}/
+w
+q
+END2
+#
+if [ -f "usr/mdec/installboot" ]; then
+	echo "installing new boot block"
+	d=`expr $rdisk : '\([a-z][a-z]\)[0-9][a-z]'`
+	usr/mdec/installboot usr/mdec/boot${d} /dev/${rdisk}
+else
+	echo "Unable to install a new boot block.  Run the command:"
+        echo "	usr/mdec/installboot usr/mdec/boot${rdisk} /dev/${rdisk}0a"
+	echo "manually after the upgrade is completed and you re-boot."
+fi
+#
+if [ -f etc/upgrade.local ]; then
+	echo "running local upgrade procedure"
+	sh etc/upgrade.local
+fi
+#
+cd /
+if [ "${ROOT_ONLY}" = "false" ]; then
+	umount /dev/${udisk}
+fi
+umount /dev/${rdisk}
+echo "checking filesystems"
+fsck -p /dev/r${rdisk}
+if [ "${ROOT_ONLY}" = "false" ]; then
+	fsck -p /dev/r${udisk}
+fi
+#
+echo "all done, now reboot your system and config a kernel for your system"

@@ -1,0 +1,27 @@
+" @(#)Exrc 1.1 86/09/25 SMI
+set autoindent
+set autoprint
+set noignorecase
+set nomesg
+set noslowopen
+set noterse
+set nonumber
+"
+set report=2
+set shell=/bin/csh
+set tabstop=4
+set wrapmargin=8
+"
+"map ; :
+"map g :%
+"map v ~
+"map F !} fmt -c
+"map S !} sort
+"map T :r!
+"
+"map! ;b \fB
+"map! ;i \fI
+"map! ;p \fP
+"map! ;r \fR
+"map! ;- \-
+"map! ;u \s-2UNIX\s+2

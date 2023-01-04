@@ -1,0 +1,18 @@
+# !/bin/sh
+#
+#	Script to convert 3.2pilot rc.local to 3.2fcs rc.local
+#
+#       @(#)  pilotrclocal_3.2rclocal 1.1 86/09/25 
+#
+#       Copyright (c) 1986 by Sun Microsystems, Inc.
+#
+
+ed $1 <<NEW
+/UCB/
+s/1.41/1.2/
+s/86\/05\/27/86\/07\/22/
+/fpa_download/
+s/fpa_download/fpa_download -q/
+w
+q
+NEW

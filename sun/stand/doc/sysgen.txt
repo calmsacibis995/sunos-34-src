@@ -1,0 +1,526 @@
+.de SX		\" call 'so' something else so derof
+.so \\$1
+..
+.\" .SX /usr/lib/tmac/tmac.e
+.po 1.5i
+.nr PO 1.5i
+.hy 14		\" don't hyphenate in bad places
+.pn 1		\" start page number at 'A'
+.af % A
+.ds PN "\\\\n%
+.nr sf 3	\" set section headings in bold face
+.nr si 2	\" indent nested sections 2 spaces
+.de $0		\" macro to enter section heading in to table of contents
+.(x C
+.if (\\$3=1) .sp
+\\$2   \\$1
+.)x \\*(PN
+..
+.de [R		\" routine declaration
+.ds RC \\$1
+.sp
+.ne 10
+.(l L
+.fi
+.na
+..
+.de *Q
+.ds RM \\$1 \\$2
+\\*(RM
+..
+.de *R
+.ds RN \\$1
+.(x R
+\\*(RN - \\*(RC
+.)x
+\\$1
+..
+.de {R
+\\*(RN
+.nf
+.ad
+..
+.de [R
+.)l
+..
+.de }R
+..
+.de {E			\" possible errors sub-section
+.lp
+Possible errors:
+.nr ps 0n
+.LB \\(bu
+..
+.de }E
+.LE
+.nr ps 1n
+.lp
+..
+.de WP
+.lp
+\fb***\fp
+..
+.de IP
+.ip "\fB\\$1\fP"
+..
+.de EB
+.sp -1
+.nf
+\L'|\\$1-1'\h'-1n'\1'\\n(.lu'\h-1n'\L'-1\\$1+1'\1-\\ln(.lu'
+.fi
+..
+.nr ii 5
+.nr hm 3v
+.nr tm 6v
+.nr fm 4v
+.nr bm 7v
+.de $h
+.tl 'APPROVAL SECTION''\*(PN'
+..
+.de $f
+.tl '\*(td''DO NOT COPY'
+.tl 'SUN MICROSYSTEMS INC''COMPANY CONFIDENTIAL'
+..
+.bp
+.sp
+.ce 2
+\fBE X T E R N A L  S P E C I F I C A T I O N
+(User Perspective)
+.sp
+.\" Fill in you project's name in place of the dot below and elsewhere
+.\" in this file.
+TITLE	     : 	Sysgen Controller Diagnostic External Specification\fR
+.sp
+AUTHOR	     :	Gale Snow
+.sp
+REPORT NO.   :  900-1027-01
+.sp
+REVISION NO. :	A @(#) sysgen.txt 1.1 9/25/86
+.sp
+DATE         : \*(td	\"td=printing date if reformated
+.sp
+STATUS       :  Preliminary
+.sp 2
+.(l L
+APPROVALS    :						DATE
+.de SG			\" Macro to define signiture lines
+.ip "\\$1" 20n		\" Position and signiture line
+------------------------------------------------------------
+.br
+\\$2			\" Name Underneath
+..
+.SG "Originator" "Gale Snow"
+.SG "Test Engineering"
+.SG "Manufacturing"
+.SG "Production"
+.SG "Quality Control"
+.)l
+.bp
+.(l L
+.ce
+Document Review Form
+.lp
+Please make note and initial on this page all corrections and/or
+proposed amendments by page number and/or section number.
+.sp
+.ce
+---------------------------------------------
+Recommendations, Differences, Construction Errors, and comments:
+.sp 36
+.ce 2
+---------------------------------------------
+Typographical Errors:
+.sp 4
+.ce 2
+---------------------------------------------
+Attach additional sheet(s) as needed.
+.)l
+.\" redefine headers for the body of the document
+.de $h
+.tl 'SYSGEN CONTROLLER DIAGNOSTIC EXTERNAL SPECIFICATION ''
+.tl '(User\'s Perspective)''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fBSYSGEN CONTROLLER DIAGNOSTIC EXTERNAL SPECIFICATION\fR
+.sh 1 "INTRODUCTION"
+.sh 2 "Purpose"
+.\"	1.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+This specification describes the procedure to follow when testing Sysgen
+Controllers using the diagnostic
+.i sysgen
+to insure functional boards for Sun Workstations.
+.sh 2 "Applicable Documents"
+.\"	1.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.np
+Sysgen SC4000 Intelligent Tape Controller Product Specification, Doc. No.
+4000-500-00, 7/21/83.
+.np
+Sysgen SC4000 Intelligent Tape Controller Installation Procedure, Doc. No.
+4000-530-00,6/11/83.
+.np
+Sun SCSI Programmers' Manual, W. M. Bradley, 7/20/83.
+.sh 1 "SYSTEM OVERVIEW"
+.\"	2.
+.sh 2 "General Description"
+.\"	2.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+The Sysgen Controller Diagnostic,
+.i sysgen,
+was developed to test the SCSI tape controllers (PN:370-1011-01) before they
+are assembled into systems.  The diagnostic exercises the board by talking
+over the SCSI bus to a known good 1/4" Streaming Cartridge Tape Drive using
+the functions provided by the controller.
+.sh 2 "Features"
+.\"	2.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+The performance of the Sysgen Controller is examined through the use of
+the following functions:
+.np
+Test Unit Ready,
+.np
+Rewind,
+.np
+Space,
+.np
+Read,
+.np
+Write,
+.np
+Write File Mark,
+.np
+Request Sense.
+.sh 2 "Required Configuration"
+.\"	2.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+The following hardware is required for an Sysgen Controller Diagnostic
+Test Station:
+.np
+a card cage (PN:340-0332).
+.np
+power supply(s) (PN:300-0135-03) for the card cage, sysgen board, and
+1/4" Streaming Cartridge Tape Drive.
+.np
+a monitor (PN:540:1015-01), video board (PN:501-0059-01), and keyboard
+(PN:540-1014-01).
+.np
+Sun-2 processor board (PN:501-1007-04).
+.np
+a scsi host adapter board (PN:501-1006-01).
+.np
+a low power memory board (PN:501-1013-01).
+.np
+an ethernet board (PN:501-0243) for booting over the network.
+.np
+a 1/4" Streaming Cartridge Tape Drive (Archive) (PN:370-0544-01).
+.np
+a 1/4" cartridge tape (PN:370-0543-01).
+.np
+cables: one from the scsi to the sysgen (PN:530-1054-01), one from the sysgen
+to the tape drive (PN:530-1024-01).
+.np
+power cables: for the Sysgen and the Archive tape drive.
+.sh 2 "Error Handling"
+.\"	2.4
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+Errors are detected and displayed for evalutation.
+.sh 2 "General Performance Characteristics"
+.\"	2.5
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+The Sysgen Controller Diagnostic takes on the order of three minutes to execute.
+.sh 2 "Planned Extensions"
+.\"	2.6
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+.i Sysgen
+will be added to the menu diagnostic.
+.sh 2 "Limitations"
+.\"	2.7
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+The following opcodes/commands are not tested:
+.np
+0x09/Set disk block size.
+.np
+0x18/Copy to (from) disk from (to) tape.
+.np
+0x19/Erase tape cartridge.
+.sp 2
+.\" Replace the dot below with the name of the major component you are
+.\" describing.  Repeat the entire section for each of your major components.
+.\" The subsections below are some of the ones that may be applicable.
+.\" Delete the ones that do not apply, and add new ones as necessary.
+.sh 1 "SYSGEN CONTROLLER DIAGNOSTIC SPECIFICATION"
+.sh 2 "User Interface"
+.\"	3.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+The steps listed below should be followed when testing the Sysgen controller:
+.np
+Connect the Sysgen controller to the SCSI host adapter in the test station
+using the 50 pin SCSI bus cable from JH on the Sysgen to the SCSI interface
+connector on the host adapter (on the far left when the board is in the card
+cage).
+.np
+Connect the tape drive to the Sysgen board from J1 on the Archive to the
+controller at JT using the 50 pin cable with the card edge connector at one
+end for the tape drive.
+.np
+Insert the 1/4" cartridge tape into the tape drive.
+.np
+Turn the test station power on.
+.np
+Boot the test program,
+.i sysgen,
+to the test station from the manufacturing file server.
+.np
+At this point the test operation begins with the Open command.
+.sh 2 "Operation"
+.\"	3.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+During operation, commands are sent to the Sysgen Controller according to
+the SCSI Interface Protocol in the following manner:
+.np
+Wait for the busy signal in the Interface Control Register (ICR) to go away.
+.np
+Assert select in the ICR.
+.np
+Wait for the busy signal in the ICR.
+.np
+Set the dma address and count.
+.np
+Pass the Command Description Block, byte at a time.
+.np
+Wait for a true interrupt request signal in the ICR indicating dma completion.
+.np
+Read back status information, byte at a time.
+.np
+Read the message byte (hopefully command complete!).
+.np
+If a chk condition exists, read back sense information.
+.sh 2 "Diagnostic"
+.\"	3.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+The diagnostic runs through the following sequence of commands to test the
+controller (the letter in parenthesis is displayed on the monitor as each
+command is executed):
+.sh 3 "Open (O)"
+.pp
+An open consists of a test unit ready command followed by a rewind command.
+Possible errors are:
+.np
+st: open failed!
+.np
+st: not ready!
+.np
+st: cannot rewind!
+.np
+st: short transfer!
+.sh 3 "Write (W)"
+.pp
+ The following patterns are written out to the tape in a sequence of 10 blocks
+of 1024 bytes each.
+.np
+0x00000000
+.np
+0xffffffff
+.np
+0x55555555
+.np
+0xaaaaaaaa
+.np
+0xa5a5a5a5
+.np
+0xf00ff00f
+.np
+0xdbe6dbe6
+.np
+0xec6dec6d
+.np
+0x12345678
+.np
+0x98765432
+.pp
+Possible errors are:
+.np
+st: write failed!
+.np
+st: write protected!
+.np
+st: short transfer!
+.sh 3 "Close (C)"
+.pp
+A close consists of a write file mark if the last command was a write, and
+a rewind command.
+.sh 3 "Open (O)"
+.pp
+An open consists of a test unit ready command followed by a rewind command.
+Possible errors are:
+.np
+st: open failed!
+.np
+st: not ready!
+.np
+st: cannot rewind!
+.np
+st: short transfer!
+.sh 3 "Read (R)"
+.pp
+The patterns written out are read back in sequence and the buffers checked
+against the data patterns to insure correctness.  The checking is the reason
+the streaming tape speed is not maintained.  Reads are attempted until the
+end of file mark is reached.
+.pp
+Possble errors:
+.np
+st: read failed!
+.np
+st: data readback error!
+.np
+st: short transfer!
+.sh 3 "Write (W)"
+.pp
+ The following patterns are written out to the tape in a sequence of 10 blocks
+of 1024 bytes each.
+.np
+0x00000000
+.np
+0xffffffff
+.np
+0x55555555
+.np
+0xaaaaaaaa
+.np
+0xa5a5a5a5
+.np
+0xf00ff00f
+.np
+0xdbe6dbe6
+.np
+0xec6dec6d
+.np
+0x12345678
+.np
+0x98765432
+.pp
+Possible errors are:
+.np
+st: write failed!
+.np
+st: write protected!
+.np
+st: short transfer!
+.sh 3 "Close (C)"
+.pp
+A close consists of a write file mark if the last command was a write, and
+a rewind command.
+.sh 3 "Open (O)"
+.pp
+An open consists of a test unit ready command followed by a rewind command.
+Possible errors are:
+.np
+st: open failed!
+.np
+st: not ready!
+.np
+st: cannot rewind!
+.np
+st: short transfer!
+.sh 3 "Space (S)"
+.pp
+The space command will skip over a specified number of file marks, in this
+case one file mark.  Possible errors:
+.np
+st: cannot skip file!
+.sh 3 "Read (R)"
+.pp
+The patterns written out are read back in sequence and the buffers checked
+against the data patterns to insure correctness.  The checking is the reason
+the streaming tape speed is not maintained.  Reads are attempted until the
+end of file mark is reached.
+.pp
+Possble errors:
+.np
+st: read failed!
+.np
+st: data readback error!
+.np
+st: short transfer!
+.sh 3 "Close (C)"
+.pp
+A close consists of a write file mark if the last command was a write, and
+a rewind command.
+.sh 2 "Error Handling"
+.\"	3.4
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.pp
+If any of the following errors occur the Sysgen Controller has failed and
+should be rejected:
+.np
+st: open failed!
+.np
+st: write failed!
+.np
+st: write protected!
+.np
+st: read failed!
+.np
+st: data readback error!
+.np
+st: cannot skip file!
+.np
+st: not ready!
+.np
+st: cannot rewind!
+.np
+st: sense error!
+.np
+st: short transfer!
+.pp
+If at any time an error occurs, the Sysgen Controller has failed the test and
+should be returned to the vendor.
+.pp
+During operation of the test the following line is displayed:
+.pp
+OW0123456789COR0123456789W0123456789COSR0123456789C
+.pp
+At the end of the test, if no errors have occurred, the following message
+will appear:
+.pp
+NO ERRORS - PASS!
+.ds PN "\\\\n%
+.de $h
+.tl 'TABLE OF CONTENTS''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fBTABLE OF CONTENTS\fR
+.sp 3
+.xp C

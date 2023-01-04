@@ -1,0 +1,576 @@
+#! /bin/csh -f
+#
+#       @(#)sysdiag.help 1.1 9/25/86 Copyright 1985 Sun Micro
+#
+#
+
+set op
+set k
+set cin
+set current_command
+set file
+set log_dir2 = `hostname`
+set args = no
+set return_after_display = no
+
+if ($?SYSDIAG_DIRECTORY) then
+  set sysdiag_directory = $SYSDIAG_DIRECTORY
+else
+  set sysdiag_directory = `pwd`
+endif
+set extra_options = no
+if ($sysdiag_directory == /usr/nemesis/fjones/src/sysdiag) then
+  set extra_options = yes
+  set current_command = ' ( extra )'
+endif
+
+if ($#argv > 0) then
+  set args = yes
+  set k = ($argv)
+endif
+
+alias return_msg 'echo " "; echo -n " Press return to continue. "; set kin = $<; if ($\!* == yes) exit'
+alias border 'echo " ************************************************************************"'
+
+while ($op != q)
+
+  if ("$k" == '') then
+
+clear
+echo ' '
+echo ' '
+echo ' '
+echo ' '
+echo ' '
+echo ' '
+echo '                           SYSTEM DIAGNOSTICS'
+echo ' '
+echo '                       HELP INFORMATION SELECTIONS'
+echo ' '
+border
+echo '     1 - Running System Diagnostics.'
+echo '     2 - Operation on a SUN Workstation.'
+echo '     3 - Operation on an alphanumeric terminal.'
+echo '     4 - Log files.'
+echo '     5 - Test descriptions.'
+echo '     6 - Error handling.'
+echo '     o - Option help.'
+echo ' '
+echo '     q - quit the help menu and return to the selection menu.'
+echo '     Q - Quit System Diagnostics.'
+border
+echo ' '
+echo ' '
+echo ' '
+if ($extra_options == yes) then
+   echo -n '  '$log_dir2''$current_command': '
+else
+   echo -n '  Enter help selection and press return: '
+endif
+           
+    set kk = $<
+    set k = ($kk)
+    if ("$k" == '') continue
+  endif
+
+  if ("$k" == q) exit
+  if ("$k" == Q) exit (1)
+ 
+  set fin = ($k)
+  set k
+  if (($fin[1] != R) || ($extra_options == no)) then
+    set cin = ($fin)
+  endif
+ 
+  if ($extra_options == yes) set current_command = " ( $cin )"
+
+  if ($#cin > 1) then
+     set op = ($cin[1])
+     set file = ($cin[2-$#cin])
+  else 
+    set op = $cin
+    set file
+  endif
+
+ switch ($op)
+
+ case 1:
+    clear
+    echo ' '
+    echo ' RUNNING SYSTEM DIAGNOSTICS'
+    echo ' '
+    return_msg args
+    continue
+
+  case 2:
+    clear
+    echo ' '
+    echo ' OPERATION ON A SUN WORKSTATION'
+    echo ' '
+    return_msg args
+    continue
+
+  case 3:
+    clear
+    echo ' '
+    echo ' OPERATION ON AN ALPHANUMERIC TERMINAL'
+    echo ' '
+    echo ' '
+    return_msg args
+    continue
+
+  case 4:
+    clear
+    echo ' '
+    echo ' LOG FILES'
+    echo ' '
+    return_msg args
+    continue
+
+  case 5:
+    clear
+    echo ' '
+    echo ' TEST DESCRIPTIONS'
+    echo ' '
+    return_msg args
+    continue
+
+  case 6:
+    clear
+    echo ' '
+    echo ' ERROR HANDLING'
+    echo ' '
+    return_msg args
+    continue
+
+  case o:
+   set sop
+   set o_args = no
+   if ($#cin > 1) then
+     set k = ($file)
+     set o_args = yes
+   endif
+   while ($sop != q)
+     if ("$k" == '') then 
+       clear
+echo ' '
+echo ' '
+echo ' '
+echo ' '
+echo '                        OPTION HELP INFORMATION'
+echo ' '
+border
+echo '     i - intervention tests.'
+echo '     t - 1/4 inch tape drive options.'
+echo '     s - serial port test options.'
+echo '     d - data communications processor test options.'
+echo '     p - IPC test options.'
+echo '     m - manufacturing test options.'
+echo '     r - run on error'
+echo ' '
+echo '     f - file (save) current options.'
+echo '     o - use (restore) options previously filed.'
+echo '     h - help information for options.'
+echo '     q - quit option help and return to the previous menu.'
+echo '     Q - Quit System Diagnostics.'
+border
+echo ' '
+       if ($extra_options == yes) then
+          echo -n '  '$log_dir2': '
+       else
+          echo -n '  Enter help selection and press return: '
+       endif
+           
+       set kk = $<
+       set k = ($kk)
+       if ("$k" == '') continue
+     endif
+
+    if ("$k" == Q) exit (1)
+    if ("$k" == q) then
+       if ($args == yes) exit
+       break; continue
+    endif  
+    set kin = ($k)
+    set k
+
+    if ($#kin > 1) then
+       set sop = ($kin[1])
+       set file = ($kin[2-$#kin])
+    else 
+      set sop = $kin
+      set file
+    endif
+
+    switch ($sop)
+    case i:
+      clear
+echo ' '
+echo ' '
+echo ' '
+echo ' '
+echo ' INTERVENTION TESTS'
+echo ' '
+echo ' '
+echo ' Sysdiag intervention tests are tests which require user interaction'
+echo ' to execute successfully. After intervention tests are enabled, menu'
+echo ' selections for the intervention tests are displayed.'
+echo ' '
+echo ' Current intervention tests are:'
+echo ' '
+echo '   All tape tests'
+echo '   Serial port tests'
+echo '   Data communications processor port tests'
+echo '   IPC disk drive tests'
+echo '   IPC parallel port tests'
+echo ' '
+echo ' Selecting intervention test options will cause the associated tests to'
+echo ' be scheduled to execute in the same manner as non-intervention tests.'
+echo ' They may still be individually selected or inhibited by using the select'
+echo ' mode of system diagnostics.'
+echo ' '
+echo ' For specific test option help, enter the selection character of the'
+echo ' specific option for which help is desired.'
+echo ' '
+
+      return_msg o_args
+      continue
+
+    case t:
+      clear
+echo ' '
+echo ' '
+echo ' 1/4 INCH TAPE DRIVE OPTIONS'
+echo ' '
+echo ' After making the 1/4 inch tape drive test options selection, sysdiag'
+echo ' will prompt for the following tape options:'
+echo ' '
+echo ' Short test - 1000 blocks are written, read and compared.'
+echo ' '
+echo ' Long test - This test will write, read and compare enough blocks to test'
+echo '	  all the tracks the tape drive contains. The number of blocks written'
+echo '	  is determined by the "tape drive tracks" and "Emulex tape controller"'
+echo '	  options described below and must be set correctly. The tape must be'
+echo '	  450 feet long or the test will either run off the end of the tape'
+echo '	  (tape is to short) or not test the last tracks (tape is to long).'
+echo '	  The blocks written, read and compared are:'
+echo '		4 track - 35000'
+echo '		9 track - 79550 without the Emulex tape controller'
+echo '		9 track - 88250 with the Emulex tape controller'
+echo ' '
+echo ' Tape drive tracks - The actual number of tracks the tape drive contains.'
+echo '	  4 or 9 must be entered. 4 track drives do not have the "QIC-24"'
+echo '	  or the "Emulex tape controller" options.'
+echo ' '
+echo ' QIC-24 - This option is used to specify if the tape drive is able to'
+echo '	  write and read in the "QIC-24" format. It will cause the'
+echo ' 	  tape to be tested with both /dev/rst0 (normal) and /dev/rst8.'
+echo ' '
+echo ' Emulex tape controller - This option is used to specify that the tape'
+echo '	  controller is an Emulex type.'
+
+      return_msg o_args
+      continue
+
+    case s:
+      clear
+echo ' '
+echo ' '
+echo ' SERIAL PORT TEST OPTIONS'
+echo ' '
+echo ' After making the serial port test option selection, sysdiag will prompt'
+echo ' for the serial ports to test. At this time enter a string of ports to'
+echo ' test or if none are to be tested, enter "none" or just press return.'
+echo ' Any number of serial ports or port pairs may be entered in any order.'
+echo ' To test a single port or ports, enter the port number, to test a pair'
+echo ' or pairs of ports, enter the port numbers separated by a "-". Single'
+echo ' ports and port pairs must be separated by a space.'
+echo ' '
+echo ' The internal ports /dev/ttya and /dev/ttyb are entered as "a" and "b".'
+echo ' The SCSI ports /dev/ttys0 - /dev/ttys3 (if available) are entered as'
+echo ' "0", "1", "2", and "3".'
+echo ' The Systech MTI ports /dev/tty00 - /dev/tty3f (if available) are entered'
+echo ' as "00" through "3f".'
+echo ' '
+echo ' Examples:'
+echo '	a			test single port ttya'
+echo '	1 a 05 20		test single ports ttys1, ttya, tty05, tty20'
+echo '	a-b 			test port pair ttya - ttyb'
+echo '	00-3a 1e-1 a b-3 2  	test port pair tty00 - tty3a,'
+echo ' 				pair tty1e - ttys1, single port ttya,'
+echo ' 				pair ttyb - ttys3, single port ttys2'
+echo ' '
+echo ' All ports to test must have the following loopback plugs installed:'
+echo ' 	The RS-232-C loopback plug PN 540-1281-01 for single ports.'
+echo '	The RS-232-C port to port loopback assembly for port pairs. (no PN)'
+
+      return_msg o_args
+      continue
+
+    case d:
+      clear
+echo ' '
+echo ' '
+echo ' '
+echo ' '
+echo ' DATA COMMUNICATIONS PROCESSOR TEST OPTIONS'
+echo ' '
+echo ' '
+echo ' After making the data communications processor test option selection,'
+echo ' sysdiag will prompt for the data communications ports to test. At this'
+echo ' time enter a string of ports to test or if none are to be tested,'
+echo ' enter "none" or just press return. Any number of data communications'
+echo ' ports may be entered in any order. To test a port or ports, enter the'
+echo ' the port number(s) separated by a space.'
+echo ' '
+echo ' The ports /dev/dcpa0 - /dev/dcpa3 are entered as "a0" through "a3".'
+echo ' The ports /dev/dcpb0 - /dev/dcpb3 are entered as "b0" through "b3".'
+echo ' The ports /dev/dcpc0 - /dev/dcpc3 are entered as "c0" through "c3".'
+echo ' The ports /dev/dcpd0 - /dev/dcpd3 are entered as "d0" through "d3".'
+echo ' '
+echo ' Examples:'
+echo '	a0			test dcpa0'
+echo '	c2 a0 d0		test dcpc2, dcpa0, dcpd0'
+echo '	a0 a1 a2 a3 		test dcpa0, dcpa1, dcpa2, dcpa3'
+echo ' '
+echo ' All ports to test must have the following loopback plugs installed:'
+echo ' 	The RS-232-C loopback plug PN 540-1281-01 for the RS-232-C ports.'
+echo '	The RS-449 loopback plug PN 540-1309-01 for the RS-449 ports.'
+echo ' '
+
+      return_msg o_args
+      continue
+
+    case p:
+      clear
+echo ' '
+echo ' '
+echo ' '
+echo ' '
+echo ' IPC TEST OPTIONS'
+echo ' '
+echo ' '
+echo ' After making the IPC test option selection, sysdiag will prompt for the'
+echo ' IPC disk drives to test followed by a prompt for the IPC parallel ports'
+echo ' to test. When prompted, enter either the disk drives or parallel ports'
+echo ' to test or if none are to be tested, enter "none" or just press return.'
+echo ' At the proper prompt, any number of disk drives or parallel ports may be'
+echo ' entered in any order separated by a space.'
+echo ' '
+echo ' The IPC disk drives are entered as "d0" through "d3".'
+echo ' The IPC parallel ports are entered as "pp0" through "pp3".'
+echo ' '
+echo ' The suffixed number signifies which IPC the disk or parallel port is'
+echo ' attached to.'
+echo ' '
+echo ' Examples (remember disks and ports are entered at the proper prompt):'
+echo '	d0			test the disk drive on IPC 0'
+echo "	d2 d0 d3		test the disk drives on IPC's 2, 0, and 3"
+echo '	pp0          		test the parallel port on IPC 0'
+echo "	pp1 pp3 		test the parallel ports on IPC's 1 and 3"
+echo ' '
+echo ' All disk drives to test must have a test diskette installed.'
+echo ' All parallel ports to test must have a loopback plug installed.'
+echo ' '
+
+      return_msg o_args
+      continue
+
+    case m:
+      clear
+echo ' '
+echo ' MANUFACTURING TEST OPTIONS'
+echo ' '
+echo ' This option selection is used exclusively for Sun manufacturing testing.'
+echo ' These options and tests should not be used outside of Sun manufacturing.'
+echo ' '
+echo ' After making the manufacturing test option selection, sysdiag will'
+echo ' prompt for the following manufacturing options:'
+echo ' '
+echo '  Vmem wait time - This options specifies a wait period between'
+echo '    successive executions of the virtual memory test. This option is'
+echo '    useful to reduce the net traffic and should only use a wait time'
+echo '    on diskless systems.'
+echo '  Graphics processor - The graphics processor board test may be enabled'
+echo '    individually or in combination with the graphics buffer. This test'
+echo '    will cause system problems if the graphics processor is in use by'
+echo '    UNIX.'
+echo '  Serial port board - This option enables the serial port board test'
+echo '    for the Systech MTI. Sysdiag will then prompt for the number of'
+echo '    boards installed in the system and the number of ports on each board'
+echo '    that it is desired to test. This test uses special test fixtures.'
+echo '  Shoebox test - This option enables the shoebox test. Sysdiag will probe'
+echo '    for SCSI disks and tapes 1 through 7. The memory tests and the IPC'
+echo '    tests will be started in the sysdiag "select" mode reguardless of'
+echo '    the mode selected by the user. Although these tests are not normally'
+echo '    ran during shoebox testing, they may be selected if desired.'
+echo ' '
+echo ' Selecting manufacturing test options will cause the associated tests to'
+echo ' be scheduled to execute in the same manner as other sysdiag tests. They'
+echo ' may still be individually selected or inhibited by using the select mode'
+echo ' of system diagnostics.'
+
+      return_msg o_args
+      continue
+
+    case r:
+      clear
+echo ' '
+echo ' '
+echo ' '
+echo ' '
+echo ' '
+echo ' '
+echo ' '
+echo ' RUN ON ERROR TEST OPTION'
+echo ' '
+echo ' '
+echo ' '
+echo ' This option selection is used exclusively for Sun manufacturing testing.'
+echo ' This options should not be used outside of Sun manufacturing.'
+echo ' '
+echo ' After making the manufacturing test option selection, sysdiag will'
+echo ' display the run on error option. At this time run on error may be'
+echo ' enabled or disabled by alternately entering "r".'
+echo ' '
+echo ' If run on error is enabled, sysdiag will continue to test the device '
+echo ' on which the error was detected. In some cases, retrys of the operation'
+echo ' on which the error was detected will be attempted. In some cases the'
+echo ' complete operation will be restarted.'
+echo ' '
+echo ' '
+echo ' '
+
+      return_msg o_args
+      continue
+
+    case f:
+      clear
+echo ' '
+echo ' '
+echo ' '
+echo ' FILE CURRENT OPTIONS'
+echo ' '
+echo ' '
+echo ' This selection is used to file (save) the current sysdiag options for the'
+echo ' future use of the "use (restore) options previously filed", selection "o".'
+echo ' It also files options for the sysdiag "automatic execution on login" feature.'
+echo ' '
+echo ' Selection usage:    f [option name]'
+echo ' '
+echo ' Where "option name" is any valid UNIX filename except for "n", "test",'
+echo ' and "tape.test". When the "option name" is omitted sysdiag will prompt'
+echo ' for one. Care must be taken when entering the option name, as an invalid'
+echo ' name will cause unpredictable results.'
+echo ' '
+echo ' The special option name "auto_start" is used for the sysdiag "automatic'
+echo ' execution on login" feature. If options have been saved with this name,'
+echo ' sysdiag, on login, will automatically set the saved options and if'
+echo ' a test selection was entered, sysdiag will automatically start the test.'
+echo ' '
+echo ' If multiple option settings are to be saved, each setting must be saved'
+echo ' with a unique name.'
+echo ' '
+echo ' When the "file current options" selection is executed, the current'
+echo ' options will be saved in a file with the same name as the entered'
+echo ' option name. All option files will reside in the sysdiag log directory'
+echo ' unless directed elsewhere, via a prefixed directory on the option name.'
+echo ' '
+
+      return_msg o_args
+      continue
+
+    case o:
+      clear
+echo ' '
+echo ' '
+echo ' '
+echo ' '
+echo ' USE OPTIONS PREVIOUSLY FILED'
+echo ' '
+echo ' '
+echo ' This selection is used to restore sysdiag options previously saved by'
+echo ' the "file (save) current options", selection "f".'
+echo ' '
+echo ' '
+echo ' Selection usage:    o [option name]'
+echo ' '
+echo ' Where "option name" was the name given to options previously saved by'
+echo ' the "file current options", selection "f". When the "option name" is'
+echo ' omitted sysdiag will prompt for one. Care must be taken when entering'
+echo ' the option name, as an invalid name will cause unpredictable results.'
+echo ' '
+echo ' If the special option name "auto_start" is used, sysdiag will set the'
+echo ' saved options as usual and if a test selection is specified, sysdiag'
+echo ' will automatically start the test.'
+echo ' '
+echo ' If the "o" selection is entered on the sysdiag main selection menu'
+echo ' followed by the "option name", sysdiag will load and set the saved'
+echo ' options and then display the option menu for verification (except'
+echo ' if the "auto_start" option name is used and a test is specified).'
+echo ' '
+
+      return_msg o_args
+      continue
+
+    case h:
+      clear
+echo ' '
+echo ' '
+echo ' '
+echo ' '
+echo ' HELP INFORMATION FOR OPTIONS'
+echo ' '
+echo ' '
+echo ' This selection is used to describe the operation of help. Requests'
+echo ' for help may be made from either the help menu or directly from the'
+echo ' option menu itself.'
+echo ' '
+echo ' Selection usage from the option help menu:'
+echo ' '
+echo ' To request help from the option help menu, just enter the selection'
+echo ' character of the specific option for which help is requested as'
+echo ' listed on the option help menu.'
+echo ' '
+echo ' Selection usage from the option menu:    h [selection]'
+echo ' '
+echo ' Where "selection" is the selection character of the specific option'
+echo ' for which help is requested as listed on the option help menu. If'
+echo ' the optional "selection" entry is omitted, the option help menu is'
+echo ' displayed.'
+echo ' '
+
+      return_msg o_args
+      continue
+    endsw
+   end
+   if ($args == yes) exit
+  continue
+
+  case e:
+    if ($extra_options == yes) vi $file
+    continue
+
+  case m:
+    if ($extra_options == yes) vi $0
+    continue
+
+  case x:
+    if ($#cin > 1) then
+      $file
+      if ($status != 0) echo ' '
+    endif
+    return_msg
+    continue
+
+  case extra:
+    if ($extra_options == no) then
+      set extra_options = yes
+      set current_command = " ( $cin )"
+    else
+      set extra_options = no
+      set current_command
+    endif
+    continue
+  endsw
+end

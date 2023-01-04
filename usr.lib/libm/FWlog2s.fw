@@ -1,0 +1,11 @@
+c       .data
+c       .asciz  "@(#)FWlog2s.fw 1.1 86/09/25 Copyr 1985 Sun Micro"
+c       .even
+c       .text
+
+c       Copyright (c) 1985 by Sun Microsystems, Inc.
+
+	real*4 function FWlog2s ( x )
+	real*4 x
+	FWlog2s = log( x ) / 0.69314 71805 59945 30941 72321
+	end

@@ -1,0 +1,15 @@
+#! /bin/sh
+
+while read LINE; do
+
+	DEST=`echo ${LINE} | sed 's: ->.*$::'`
+	SOURCE=`echo ${LINE} | sed 's:^.* ->::'`
+
+	if [ -s ${DEST} ]; then
+		mv ${DEST} ${DEST}.old
+	fi
+
+	echo "linking ${DEST} to ${SOURCE}"
+	ln -s ${SOURCE} ${DEST}
+
+done

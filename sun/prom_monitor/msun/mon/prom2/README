@@ -1,0 +1,15 @@
+The  prom2  directory contains source for most of the code which used
+to be in the second Prom set of the Sun Rom Monitor.  In particular,
+it contains the device drivers for the various bootable devices.
+
+The older drivers are specific to the ROM monitor.  The newer drivers
+(initially, nd and sd) are common between the ROM monitor and the Unix
+standalone system.  All new drivers should be written this way, since
+it reduces the effort required, and permits the ROM drivers to be called
+from the standalone code, reducing the size and complexity of the bootstrap
+code on the disk.
+
+Bootcmd.c is the Monitor boot command, which vectors thru a table to the
+various device bootstrap routines.
+
+@(#)README 1.1 83/09/19 Copyright (c) 1983 by Sun Microsystems, Inc.

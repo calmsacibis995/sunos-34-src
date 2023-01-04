@@ -1,0 +1,98 @@
+c	.data
+c	.asciz	"@(#)FFexps.ff 1.1 86/09/25 Copyr 1986 Sun Micro"
+c	.even
+c	.text
+
+c	Copyright (c) 1986 by Sun Microsystems, Inc.
+
+        real function FFetwoton ( n )
+        integer n
+c       twoton is computes 2**n
+        integer ikluge
+        real rkluge
+        equivalence (ikluge,rkluge)
+ 
+        ikluge = 8388608 * (n + 127)
+        FFetwoton = rkluge
+        end
+ 
+	double precision function FFexp ( x, n )
+	real x
+	integer n
+c	computes n = nint(x * log2e)
+c	computes (2**-n)*exp(x) - 1 = exp( x - n * loge(2) ) - 1
+	real s1, s2, t1, t2, t3
+	parameter (s1 = -0.60091983800000000e+02 )
+	parameter (s2 =  0.10015315100000000e+02 )
+	parameter (t1 = -0.12018396800000000e+03 )
+	parameter (t2 =  0.60091983800000000e+02 )
+	parameter (t3 = -0.12015315100000000e+02 )
+	real xn, y 
+	double precision dy
+	double precision loge2a
+	real loge2b
+	parameter (loge2a = 0.69314 71804 85539 1383d0)
+        parameter (loge2b = 7.4406  17109 80297 9273e-11)
+
+	xn = anint( x * 1.44269 504078)
+	n = xn
+	dy = dble(x) - dble(xn) * loge2a
+	y = real(dy)
+	FFexp = dy - dble(xn * loge2b - 
+     1		y * y * (s1+y*(s2-y))/(t1+y*(t2+y*(t3+y))))
+	end
+
+	real function FFexps(x)
+	real x
+	
+	real ax
+	integer n
+	double precision FFexp, e
+	real FFetwoton, twom13
+	parameter (twom13 = 1.220703125000000000e-4)
+c	twom13 = 2**-13 = 39 00 00 00
+
+	ax = abs(x)
+	if (ax .le. 87.0) then
+		if (ax .le. twom13) then
+			FFexps = 1.0 + x
+		else
+			e = FFexp ( x, n )
+			if (n .eq. 0) then
+				FFexps = real(e) + 1.0
+			else
+				FFexps = real(e + 1.0d0) * FFetwoton(n) 
+			endif
+		endif
+	else
+		FFexps = real(exp(dble(x)))
+	endif
+	end
+
+	real function FFexp1s(x)
+	real x
+c	FFexp1s computes exp(x)-1
+
+	integer n
+	double precision e, FFexp
+	real p, FFetwoton
+	real twom26
+	parameter (twom26 = 1.490116119384765625e-8)
+c	twom26 = 2**-26 = 32 80 00 00
+	
+	if (abs(x) .le. 87.0) then
+		if (abs(x) .le. twom26) then
+			FFexp1s = x
+		else
+			e = FFexp ( x, n )
+			if (n .eq. 0) then
+				FFexp1s = real(e)
+			else
+				p = FFetwoton(n)
+				FFexp1s = real(dble(p) * e + dble(p - 1.0)) 
+			endif
+		endif
+	else
+		FFexp1s = real(exp(dble(x))-1.0d0)
+	endif
+	end

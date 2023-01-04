@@ -1,0 +1,4 @@
+#! /bin/sh
+cd /usr/lib/uucp
+rm -f /usr/spool/uucp/STST.$1
+exec uucico -r1 -s$1 $2

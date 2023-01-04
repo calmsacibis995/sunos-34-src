@@ -1,0 +1,388 @@
+.\"static char     sccsid[] = "@(#)autodefect.txt 1.1 9/25/86 Copyright Sun Micro"
+.de SX          \" call 'so' something else so derof
+.so \\$1
+..
+.po 1.5i
+.nr PO 1.5i
+.hy 14          \" don't hyphenate in bad places
+.pn 1           \" start page number at 'A'
+.af % A
+.ds PN "\\\\n%
+.nr sf 3        \" set section headings in bold face
+.nr si 2        \" indent nested sections 2 spaces
+.de $0          \" macro to enter section heading in to table of contents
+.(x C
+.if (\\$3=1) .sp
+\\$2   \\$1
+.)x \\*(PN
+..
+.de [R          \" routine declaration
+.ds RC \\$1
+.sp
+.ne 10
+.(l L
+.fi
+.na
+..
+.de *Q
+.ds RM \\$1 \\$2
+\\*(RM
+..
+.de *R
+.ds RN \\$1
+.(x R
+\\*(RN - \\*(RC
+.)x
+\\$1
+..
+.de {R
+\\*(RN
+.nf
+.ad
+..
+.de [R
+.)l
+..
+.de }R
+..
+.de {E                  \" possible errors sub-section
+.lp
+Possible errors:
+.nr ps 0n
+.LB \\(bu
+..
+.de }E
+.LE
+.nr ps 1n
+.lp
+..
+.de WP
+.lp
+\fb***\fp
+..
+.de IP
+.ip "\fB\\$1\fP"
+..
+.de EB
+.sp -1
+.nf
+\L'|\\$1-1'\h'-1n'\1'\\n(.lu'\h-1n'\L'-1\\$1+1'\1-\\ln(.lu'
+.fi
+..
+.nr ii 5
+.nr hm 3v
+.nr tm 6v
+.nr fm 4v
+.nr bm 7v
+.de $h
+.tl 'APPROVAL SECTION''\*(PN'
+..
+.de $f
+.tl '\*(td''DO NOT COPY'
+.tl 'SUN MICROSYSTEMS INC''COMPANY CONFIDENTIAL'
+..
+.bp
+.sp
+.ce 2
+\fBE X T E R N A L  S P E C I F I C A T I O N
+(User Perspective)
+.sp
+TITLE        :  Autodefect test Specification\fR
+.sp
+AUTHOR       : 		Reza Rahsaz 
+.sp
+REPORT NO.   :  
+.sp
+REVISION NO. :  @(#) autodefect.txt 1.5 4/10/85
+.sp
+DATE         : \*(td    \"td=printing date if reformated
+.sp
+STATUS       :
+.sp 2
+.(l L
+APPROVALS    :                                          DATE
+.de SG                  \" Macro to define signiture lines
+.ip "\\$1" 20n          \" Position and signiture line
+------------------------------------------------------------
+.br
+\\$2                    \" Name Underneath
+..
+.SG "Originator" "	Reza Rahsaz"
+.SG "Manufacturing Engineering" " "
+.SG "Production" " "
+.SG "Test Engineering" " "
+.)l
+.bp
+.(l L
+.ce
+document Review Form
+.lp
+Please make note and initial on this page for  all corrections and/or
+proposed amendments by page number and/or section number.
+.sp
+.ce
+---------------------------------------------
+Recommendations, Differences, Construction Errors, and comments:
+.sp 36
+.ce 2
+---------------------------------------------
+Typographical Errors:
+.sp 4
+.ce 2
+---------------------------------------------
+Attach additional sheet(s) as needed.
+.)l
+.\" redefine headers for the body of the document
+.de $h
+.tl 'AUTODEFECT EXTERNAL SPECIFICATION''
+.tl'(User\'s Perspective)''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fBAUTODEFECT EXTERNAL SPECIFICATION\fR
+.sp
+.sh 1 "INTRODUCTION"
+.sp
+.sh 2 "Purpose"
+.lp
+\fIAUTODEFECT\f Rprogram,
+.np
+reads defect list recorded by manufacturer in Xebec format,
+.np
+translates the defect list into Adaptec format,
+.np
+formats the disk, surface analysis, and labels the disk.
+.sp
+.sh 2 "Applicable Documents"
+.lp
+The following documents are useful in understanding the diagnostic
+and the overall functinoality of the program:
+.np
+\fIXebec S1410 5.25 Inch Winchester Disk Controller
+.np
+\fISun SCSI Programmers\' Manual\fR, W. M. Bradley
+.np
+\fISun SCSI Board Theory of Operation\fR, W. M. Bradley
+.np
+\fIIntroduction to he SASI/SCSI Interface and the Adaptec Controller\fR,
+5/23/83, Bill Stanley, Adaptec Inc.
+.np
+\fIAdaptec ACB 4000 and 5000 Series Disk Controllers OEM Manual\fR, 5/16/83,
+Adaptec Inc.
+.lp
+\fIAt this time the above specifications have not yet been assigned part
+numbers\fR.
+.sp 2
+.sh 1 "SYSTEM OVERVIEW"
+.sp
+.sh 2 "General Description"
+.lp
+Basically this program will be used in R/I as an initial defect translation
+and test for varaiety of disks supportted by sun manufacturing. It reads
+the defect map on the disk by Xebec controller and converts it to
+the format acceptable by Adaptec controller. Then formats with the defect
+list, surface analysis and labels the disk. 
+.sp
+.sh 2 "Features "
+.lp
+The AUTODEFECT program provides the user the following features:
+.np
+Fully automated test.
+.np
+Non destructive in the case if the disk has already been formatted 
+by Adaptec.
+.lp
+There is a utility for adding, deleting, printing the defect list
+which can be accessed by entering CONTROL-C while it is in the
+format phase. This routine will be a great help in case of additional
+defects must be entered.
+.sp
+.sh 2 "Required Configuration"
+.lp
+The following hardware is required:
+.np
+A test station containing:
+.(l
+   *  a card-cage (PN: 340-0332),
+   *  two power supplys (PN: 300-0135-03),
+   *  a Sun 2 processor board (PN: 501-1007-01),
+   *  one megabyte of memory (PN: 501-1013-01),
+   *  a means of booting the SCSI diagnostic, and
+   *  a monitor.
+.)l
+The monitor may either be a ``\fIdumb terminal\fR'' or a Sun monitor,
+video board, and keyboard.
+.np
+A \fBknown good\fR Xebec controler.
+.np
+A \fBknown good\fR Adaptec board (PN: 370-1010-01)
+.br
+with a jumper on A-B in switch J5.
+.np
+A power cable for Adaptec board (PN: 530-xxxx-x).
+.np
+A power cable for the disk (PN: 530-xxxx-x).
+.np
+A power cable for Xebec board (PN: 530-xxxx-x).
+.np
+The internal cable running from the SCSI board to the Adaptec and
+Xebec board.
+.np
+The internal cable running from Xebec and Adaptec board to the disk.
+.sp
+.sp
+.sp
+.sh 2 "Error Handler"
+.lp
+Upon recieving an error the test will print the error message 
+and immediately terminates the process. Possible errors could be
+a mulfunction in one of the hardware pieces such as: disk, Adaptec or
+Xebec board, and cables. 
+.sp
+.sp
+.lp
+
+.sp
+.sh 1 "RUN PROCEDURE"
+.sp
+.sh 2 "Pre-Loading"
+.lp
+Configure the workstation as described above and load the Autodefect
+program.
+.sh 2 "Starting the Translation"
+.lp
+Enter one of the following PROM monitor command:
+
+	>bec(,n)stand/autodefect
+.br
+or,
+.br
+	>bie(,n)stand/autodefect
+
+where n is the ethernet server id in hexedecimal.
+.lp
+The program will display the following messages:
+.sp
+        Auto Defect Handler    Rev. 3/11/85 
+.sp
+    	Enter drive selection:
+.br
+                0 -- Micropolis 1304 (50 Mb)
+.br
+                1 -- Micropolis 1325 (85 Mb)
+.br
+		2 -- Fujitsu M2243AS (85 Mb)
+.br
+    	Which one?
+.lp
+User must enter 0, or 1 based on the type of disk is being used.
+.br
+Then displays the following messages:
+.sp
+    	Enter type of test:
+.br
+                0 -- complete surface analysis test 
+.br
+                1 -- partial  surface analysis test
+.br
+                2 -- no surface analysis test
+.br
+    	Which one?
+.sp
+.br
+User enters 0, for full surface analysis, 
+.br
+1, for partial surface analysis, or
+.br
+2, for no surface analysis test at all.
+.sp
+.lp
+If anything other than 0-2 entered, the program
+displays the following error message:
+.sp
+
+    	number out of range -- reenter 
+.sp
+.lp
+Full surface analysis analyzes the disk starting from cylinder 0
+till the last cylinder, where partial surface analysis analyzes
+25 cylinders from beginning and 25 cylinders from the end of disk.
+.lp
+After the selection phase, program will start actual translation
+and displays the following messages on each step:
+.sp
+    	Adaptec trys to read defect list
+
+    	The disk not formatted by Adaptec, try with Xebec
+
+    	Internal diag test completed.
+    
+    	Ram diag test  completed.
+
+	Reading defects from disk by Xebec controller...
+
+	Now the defect list has been set to Adaptec format.
+
+    If disk does not have the defect list either in Xebec or in Adaptec
+    format it will ask the operator to add defects for each head.
+
+    If none was entered, it will display:
+.sp
+	No disk defect list found, or entered
+.br
+	Disk will be formatted without defect list.
+.sp
+    And it proceeds:
+
+	SCSI format.
+
+	DISK FORMAT - DESTROYS ALL DISK DATA!
+.br
+	Format done
+
+	Seek
+
+	SURFACE ANALYSIS - DESTROYS ALL DISK DATA!
+
+	Surface analysis complete.
+
+	label this disk ...
+
+	verify label
+
+    And prints partition infomation.
+.lp
+At this point the translation and the test is complete. The following
+messages will be displayed:
+.sp
+	      If you want to test another drive, attach the cables
+.br
+	      and power on the drive
+
+	      Enter :
+
+	          s : start next drive
+
+	          f : reformat the drive
+
+	          m : select drive type
+
+	          q : quit testing
+
+If anything other than the above options entered, it will display:
+
+	      Unknown command, re-enter
+
+.de $h
+.tl 'TABLE OF CONTENTS''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fBTABLE OF CONTENTS\fR
+.sp 3
+.xp C
+

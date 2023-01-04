@@ -1,0 +1,7 @@
+#! /bin/sh
+# 
+#       @(#)buildmini.10.config 1.1 85/09/02 SMI
+#
+miniroot=xy1e
+minisize=9216
+script=upgrade_10

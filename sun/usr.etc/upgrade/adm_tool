@@ -1,0 +1,425 @@
+#! /bin/sh
+#
+# Usage is "adm_tool name machinetype yptype tapetype tapedev"
+#
+# Before running the script, be sure that all diskless clients of the
+# server are halted.
+#
+#       @(#)  adm_tool 1.1 86/09/25
+#
+#       Copyright (c) 1986 by Sun Microsystems, Inc.
+#
+
+HOME=/; export HOME
+PATH=/bin:/usr/bin:/etc:/usr/etc:/usr/etc/upgrade:/usr/ucb
+
+NDLOCAL=/a/etc/nd.local
+
+SERVERFILES="/a/.login /a/.cshrc /a/.rhosts /a/etc/passwd /a/etc/exports\
+	     /a/etc/printcap /a/etc/fstab /a/etc/hosts.equiv /a/etc/dumpdates\
+	     /a/etc/dump /a/etc/hosts /a/etc/nd.local /a/etc/rc.boot\
+	     /a/etc/rc.local /a/etc/ttytype /a/etc/ttys /a/usr/hosts/MAKEHOSTS\
+	     /a/private/usr/lib/crontab /a/private/usr/lib/sendmail.cf"
+CLIENTFILES=".login .cshrc .rhosts etc/passwd etc/printcap etc/fstab\
+	     etc/hosts.equiv etc/hosts etc/rc.local etc/rc.boot\
+	     private/usr/lib/crontab private/usr/lib/sendmail.cf"
+STANDALONEFILES="/a/.login /a/.cshrc /a/.rhosts /a/etc/passwd /a/etc/exports\
+	         /a/etc/printcap /a/etc/fstab /a/etc/hosts.equiv\
+		 /a/etc/dumpdates /a/etc/dump /a/etc/hosts /a/etc/rc.local\
+		 /a/etc/rc.boot /a/etc/ttytype /a/etc/ttys /a/usr/lib/crontab\
+		 /a/usr/lib/sendmail.cf"
+YPFILES="/a/etc/ethers /a/etc/netgroup /a/etc/services /a/etc/protocols\
+         /a/etc/servers /a/etc/group /a/etc/networks /a/etc/rpc\
+	 /a/usr/lib/aliases"
+
+CLIENTYPFILES="etc/ethers etc/netgroup etc/services etc/protocols etc/servers \
+               etc/group etc/networks etc/rpc usr/lib/aliases"
+
+CMDNAME=$0
+
+USAGE="
+usage: ${CMDNAME} op name machinetype yptype release
+where:  
+        op          = \"save\" or \"restore\" or \"clean\" 
+        machinetype = \"standalone\" or \"server\" or \"diskless\"
+        yptype      = \"master\" or \"slave\" or \"client\" or \"none\"
+	release	    = \"3.0FCS\" or \"3.2PILOT\" or \"3.0fcs\" or \"3.2pilot\" or \"3.2+extensions\"
+"
+if [ "$#" -lt 5 ]; then
+        echo "${CMDNAME}: Incorrect number of arguments."
+        echo "${USAGE}"
+        exit 1
+fi
+
+OP=${1}; shift
+case "$OP" in
+	"save" | "restore" | "clean" )
+		;;
+	* )
+        	echo "${CMDNAME}: Unknown operation (\"${OP}\") specified."
+        	echo "${USAGE}"
+        	exit 1 ;;
+esac
+
+NAME=${1}; shift
+
+MACHINETYPE=${1}; shift
+case "$MACHINETYPE" in
+	"standalone" | "server" | "diskless" )
+		;;
+	* )
+        	echo "${CMDNAME}: Unknown machinetype (\"${MACHINETYPE}\") specified."
+        	echo "${USAGE}"
+        	exit 1 ;;
+esac
+
+YPTYPE=${1}; shift
+case "$YPTYPE" in
+	"master" | "slave" | "client" | "none" )
+		;;
+	* )
+        	echo "${CMDNAME}: Unknown yptype  (\"${YPTYPE}\") specified."
+        	echo "${USAGE}"
+        	exit 1 ;;
+esac
+
+RELEASE=${1}; shift
+case "$RELEASE" in
+        "3.0FCS" | "3.2PILOT" | "3.0fcs" | "3.2pilot" | "3.2+extensions" )
+		if [ "$RELEASE" = "3.0fcs" ]; then
+			RELEASE="3.0FCS"
+		elif [ "$RELEASE" = "3.2pilot" ]; then 
+                        RELEASE="3.2PILOT"
+		fi ;;
+        * )
+                echo "${CMDNAME}: Unknown release (\"${RELEASE}\") specified."
+                echo "${USAGE}"
+                exit 1 ;;
+esac
+
+if [ "$OP" = "save" ]; then
+	#
+	# Save files for standalone machine
+	#
+	if [ "$MACHINETYPE" = "standalone" ]; then
+		echo "Start preserving ${NAME}'s files"
+		for i in $STANDALONEFILES
+		do
+			if [ -f "${i}" ]; then
+				cp ${i} ${i}.save
+				/bin/sync
+			fi
+		done
+	elif [ "$MACHINETYPE" = "server" ]; then
+		#
+		# Save files for each client in the CLIENTLIST
+		#
+		cat $NDLOCAL|awk '$1 == "user" && $3 == 0 && $7 != -1 { print $0 }' > /tmp/CLIENTLIST
+                for i in `awk '$1 == "user" && $3 == 0 { print $2 }' < /tmp/CLIENTLIST`
+        	do
+                	mkdir /a/${i}
+			set `grep "user $i 0" $NDLOCAL | sed s,\/," ",g`
+                	ndl=ndl${8}
+                	if /etc/mount /a/dev/${ndl} /a/${i}; then
+				echo "Start preserving ${i}'s files"
+                		cd /a/${i}
+				for j in $CLIENTFILES
+				do
+					if [ -f "${j}" ]; then
+						cp ${j} ${j}.save
+						/bin/sync
+					fi
+				done
+				#
+                		# Save some /etc files for none yp machine
+                		#
+                		if [ "$YPTYPE" = "none" ]; then
+					cd /a/${i}
+                        		for j in $CLIENTYPFILES
+                        		do
+						if [ -f "${j}" ]; then
+                                			cp ${j} ${j}.save
+							/bin/sync
+						fi
+                        		done
+                		fi
+                		cd /; /etc/umount /a/dev/${ndl}; rm -rf /a/${i}
+			else
+				echo "Can not mount ${ndl} to save files!"
+				exit 1
+			fi
+        	done
+		#
+		# Save server's files
+		#
+		echo "Start preserving ${NAME}'s files"
+		for i in $SERVERFILES 
+                do 
+			if [ -f "${i}" ]; then
+                        	cp ${i} ${i}.save 
+				/bin/sync
+			fi
+                done
+	elif [ "$MACHINETYPE" = "diskless" ]; then
+                set `grep "user $NAME 0" $NDLOCAL | sed s,\/," ",g`
+                ndl=ndl${8}
+                mkdir /a/${NAME}
+                if /etc/mount /a/dev/${ndl} /a/${NAME}; then
+			echo "Start saving ${NAME}'s files"
+                	cd /a/${NAME}
+                	for j in $CLIENTFILES
+                	do
+				if [ -f "${j}" ]; then
+                        		cp ${j} ${j}.save
+					/bin/sync
+				fi
+                	done
+			#
+        		# Save some /etc files for none yp machine
+        		#
+        		if [ "$YPTYPE" = "none" ]; then
+				cd /a/${NAME}
+                		for j in $CLIENTYPFILES
+                		do
+					if [ -f "${j}" ]; then
+                       				cp ${j} ${j}.save
+						/bin/sync
+					fi
+                		done
+        		fi
+                	cd /; /etc/umount /a/dev/${ndl}; rm -rf /a/${NAME}
+		else
+			echo "Can not mount ${ndl} to save files !"
+			exit 1
+		fi
+	else
+        	echo "${CMDNAME}: Unknown machinetype \"${MACHINETYPE}\"."
+        	echo "${USAGE}"
+        	exit 1
+	fi
+	#
+	# Save yp files for yp master and some /etc files for none yp machine 
+	#
+	if [ "$YPTYPE" = "master" -o "$YPTYPE" = "none" ]; then
+		if [ "$MACHINETYPE" = "server" -o "$MACHINETYPE" = "standalone" ]; then
+                	for i in $YPFILES
+                	do
+				if [ -f "${i}" ]; then
+                       			cp ${i} ${i}.save
+					/bin/sync
+				fi
+                	done
+		fi
+	fi
+
+	echo "All done preserving files."
+
+elif [ "$OP" = "restore" ]; then
+
+	#
+	# Restore files for standalone machine
+	#
+	if [ "$MACHINETYPE" = "standalone" ]; then
+		echo "Start restoring ${NAME}'s files."
+		for i in $STANDALONEFILES 
+                do 
+			if [ -f "${i}.save" ]; then
+                        	cp ${i}.save ${i}
+				merge_tool ${i} ${RELEASE} ${NAME}
+				/bin/sync
+			fi
+                done
+        elif [ "$MACHINETYPE" = "server" ]; then
+		#
+		# Restore server's files
+		#
+                echo "Start restoring ${NAME}'s files"
+		for i in $SERVERFILES 
+                do 
+			if [ -f "${i}.save" ]; then 
+                                cp ${i}.save ${i}
+				merge_tool ${i} ${RELEASE} ${NAME}
+				/bin/sync
+                        fi
+                done
+	elif [ "$MACHINETYPE" = "diskless" ]; then
+		#
+		# Restore client's files for specified client
+		#
+                echo "Start restoring ${NAME}'s files"
+                cd /a/${NAME}
+                for j in $CLIENTFILES
+                do
+			if [ -f "/a/${NAME}/${j}.save" ]; then
+                                cp /a/${NAME}/${j}.save /a/${NAME}/${j}
+				merge_tool /a/${NAME}/${j} ${RELEASE} ${NAME}
+				/bin/sync
+                        fi
+                done
+		#
+                # Restore files for none yp machine
+                #
+                if [ "$YPTYPE" = "none" ]; then
+			cd /a/${NAME}
+                        for j in $CLIENTYPFILES
+                        do
+				if [ -f "${j}.save" ]; then
+                                	cp ${j}.save ${j}
+					merge_tool ${j} ${RELEASE} ${NAME}
+					/bin/sync
+				fi
+                        done
+                fi
+        else
+                echo "${CMDNAME}: Unknown machinetype \"${MACHINETYPE}\"."
+                echo "${USAGE}"
+                exit 1
+        fi
+	#
+	# Restore yp files for yp master and some /etc files for none yp machine
+	#
+	if [ "$YPTYPE" = "master" -o "$YPTYPE" = "none" ]; then
+		if [ "$MACHINETYPE" = "server" -o "$MACHINETYPE" = "standalone" ]; then
+                        for i in $YPFILES
+                        do
+				if [ -f "${i}.save" ]; then 
+                                        cp ${i}.save ${i} 
+					merge_tool ${i} ${RELEASE} ${NAME}
+					/bin/sync
+                                fi
+                        done
+                fi
+        fi
+	echo "All done restoring files."
+
+elif [ "$OP" = "clean" ]; then
+
+	#
+	# Clean files for standalone machine
+	#
+	if [ "$MACHINETYPE" = "standalone" ]; then
+		echo "Start cleaning ${NAME}'s files"	
+		for i in $STANDALONEFILES
+		do
+			if [ -f "${i}.save" ]; then
+				rm -f ${i}.save
+				/bin/sync
+			fi
+		done
+        elif [ "$MACHINETYPE" = "server" ]; then
+		#
+		# Clean files for each client in the CLIENTLIST
+		#
+		if [ -f $NDLOCAL ]; then
+			cat $NDLOCAL|awk '$1 == "user" && $3 == 0 && $7 != -1 { print $0 }' > /tmp/CLIENTLIST
+		else
+			echo "No nd.local. Can not clean client partitions !!"
+		fi
+		for i in `awk '$1 == "user" && $3 == 0 { print $2 }' < /tmp/CLIENTLIST`
+                do
+                        mkdir /a/${i}
+                       	set `grep "user $i 0" $NDLOCAL | sed s,\/," ",g`
+                	ndl=ndl${8}
+                        if /etc/mount /a/dev/${ndl} /a/${i}; then
+				echo "Start cleaning ${i}'s files"
+                        	cd /a/${i}
+				for j in ${CLIENTFILES}
+				do
+					if [ -f "${j}.save" ]; then
+						rm -f ${j}.save
+						/bin/sync
+					fi
+				done
+				#
+                		# Clean files for none yp machine
+                		#
+                		if [ "$YPTYPE" = "none" ]; then
+					cd /a/${i}
+                        		for j in $CLIENTYPFILES
+                        		do
+						if [ -f "${j}.save" ]; then 
+                                                	rm -f ${j}.save 
+							/bin/sync
+                                        	fi 
+                        		done
+                		fi
+                        	cd /; /etc/umount /a/dev/${ndl}; rm -rf /a/${i}
+			else
+				echo "Can not mount ${ndl} to clean files !"
+				exit 1
+			fi
+                done
+		#
+		# Clean server's files
+		#
+                echo "Start cleaning ${NAME}'s files"
+		for j in ${SERVERFILES} 
+                do 
+			if [ -f "${j}.save" ]; then  
+                                 rm -f ${j}.save  
+				 /bin/sync
+                        fi  
+                done
+	elif [ "$MACHINETYPE" = "diskless" ]; then
+                if [ -f $NDLOCAL ]; then
+			set `grep "user $NAME 0" $NDLOCAL | sed s,\/," ",g`
+                else
+                        echo "No nd.local. Can not clean $NAME !!"
+                fi
+                ndl=ndl${8}
+                mkdir /a/${NAME}
+                if /etc/mount /a/dev/${ndl} /a/${NAME}; then
+			echo "Start restoring ${NAME}'s files"
+                	cd /a/${NAME}
+                	for j in $CLIENTFILES
+                	do
+				if [ -f "${j}.save" ]; then
+                                	rm -f ${j}.save   
+					/bin/sync
+                        	fi   
+                	done
+                	#
+                	# Restore files for none yp machine
+                	#
+                	if [ "$YPTYPE" = "none" ]; then
+				cd /a/${NAME}
+                        	for j in $CLIENTYPFILES
+                        	do
+					if [ -f "${j}.save" ]; then
+                                 		rm -f ${j}.save   
+						/bin/sync
+                        		fi   
+                        	done
+                	fi
+                	cd /; /etc/umount /a/dev/${ndl}; rm -rf /a/${NAME}
+		else
+			echo "Can not mount ${ndl} to clean files !"
+			exit 1
+		fi
+        else
+                echo "${CMDNAME}: Unknown machinetype \"${MACHINETYPE}\"."
+                echo "${USAGE}"
+                exit 1
+        fi
+	#
+        # Clean yp files for yp master and some /etc files for none yp machine
+	#
+        if [ "$YPTYPE" = "master" -o "$YPTYPE" = "none" ]; then
+		if [ "$MACHINETYPE" = "server" -o "$MACHINETYPE" = "standalone" ]; then
+                        for i in $YPFILES
+                        do
+				if [ -f "${i}.save" ]; then 
+                                        rm -f ${i}.save    
+					/bin/sync
+                                fi    
+                        done
+                fi
+        fi
+	echo "All done cleaning files."
+else
+        echo "${CMDNAME}: Unknown operation (\"${OP}\") specified."
+        echo "${USAGE}" 
+        exit 1 
+fi
+rm -f /tmp/CLIENTLIST
+exit 0

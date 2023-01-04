@@ -1,0 +1,49 @@
+#! /bin/sh
+#
+# @(#) extract 1.1 86/09/25
+#
+#  extract tapedev fsf bs keywords tapeserver 
+#
+cmdname=$0
+tapedev=$1
+fsf=$2
+bs=$3
+keywords=$4
+tapeserver=$5
+
+extmesg="Extracting \"${keywords}\" files from \"${tapedev}\" release tape."
+
+if [ $# -lt 4 -o $# -gt 5 ]; then
+	echo Usage: $0 tapedev fsf bs keywords tapeserver 
+	exit 1
+fi
+
+if [ "${tapeserver}" != "" ]; then
+	remote="rsh ${tapeserver} -n"
+fi
+#
+# No way to get exit code from command executed with rsh
+# so kludge and test if the mt -f returns an error message,
+# if the mt -f is successful it should be silent
+#
+STRING=`${remote} mt -f ${tapedev} rew 2>&1`
+set -x
+if [ -z "${STRING}" ]; then
+	${remote} mt -f ${tapedev} fsf ${fsf} 
+else
+	echo "${STRING}"
+	echo "Tape drive ${tapedev} not ready."
+	exit 1
+fi
+set +x
+if [ "${tapeserver}" = "" ]; then
+
+	echo; echo "${extmesg}"
+	tar xvpfb ${tapedev} ${bs}  
+else
+	echo; echo "${extmesg}"
+	${remote} "dd if=${tapedev} bs=${bs}b" | tar xvpfB -  
+fi
+set -x
+${remote} mt -f ${tapedev} rew
+sync; sync

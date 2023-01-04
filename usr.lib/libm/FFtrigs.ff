@@ -1,0 +1,240 @@
+c	static	char sccsid[] = "@(#)FFtrigs.ff 1.3 86/12/29 Copyr 1986 Sun Micro";
+
+c
+c 	Copyright (c) 1986 by Sun Microsystems, Inc.
+c
+
+	real*4 function Fscosapprox ( x, ex )
+	real*4 x, ex
+
+	real*4 c1,c2,c3
+
+      parameter (c1 =  0.41666612000000000e-01)
+c          3d2aaa9c
+      parameter (c2 = -0.13886529500000000e-02)
+c          bab60376
+      parameter (c3 =  0.24372679000000000e-04)
+c          37cc73ee
+
+	
+	real*4 z, ca
+
+	z = x * x
+	 
+	ca = z * z *
+     1            (c1+z*(c2+z*c3))
+
+ 	ca = ca - ex * x
+	z = 0.5 * z
+	if (z .ge. 2.6117239648121182150e-1	) then
+		Fscosapprox = 0.5 - ((z - 0.5) - ca)
+	else
+		Fscosapprox = 1.0 - (z - ca)
+	endif
+c	signal inexact
+	end
+
+	real*4 function Fssinapprox ( x, ex )
+	real*4 x, ex
+
+	real*4 s1,s2,s3
+      parameter (s1 = -0.16666650800000000e+00)
+c          be2aaaa0
+      parameter (s2 =  0.83320159400000000e-02)
+c          3c088302
+      parameter (s3 = -0.19501814700000000e-03)
+c          b94c7dc9
+
+	
+	real*4 z
+
+	z = x * x
+        Fssinapprox = x + (ex + x * z *
+     1            (s1+z*(s2+z*s3)))
+
+c	signal inexact
+	end
+
+	real*4 function Fstanapprox ( x, ex )
+	real*4 x, ex
+
+	real*4 p1,p2,p3,p4,p5,p6,p7
+      parameter (p1 =  0.33333358200000000e+00)
+c          3eaaaab3
+      parameter (p2 =  0.13332521900000000e+00)
+c          3e088668
+      parameter (p3 =  0.54071068800000000e-01)
+c          3d5d79a0
+      parameter (p4 =  0.21237263500000000e-01)
+c          3cadf9c5
+      parameter (p5 =  0.10932311400000000e-01)
+c          3c331d70
+      parameter (p6 = -0.15734920400000000e-04)
+c          b783fe7c
+      parameter (p7 =  0.44221258700000000e-02)
+c          3b90e77b
+
+	real*4 z
+
+	z = x * x
+	Fstanapprox = x + (ex + x * z * 
+     1		(p1+z*(p2+z*(p3+z*(p4+z*(p5+z*(p6+z*p7)))))))
+
+c	signal inexact
+	end
+
+	real*4 function Fscotanapprox ( x, ex )
+	real*4 x, ex
+
+	real*4 Fstanapprox
+
+	Fscotanapprox = 1.0/Fstanapprox( x, ex )
+
+c	signal inexact
+	end
+
+	subroutine Fsargred ( x, rx, ex, quad )
+	real*4 x, rx, ex
+	integer quad
+
+c	Fsargred returns rx+ex = x - (4n+quad) * (pi/2)
+c	argument reduction is performed using a 66 bit approximation
+c	to pi to mimic the 68881
+
+c	quad is in the range 0..3
+
+	doubleprecision dx, dex, dx0, q, dkluge
+	integer ikluge(2)
+	equivalence (dkluge, ikluge)
+
+	quad = 0
+	if (.not.(abs(x) .le. 3.402823466385288598e+38)) then
+c		handle infinity and nan
+		rx = x-x
+		ex = 0.0
+		return
+	endif
+	dx = dble(x)
+	dex = 0.0d0
+ 1	continue
+	q = dx * 	6.366197723675813824d-1		
+	if (abs(q) .gt. 1.048576d6) then
+		dkluge = q
+		ikluge(1) = ikluge(1) + 2
+		ikluge(1) = and(ikluge(1),not(3))
+		ikluge(2) = 0
+		q = dkluge
+		endif
+	q = anint(q)
+	if (abs(q) .lt. 1.048576d6) then
+		quad = quad + mod(int(q),4)
+	endif
+	dx0 = dx - q * 	1.570796326734125614d0		
+	dx =   (dx0 - q * 	6.077100506303965976d-11 	) + dex
+	dex = ((dx0 - dx) - q * 	6.077100506303965976d-11 	) + dex
+	if (abs(dx) .gt. 7.8539816339744839d-1) then
+		goto 1
+	endif
+	rx = real(dx)
+	ex = real((dx - dble(rx))+dex)
+	if (quad .lt. 0) quad = quad + 4
+	end	
+
+	real*4 function FFsins ( xx )
+	real*4 xx
+
+	real*4 x, Fssinapprox, Fscosapprox
+	real*4 ex
+	integer quad
+
+	if (abs(xx) .le. 	7.853981852531433105e-1		) then
+                if (abs(xx) .le. 6.103515625e-5 		) then
+                        FFsins = xx
+                        return
+                else
+			x = xx
+       			ex = 0.0
+			goto 10
+		endif
+	endif
+	call Fsargred( xx, x, ex, quad)
+	goto (10,11,12,13) quad+1
+ 10	continue
+        FFsins =   Fssinapprox ( x, ex )
+        return
+ 11	continue
+	FFsins =   Fscosapprox ( x, ex )
+	return
+ 12	continue
+	FFsins =  -Fssinapprox ( x, ex )
+	return
+ 13	continue
+	FFsins =  -Fscosapprox ( x, ex )
+	return
+	end	
+
+	real*4 function FFcoss ( xx )
+	real*4 xx
+
+	real*4 x, Fssinapprox, Fscosapprox
+	real*4 ex
+	integer quad
+
+	if (abs(xx) .le. 	7.853981852531433105e-1		) then
+                if (abs(xx) .le. 6.103515625e-5 		) then
+                        FFcoss = 1.0
+                        return
+                else
+			x = xx
+       			ex = 0.0
+			goto 10
+		endif
+	endif
+	call Fsargred( xx, x, ex, quad)
+	goto (10,11,12,13) quad+1
+ 10	continue
+        FFcoss =   Fscosapprox ( x, ex )
+        return
+ 11	continue
+	FFcoss =  -Fssinapprox ( x, ex )
+	return
+ 12	continue
+	FFcoss =  -Fscosapprox ( x, ex )
+	return
+ 13	continue
+	FFcoss =   Fssinapprox ( x, ex )
+	return
+	end	
+
+	real*4 function FFtans ( xx )
+	real*4 xx
+
+	real*4 x, Fstanapprox, Fscotanapprox
+	real*4 ex
+	integer quad
+
+	if (abs(xx) .le. 	7.853981852531433105e-1		) then
+                if (abs(xx) .le. 6.103515625e-5 		) then
+                        FFtans = xx
+                        return
+                else
+			x = xx
+       			ex = 0.0
+			goto 10
+		endif
+	endif
+	call Fsargred( xx, x, ex, quad)
+	goto (10,11,12,13) quad+1
+ 10	continue
+        FFtans =    Fstanapprox ( x, ex )
+        return
+ 11	continue
+	FFtans = -Fscotanapprox ( x, ex )
+	return
+ 12	continue
+	FFtans =    Fstanapprox ( x, ex )
+	return
+ 13	continue
+	FFtans = -Fscotanapprox ( x, ex )
+	return
+	end	

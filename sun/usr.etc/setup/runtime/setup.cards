@@ -1,0 +1,37 @@
+# 
+#  @(#)setup.cards 1.1 86/09/25 SMI 
+#
+#
+# setup configuration cards
+#
+% default_card
+2/50
+cpu=MC68010 CPU; root=First Fit, 15884; swap=First Fit, 33440;
+% default_card
+2/120
+cpu=MC68010 CPU; root=First Fit, 15884; swap=First Fit, 33440;
+% default_card
+2/130
+cpu=MC68010 CPU; root=First Fit, 15884; swap=First Fit, 33440;
+% default_card
+2/160
+cpu=MC68010 CPU; root=First Fit, 15884; swap=First Fit, 50160;
+% default_card
+2/170
+cpu=MC68010 CPU; root=First Fit, 15884; swap=First Fit, 33440;
+% default_card
+3/50
+cpu=MC68020 CPU; root=First Fit, 15884; swap=First Fit, 33440;
+% default_card
+3/75
+cpu=MC68020 CPU; root=First Fit, 15884; swap=First Fit, 33440;
+% default_card
+3/160M
+cpu=MC68020 CPU; root=First Fit, 15884; swap=First Fit, 33440;
+% default_card
+3/160C
+cpu=MC68020 CPU; root=First Fit, 15884; swap=First Fit, 50160;
+% default_card
+3/180
+cpu=MC68020 CPU; root=First Fit, 15884; swap=First Fit, 33440;
+% end_default_cards

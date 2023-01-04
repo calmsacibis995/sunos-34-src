@@ -1,0 +1,3 @@
+tmp/exit.o tmp/fakcu.o
+tmp/flsbuf.o tmp/abort.o
+tmp/flsbuf.o tmp/exit.o

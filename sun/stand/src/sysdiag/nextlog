@@ -1,0 +1,22 @@
+#! /bin/csh -f
+#
+#       @(#)nextlog 1.1 9/25/86 Copyright 1985 Sun Micro
+#
+#	script to construct log.$*.[0-9]*
+#	takes arguments and looks for first number not used yet for suffix
+#
+foreach name ($argv)
+	if ($name == core) then
+		@ n=1
+		while(-e $SD_LOG_DIRECTORY/core.$n)
+			@ n++
+		end
+		echo $SD_LOG_DIRECTORY/core.$n
+	else 
+		@ n=1
+		while(-e $SD_LOG_DIRECTORY/log.$name.$n)
+			@ n++
+		end
+		echo $SD_LOG_DIRECTORY/log.$name.$n
+	endif
+end

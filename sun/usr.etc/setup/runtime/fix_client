@@ -1,0 +1,90 @@
+#! /bin/sh
+#
+# @(#)fix_client 1.1 86/09/25 SMI; from UCB X.X XX/XX/XX
+#
+
+if [ $# != 7 ]; then
+	echo Usage: $0 to_ndl ndp fstab clientname domainname arch yp
+	exit 1
+fi
+to_ndl=$1
+ndp=$2
+fstab=$3
+clientname=$4
+domainname=$5
+arch=$6
+yp=$7
+
+#
+# At this point (examples in parens),
+#   to_ndl	- full name of nd logical partition to copy to (/dev/ndl5)
+#   ndp		- pub partition unit number
+#   fstab	- name of fstab file to install in client's /etc
+#   clientname	- name of this client (sam)
+#   domainname	- name of yellow pages domain (sun)
+#   arch	- name of client's architecture (MC68010)
+#   yp		- Either "yes" or "no" for the yellow pages.
+#
+
+#
+# Create symlinks from the client's directories to directories imported
+# from the server.
+#
+set -x
+mkdir /nd.root
+mount $to_ndl /nd.root
+cd /nd.root
+rm -rf lib
+ln -s pub/stand stand
+ln -s pub/vmunix vmunix
+ln -s pub/bin bin
+ln -s pub/lib lib
+
+#
+# Make devices for the client
+#
+cd /nd.root/dev
+./MAKEDEV std pty0 pty1 pty2 win0 win1 win2 nd0 nd1 ndp$ndp
+
+#
+# Copy the /etc/hosts and fstab files, fix the hostname and domainname.
+#
+cd /nd.root/etc
+cp /setup.root/etc/hosts .
+cp $fstab fstab
+/usr/etc/setup.files/fix_hostname /nd.root/etc $clientname
+/usr/etc/setup.files/fix_domainname /nd.root/etc $domainname
+
+#
+# Some files on /usr (like /usr/spool) are symlinks to files in 
+# /private.  The symlink files are shared over the nfs and must
+# point to the same filenames.  Therefore, the clients must have
+# a /private.arch that is pointed to.  Here we setup /private to
+# point at /private.arch
+#
+cd /nd.root
+mv private private.$arch
+ln -s private.$arch private
+
+#
+# If no yellow pages, move ypbind out of the way.
+#
+cd etc
+if [ "$yp" = "no" ]; then
+	mv ypbind ypbind.orig
+else
+	rm -rf ethers netgroup networks protocols services rpc
+fi
+
+#
+# Comment out the "mountd" line in /etc/servers.
+#
+/usr/etc/setup.files/fix_servers /nd.root/etc
+
+#
+# Finish up
+#
+cd /
+sync
+/etc/umount $to_ndl
+rm -rf /nd.root

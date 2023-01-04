@@ -1,0 +1,198 @@
+
+
+
+
+
+
+S U N  Microsystems  MEMORANDUM
+
+
+
+
+
+	      Version: @(#)instructions 1.1 86/09/25 Copyright Sun Micro
+                Date : 10/04/84
+                  To : Jon Garmon
+                From : Tom Kraus
+               Phone : 960-3300 x317
+             Subject : Using the Monitor Diagnostic/Exerciser
+        Distribution : Terry Horwath
+
+
+     The program (vid.120.pat) which displays  various  pat-
+terns  on  the  monitor of the Model 120 Sun Workstation has
+been enhanced.  The program is now capable of displaying the
+patterns  continuously  (continuous mode) or, as before, the
+patterns can be displayed on  an  individual  basis  (single
+selection  mode).   What  follows  are  the instructions for
+using the program.
+
+     Assuming that a copy of program vid.120.pat resides  in
+the  directory  that  you  are  currently in, the program is
+called by typing "vid.120.pat" and pressing the RETURN  key.
+There  are  three  menus  associated  with the program.  The
+three menus are titled the (1) Primary Option Menu, (2) Con-
+tinuous  Mode  Menu and (3) Single Selection Mode Menu.  The
+Primary Option Menu will appear after the program is called.
+
+1.   The Primary Option Menu has  three  options  associated
+     with  it.   Each  of  these options is explained below.
+     Notice that, these options are selected by  typing  the
+     proper  character  only.   It is NOT necessary to press
+     the RETURN key after typing a character.  In fact, that
+     will cause one of the sub-menus to be redisplayed.
+
+     a.   Option "c" (continuous mode) places the program in
+          continuous  mode.   The  Continuous Mode Menu will
+          appear if this option is selected.
+
+     b.   Option "s" (single selection mode) causes the pro-
+          gram  to  enter  single  selection  mode.  If this
+          option is chosen, the Single Selection  Mode  Menu
+          will be displayed.
+
+     c.   Option "q" (quit) terminates the program.
+
+     If any other non-fatal character  is  typed  (excluding
+     "c",  "s"  and  "q"),  the  Primary Option Menu will be
+     redisplayed.   An  example  of  a  fatal  character  is
+     "control-C".   Typing a "control-C" would terminate the
+     program.
+
+
+
+                      October 4, 1984
+
+
+
+
+
+                           - 2 -
+
+
+2.   The Continuous Mode Menu also has three options.  These
+     options are explained below.  In order to select one of
+     the options, type the character  which  corresponds  to
+     the  desired  option.   Again,  it  is not necessary to
+     press the RETURN key after typing  the  character.   If
+     the  RETURN  key  is  pressed, the Continuous Mode Menu
+     will be redisplayed.
+
+     a.   Option "b" initiates a  continuous  display  of  a
+          pattern  sequence.  Each pattern sequence consists
+          of a total of sixteen  different  patterns.   Ini-
+          tially,  each  of  the eight non-inverted patterns
+          will appear on  the  screen,  one  after  another.
+          Next,  all  eight of the inverted patterns will be
+          displayed individually.  After each display of the
+          pattern sequence, another sequence will follow.
+
+          Assuming that the machine never goes down and  the
+          keyboard  is  never touched, the patterns would be
+          displayed forever.   There  are  several  ways  to
+          interrupt the continuous display of patterns, how-
+          ever.
+
+          In order to terminate the program while  the  pat-
+          terns  are  being  displayed, a "q" must be typed.
+          To return to the Primary  Option  Menu  while  the
+          patterns  are  being displayed, the <esc> key must
+          be pressed.  To return to the Continuous Mode Menu
+          while  the  patterns are being displayed, any non-
+          fatal character (excluding <esc> and "q")  can  be
+          typed.  If a fatal character is typed, the program
+          will terminate.
+
+     b.   Option <esc> (pressing the ESCAPE key) causes  the
+          program  to  return  to  the  Primary Option Menu.
+          From the Primary Option Menu, it would now be pos-
+          sible to enter single selection mode (by selecting
+          option "s").
+
+     c.   Option "q" (quit) terminates the program.
+
+     If any other non-fatal character (excluding  <esc>  and
+     "q")  is typed, either from the Continuous Mode Menu or
+     during the continuous display of patterns, the Continu-
+     ous Mode Menu will be redisplayed.
+
+3.   The Single  Selection  Mode  Menu  has  twelve  options
+     available.   Option  1-8  are discussed together while,
+     the other four options are explained individually.   In
+     order  to  chose  one of these options, type the proper
+     character.  There is no need to press  the  RETURN  key
+     after  typing  the  character.   If  the  RETURN key is
+     pressed, the Single Selection Mode Menu will reappear.
+
+
+
+
+                      October 4, 1984
+
+
+
+
+
+                           - 3 -
+
+
+     a.   Options "1", "2", "3", "4", "5", "6", "7" and  "8"
+          cause  a  pattern  to  be displayed until the user
+          interrupts  the   program.   Each   number   (1-8)
+          corresponds  to  a  different pattern.  A model of
+          each pattern appears on the Single Selection  Mode
+          Menu.   The patterns can be interrupted in several
+          ways.
+
+          If an "r" (return to Single Selection  Mode  Menu)
+          or  any  other non-fatal character (excluding "i",
+          <esc> and "q") is typed while a pattern  is  being
+          shown,  the  Single Selection Mode Menu will reap-
+          pear.  This enables the  user  to  select  another
+          pattern for display.  Typing an "i" will cause the
+          pattern currently being displayed to  be  inverted
+          (see  option  "i"  below).   If  the ESCAPE key is
+          pressed while a pattern is on the screen, the Pri-
+          mary  Option  Menu  will  reappear.   Typing a "q"
+          while a pattern is being displayed terminates  the
+          program.  Finally, typing a fatal character, while
+          a pattern is being displayed, will also  terminate
+          the program.
+
+     b.   Option "i" inverts the patterns.  That is, if  the
+          foreground  of  the pattern is black and the back-
+          ground is white, pressing "i" will cause the fore-
+          ground  to  become  white  and  the  background to
+          become black.
+
+     c.   Option <esc> (pressing the ESCAPE key) causes  the
+          program  to  return  to  the  Primary Option Menu.
+          This gives the user the opportunity to enter  con-
+          tinuous  mode  (by  selecting  option "c" from the
+          Primary Option Menu) after being in single  selec-
+          tion mode.
+
+     d.   Option "q" (quit) terminates the program.
+
+     If any other non-fatal character (excluding <esc>, "1",
+     "2",  "3",  "4",  "5",  "6",  "7", "8", "i" and "q") is
+     typed, either from the Single Selection  Mode  Menu  or
+     during  the  display of a pattern, the Single Selection
+     Mode Menu will be redisplayed.
+
+
+     If there are any questions  and/or  comments  regarding
+the content of this memo, please feel free to contact me.
+
+
+
+
+
+
+
+
+
+
+                      October 4, 1984
+
+

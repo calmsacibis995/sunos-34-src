@@ -1,0 +1,57 @@
+#! /bin/sh
+#
+# verify_tapevol_arch arch tapen tapedev tapeserver
+#
+#	@(#)  verify_tapevol_arch 1.2 87/02/28
+#
+#       Copyright (c) 1987 by Sun Microsystems, Inc.
+#
+
+arch=$1
+tapen=$2 
+tapedev=$3
+tapeserver=$4
+ARCH_TAPE=""
+TAPE_NUM=""
+
+if [ $# -lt 3 -o $# -gt 4 ]; then
+        echo Usage: $0 arch tapen tapedev tapeserver
+        exit 1
+fi
+if [ "${tapeserver}" != "" ]; then
+        remote="rsh ${tapeserver} -n"
+fi
+
+while true; do
+	while true; do
+		STRING=`${remote} mt -f ${tapedev} rew 2>&1`
+		if [ -z "${STRING}" ]; then
+	   		${remote} mt -f ${tapedev} fsf 1
+			break
+		else
+	   		echo "${STRING}"
+	   		echo "Tape drive ${tapedev} not ready."
+			echo
+                	echo -n "Load release tape #${tapen} for ${arch}: "
+                	read x
+		fi
+	done
+	#
+	# get TOC from release tape(dd format)
+	#
+	if [ "${remote}" = "" ]; then
+        	dd if=${tapedev} > /tmp/_TOC 2>&1
+	else
+        	${remote} "dd if=${tapedev}" > /tmp/_TOC 2>&1
+	fi
+	ARCH_TAPE=`awk '/MC/ {print $1}' < /tmp/_TOC `
+	TAPE_NUM=`awk '/MC/ {print $3}' < /tmp/_TOC `
+	if [ "${ARCH_TAPE}" != "${arch}" -o "${TAPE_NUM}" != "${tapen}" ]; then
+                echo;echo -n "Load release tape #${tapen} for ${arch}: " 
+                read x
+	else 
+		break
+	fi
+done
+${remote} mt -f ${tapedev} rew 2>&1
+sync; sync

@@ -1,0 +1,10 @@
+#
+#	@(#)suntools	1.5	87/03/17	SMI
+#
+#	default .suntools file
+#	
+cmdtool    -Wp   0   0 -WP    0   0 -Wh  3 -Ww 80 -Wl "<< CONSOLE >>" -WL "console" -C 
+clock      -Wp 497  32 -WP  704   0 -Wi -Wh 1
+shelltool  -Wp   0  71 -WP  772   0 -Wi -Wh 44 -Ww 80
+textedit   -Wp 259  98 -WP  840   0 -Wi
+mailtool   -Wp 492  71 -WP  908   0 -Wi

@@ -1,0 +1,49 @@
+# daily UUCP cleanup
+# perform once per day at 0701 hours
+uulib=/usr/lib/uucp
+spool=/usr/spool/uucp
+PATH="/bin:/usr/bin:" ; export PATH
+
+cd $uulib
+uulog
+$uulib/uuclean -p -m -n96 -d/usr/spool/uucp/C.
+$uulib/uuclean -p -m -n96 -d/usr/spool/uucp/D.
+$uulib/uuclean -p -m -n96 -d/usr/spool/uucp/D.decvax
+$uulib/uuclean -pSTST. -pTM. -pLTMP. -pLOG. -pX. -m -n4 -d/usr/spool/uucp
+$uulib/uuclean -d/usr/lib/uucp/.XQTDIR -p -n72
+# uustat -c168
+# $uulib/uusub -u24
+
+set `date`
+day=$1
+daymon=$3
+
+#   Old spool/log files are kept by the naming scheme:
+#   LOGFILE.${day}${daymon} where ${day} is the day of
+#   the week, Sun to Sat, and ${daymon} is the numerical
+#   day of the month.  SYSLOG files are kept by the scheme:
+#   SYSLOG.week: the current week's: totals; SYSLOG.month:
+#   the current month's totals; SYSLOG.${month} where
+#   ${month} is the first three letters of the month: the
+#   totals for that month.
+
+cd $spool
+mv LOGFILE OLD/LOGFILE.${day}${daymon}
+rm -f OLD/LOGFILE.last
+ln OLD/LOGFILE.${day}${daymon} OLD/LOGFILE.last
+mv SYSLOG SYSLOG.$$
+cat SYSLOG.$$ >>OLD/SYSLOG.week
+rm -f SYSLOG.$$
+
+#  Remove LOGFILEs older than one week; save SYSLOG
+#  files forever.  Remove them manually if desired.
+
+cd OLD
+find . -name 'LOGFILE.*' -mtime +7 -exec rm -f {} \;
+
+#  Poll morning systems
+
+for i in
+do
+	touch /usr/spool/uucp/C./C.${i}n0000
+done

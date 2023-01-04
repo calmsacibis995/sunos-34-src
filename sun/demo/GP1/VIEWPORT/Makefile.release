@@ -1,0 +1,95 @@
+#
+# @(#)Makefile.release 1.4 87/02/24 SMI
+#
+
+#
+# Makefile for VIEWPORT library and demos
+# To be include on the release tapes
+#
+
+CFLAGS= -O -fswitch -fsingle
+
+LTOOL= -lsuntool
+LSUNWINDOW= -lsunwindow
+LPIXRECT= -lpixrect
+LTOOL= -lsuntool
+LIBS= ${LTOOL} ${LSUNWINDOW} ${LPIXRECT} -lm
+
+GFXLIB_CFILES= AppWrdLst.c DelObj.c NewObj.c PutObjVal.c SizeObj.c bitmap.c \
+	gpbuf.c matrix.c pix.c vp.c vpoval.c
+GFXLIB_HFILES= bitmap.h bitmap_int.h gpbuf.h gpbuf_int.h obj.h obj_int.h pix.h \
+	types.h vp.h vp_int.h 
+
+GFXLIB= gfxlib.a
+GFXLIBOBJ= AppWrdLst.o DelObj.o NewObj.o PutObjVal.o SizeObj.o bitmap.o \
+	gpbuf.o matrix.o pix.o vp.o vpoval.o
+
+DEMOS= rotcube box boxvp shader
+
+SHADER_CFILES= shader_main.c shader_panel.c shader_canvas.c shader_draw.c \
+	shader_color.c shader_drag.c shader_file.c shader_light.c \
+	shader_matinv.c
+OTHER_CFILES= rotcube.c box.c boxvp.c
+ALL_CFILES= $(GFXLIB_CFILES) $(SHADER_CFILES) $(OTHER_CFILES)
+
+all: uncompact ${GFXLIB} ${DEMOS}
+
+uncompact:
+	-set +e; \
+	for i in ${ALL_CFILES}; do \
+		if (test -f $$i.C); then \
+			uncompact $$i.C; \
+	fi; \
+	done ;
+
+${GFXLIB}: ${GFXLIBOBJ}
+	ar rv ${GFXLIB} $?
+	ranlib ${GFXLIB}
+
+rotcube: rotcube.o ${GFXLIB}
+	cc -o rotcube rotcube.o ${GFXLIB} ${LIBS} ${CFLAGS}
+
+rotcube.o: rotcube.c
+	cc -c rotcube.c ${CFLAGS}
+
+box: box.o ${GFXLIB}
+	cc -o box box.o ${GFXLIB} ${LIBS} ${CFLAGS}
+
+box.o: box.c
+	cc -c box.c ${CFLAGS}
+
+boxvp: boxvp.o ${GFXLIB}
+	cc -o boxvp boxvp.o ${GFXLIB} ${LIBS} ${CFLAGS}
+
+boxvp.o: boxvp.c
+	cc -c boxvp.c ${CFLAGS}
+
+shader: shader_main.o shader_panel.o shader_canvas.o shader_draw.o \
+	shader_color.o shader_drag.o shader_file.o shader_light.o \
+	shader_matinv.o ${GFXLIB} shader.h
+	cc -o shader shader_main.o shader_panel.o shader_canvas.o \
+	shader_draw.o shader_color.o shader_drag.o shader_file.o \
+	shader_light.o shader_matinv.o ${GFXLIB} ${LIBS} ${CFLAGS}
+
+install: all
+	-install rotcube tempfile && \
+	 rm rotcube; rm rotcube.o && \
+	 mv tempfile rotcube;
+	-install box tempfile && \
+	 rm box; rm box.o && \
+	 mv tempfile box;
+	-install boxvp tempfile && \
+	 rm boxvp; rm boxvp.o && \
+	 mv tempfile boxvp;
+	-install shader tempfile && \
+	 rm shader; rm shader_*.o && \
+	 mv tempfile shader;
+
+clean:
+	rm -f *.o
+	-for i in ${GFXLIB}; do \
+		rm -f $$i; \
+		done
+	-for i in ${DEMOS}; do \
+		rm -f $$i; \
+		done

@@ -1,0 +1,60 @@
+# @(#)Login 1.1 86/09/25 SMI
+##################################################################
+#
+#         .login file
+#
+#         Read in after the .cshrc file when you log in.
+#         Not read in for subsequent shells.  For setting up
+#         terminal and global environment characteristics.
+#
+##################################################################
+
+
+#         terminal characteristics for remote terminals:
+
+#         Leave lines for all but your remote terminal commented
+#         out (or add a new line if your terminal does not appear).
+
+if ($TERM != "sun") then
+set noglob
+#eval `tset -sQ -m dialup:?925 -m switch:?925 -m dumb:?925 $TERM`
+#eval `tset -sQ -m dialup:?h19 -m switch:?h19 -m dumb:?h19 $TERM`
+#eval `tset -sQ -m dialup:?mac -m switch:?mac -m dumb:?mac $TERM`
+#eval `tset -sQ -m dialup:?vt100 -m switch:?vt100 -m dumb:?vt100 $TERM`
+#eval `tset -sQ -m dialup:?wyse-nk -m switch:?wyse-nk -m dumb:?wyse-nk $TERM`
+#eval `tset -sQ -m dialup:?wyse-vp -m switch:?wyse-vp -m dumb:?wyse-vp $TERM`
+unset noglob
+endif
+
+#         general terminal characteristics
+
+#stty -crterase
+#stty -tabs
+#stty crt
+#stty erase '^h'
+#stty werase '^?'
+#stty kill '^['
+#stty new
+
+#         environment variables
+
+#setenv DEFAULT_FONT "/usr/lib/fonts/fixedwidthfonts/screen.r.11"
+#setenv EXINIT 'set sh=/bin/csh sw=4 ai report=2'
+setenv MORE '-c'
+#setenv PRINTER lw
+
+#         commands to perform at login
+
+#echo "!=<"     # turn off key click
+
+#w         # see who is logged in
+
+if ("`tty`" != "/dev/console") exit
+echo -n "Suntools? (^C to interrupt) "
+sleep 5
+suntools
+
+
+
+
+

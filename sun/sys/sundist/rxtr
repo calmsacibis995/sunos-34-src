@@ -1,0 +1,39 @@
+#! /bin/sh
+#
+#	rxtr	1.1	86/09/25
+#
+disc=${disc-$disk}
+: ${host?'Usage: host=name disc=xx tape=xx rxtr'}
+: ${disc?'Usage: host=name disc=xx tape=xx rxtr'}
+: ${tape?'Usage: host=name disc=xx tape=xx rxtr'}
+set -x
+if [ $tape = "mt" -o $tape = "xt" ]; then  
+        bs=20  
+else  
+        bs=200  
+fi  
+cd /dev;
+./MAKEDEV ${disc}0
+echo /dev/${disc}0a / 4.2 rw 1 1 > /etc/fstab
+sync
+/etc/newfs /dev/r${disc}0a
+sync
+/etc/fsck /dev/r${disc}0a
+/etc/mount /dev/${disc}0a /a
+rsh ${host} mt -f /dev/nr${tape}0 rew
+rsh ${host} mt -f /dev/nr${tape}0 fsf 5
+cd /a
+rsh ${host} dd if=/dev/nr${tape}0 bs=${bs}b | tar xpBf -
+cd /a/dev
+./MAKEDEV std ${disc}0 pty0 win0
+cat >/a/etc/fstab <<EOF
+/dev/${disc}0a / 4.2 rw 1 1
+/dev/${disc}0g /usr 4.2 rw 1 2
+EOF
+cd /
+cp /usr/ucb/rsh /a/etc
+rcp ${host}:/etc/passwd ${host}:/etc/hosts ${host}:/etc/group /a/etc
+/etc/umount /dev/${disc}0a
+sync
+/etc/fsck /dev/r${disc}0a
+echo 'Root filesystem extracted'

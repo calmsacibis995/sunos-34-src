@@ -1,0 +1,62 @@
+# !/bin/sh
+#
+#	Script to convert 3.0fcs rc.boot to 3.2fcs rc.boot
+#
+#       @(#)  3.0rcboot_3.2rcboot 1.1 86/09/25
+#
+#       Copyright (c) 1986 by Sun Microsystems, Inc.
+#
+
+ed $1 <<NEW
+/SMI/
+s/85\/12\/18/86\/07\/07/
+/hostname/
+a
+#
+# It is important to fsck the root filesystem here to prevent
+# spurious panics after system crashes.
+#
+error=0
+if [ $1x = singleuserx ]
+then
+        echo "Singleuser boot -- fsck not done" >/dev/console
+else
+        if [ -r /fastboot ]
+        then
+                echo "Fast boot ... skipping disk checks" >/dev/console
+        else
+                /etc/fsck -p >/dev/console 2>&1
+                case $? in
+                0)
+                        ;;
+                4)
+                        echo "Root fixed - rebooting." >/dev/console
+                        /etc/reboot -q -n
+                        ;;
+                8)
+                        echo "Reboot failed...help!" >/dev/console
+                        error=1
+                        ;;
+                12)
+                        echo "Reboot interrupted." >/dev/console
+                        error=1
+                        ;;
+                *)
+                        echo "Unknown error in reboot fsck." >/dev/console
+                        error=1
+                        ;;
+		esac
+        fi
+fi
+.
+w
+/sync/
+a
+#
+# exit with error status if there were any fsck errors above
+#
+exit \$error
+.
+w
+q
+NEW

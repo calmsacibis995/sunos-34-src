@@ -1,0 +1,4 @@
+#@(#)access.syscall	1.1 9/24/86. 86/01/17 SMI
+int	access(!path, mode) char *path; int mode; {return(0);} $
+(vroot_args.returns.test == 0) || (errno != ENOENT)
+rw_read

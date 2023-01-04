@@ -1,0 +1,169 @@
+/*	@(#)assym.h 1.1 9/25/86 Copyright Sun Microsystems, Inc. */
+#define SERIAL0_BASE 0xf5a000
+#define PARALLEL_BASE 0xf59800
+#define TIMER_BASE 0xf5a800
+#define PROM0_BASE 0xf60000
+#define KEYB_CONTROL 0xf5a014
+#define KEYB_DATA 0xf5a016
+
+#define NUMCONTEXTS 8
+#define NUMPMEGS 256
+#define PGSPERSEG 16
+#define BYTESPERPG 2048
+#define BYTES_PG_SHIFT 11
+#define ADRSPC_SIZE 0x1000000
+#define	LOWMASK 0xfffff800
+#define PMAPOFF 0x0
+#define SMAPOFF 0x5
+#define CONTEXTOFF 0x6
+#define USERCONTEXTOFF 0x7
+#define SUPCONTEXTOFF 0x6
+#define CONTEXTMASK 0x7
+#define FC_MAP 0x3
+#define LEDOFF 0xb
+#define ENABLEOFF 0xe
+#define BUSERROFF 0xc
+
+#define PME_MEM_0 0xfe000000
+#define PME_MEM_800 0xfe000001
+#define PME_TIMER 0xec400005
+#define PME_PROM0 0xfe400000
+#define PME_INVALID 0x80000000
+#define PME_PARALLEL 0xec400003
+#define PME_DES 0xec400002
+
+#define INITSP 0x1000
+#define USERCODE 0x2000
+#define INUARTA 0x1
+#define INUARTB 0x2
+#define NMIFREQ 0x1f4
+
+#define g_bestack 0x200
+#define sizeofbestack 0x3a
+#define g_bestack_vor 0x206
+#define g_beregs 0x23a
+#define g_because 0x27e
+#define g_memorysize 0x288
+#define g_resetaddr 0x3d4
+#define g_resetaddrcomp 0x3d8
+#define g_resetmap 0x3dc
+#define g_resetmapcomp 0x3e0
+#define g_prevkey 0x32f
+#define g_debounce 0x3d0
+#define g_nmiclock 0x284
+#define g_echo 0x3d1
+#define g_insource 0x3ce
+#define g_outsink 0x3cf
+#define g_translation 0x3a2
+#define g_keybid 0x331
+#define g_curkeyboard 0x3a6
+#define g_setkeytable 0x3c2
+#define g_keybuf 0x332
+#define g_font 0x466
+#define g_linebuf 0x2d0
+#define g_lineptr 0x322
+#define g_linesize 0x326
+#define g_keyentry 0x3aa
+#define gp 0x200
+#define g_keyrinit 0x3b8
+#define g_keyrtick 0x3c0
+#define g_keystrtab 0x3b4
+#define g_busbuf 0x28c
+#define g_diag_state 0x290
+#define g_enable 0x280
+#define g_leds 0x282
+#define g_keybzscc 0x32a
+#define g_inzscc 0x3c6
+
+#define GXBase 0x416
+#define fbaddr 0x416
+
+#define CLK_16BIT 0xffef
+#define CLK_CLEAR 0xffe0
+#define CLK_ACC_MODE 0xff00
+#define CLKM_DEFAULT 0xb00
+#define clk_cmd 0x2
+#define clk_data 0x0
+
+#define TIMER_NMI 0x1
+
+#define ena_notboot 0x80
+#define ena_par_check 0x10
+#define ena_par_gen 0x1
+#define ena_ints 0x40
+
+#define EVEC_RESET 0x0
+#define EVEC_DOG 0x3
+#define EVEC_BOOTING 0x2
+#define EVEC_SOFT 0x4
+#define EVEC_BUSERR 0x8
+#define EVEC_TRAP1 0x84
+#define EVEC_TRAPE 0xb8
+#define EVEC_KCMD 0x1
+#define EVEC_ABORT 0x81
+#define VOR_OFFSET 0xfff
+#define sizeofintstack 0x8
+#define i_vor 0x6
+
+#define ZSRR0_BREAK 0x80
+#define ZSRR0_RX_READY 0x1
+#define ZSRR0_TX_READY 0x4
+#define zscc_control 0x0
+#define zscc_data 0x2
+#define sizeofzscc 0x4
+#define A_CONTROL 0x4
+#define A_DATA 0x6
+#define B_CONTROL 0x0
+
+#define v_printf 0xf60084
+
+#define MEMBIT 0xb
+#define DESBIT 0xc
+#define MCONBIT 0x19
+#define MADDRBIT 0x1a
+#define MTRANBIT 0x1b
+#define LEDQUICK 0xc350
+#define LEDLONG 0x3d090
+
+#define DESSELOFF 0x2
+#define DESREGOFF 0x0
+#define DESR_IO 0x0
+#define DESR_CMD_STAT 0x2
+#define DESR_MODE 0x6
+#define DESC_RESET 0x0
+#define DESC_STOP 0xe0
+#define DESC_START 0xc0
+#define DESC_START_DEC 0x40
+#define DESC_START_ENC 0x40
+#define DESC_LOAD_E_KEY 0x11
+#define DESC_LOAD_D_KEY 0x12
+#define DESS_MST_FLAG 0x1
+#define DESS_SLAVE_FLAG 0x2
+#define DESS_AUX_FLAG 0x4
+#define DESS_PAR 0x8
+#define DESS_LPAR 0x10
+#define DESS_BUSY 0x20
+#define DESS_CMD_PEND 0x40
+#define DESS_STARTED 0x80
+#define DESM_ECB 0x0
+#define DESM_CFB 0x1
+#define DESM_CBC 0x2
+#define DESM_ME_SC 0x0
+#define DESM_MC_SE 0x4
+#define DESM_M_ONLY 0x8
+#define DESM_DECRYPT 0x0
+#define DESM_ENCRYPT 0x10
+
+#define mis_d0 0x0
+#define mis_a7 0x3c
+#define mis_usp 0x40
+#define mis_sfc 0x44
+#define mis_dfc 0x48
+#define mis_vbase 0x4c
+#define mis_scon 0x50
+#define mis_ucon 0x54
+#define mis_sr 0x5a
+#define mis_vor 0x60
+#define mis_size 0x62
+
+#define PME_MEM_VIDEO 0xfe00fe00

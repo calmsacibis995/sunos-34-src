@@ -1,0 +1,191 @@
+#	@(#)Makefile.sun3 1.1 86/09/25
+#
+# Sun-3 kernel debugger (kadb) makefile
+#
+CC=	cc -m68020
+AS=	as -m68020
+LD=	ld
+AR=	ar
+RM=	rm -f
+TOUCH=	touch -cf
+GREP=	egrep
+
+RELOC=	fd00000
+COPTS=	-DKADB -Dsun3
+CFLAGS=	-O ${COPTS} -DKERNEL
+DDIR=	/usr/src/sun/bin/adb
+MACDIR=	../adb
+MACLIST=`cd ${MACDIR}; make maclist`
+INSTALLDIR=	${DESTDIR}/
+
+HFILES=\
+	../debug/debug.h\
+	../debug/debugger.h\
+	pf.h
+
+CFILES=\
+	kadb.c\
+	genpf.c\
+	../debug/machdep.c\
+	../debug/main.c\
+	../debug/support.c
+
+SFILES=\
+	../debug/locore.s\
+	../debug/s3map.s
+
+SPECIAL=\
+	locore.o
+
+OBJ=\
+	${SPECIAL}\
+	kadb.o\
+	machdep.o\
+	main.o\
+	s3map.o\
+	support.o
+
+STAND=	../stand
+LIBSA=	libsa.a
+LIBS=	${STAND}/${LIBSA} -lc
+
+kadb:	Makefile ukadb.o pf.o
+	${LD} -N -T ${RELOC} -o $@ ukadb.o pf.o
+
+# ukadb.o is the a.out for all of kadb except the macro file pf.o,
+# this makes it is easier to drop in different set of macros.
+ukadb.o:	${OBJ} ${DDIR}/kadb.o ${STAND}/${LIBSA}
+	${LD} -r -o $@ ${OBJ} ${DDIR}/kadb.o ${LIBS}
+
+# don't strip to make patching `ndbootdev' and `vmunix' variables easier
+install:	kadb
+	install kadb ${INSTALLDIR}
+
+tags:	${HFILES} ${CFILES} ${DDIR}/*.c ${DDIR}/*.h
+	ctags ${HFILES} ${CFILES} ${DDIR}/*.c ${DDIR}/*.h
+
+clean:
+	${RM} a.out *.o genpf pf.c errs
+
+${STAND}/${LIBSA}:	FRC
+	cd ${STAND}; make ${MFLAGS} ${LIBSA}
+
+${DDIR}/kadb.o:	FRC
+	cd ${DDIR}; make ${MFLAGS} kadb.o
+
+FRC:
+
+locore.o:	../debug/locore.s
+	/lib/cpp -E -I. -DLOCORE -DKERNEL ${COPTS} ../debug/locore.s > locore.pp
+	${AS} -o locore.o locore.pp
+	${RM} locore.pp
+
+genpf:	genpf.c
+	${CC} -o genpf genpf.c
+
+pf.c:	genpf ${MACDIR}/*
+	cd ${MACDIR}; make ${MFLAGS}
+	genpf ${MACLIST}
+
+pf.o:	pf.c
+	${CC} -c -I. ${CFLAGS} pf.c
+
+kadb.o: kadb.c
+	${CC} -c -I. -I${DDIR} -O ${COPTS} kadb.c
+
+machdep.o:	../debug/machdep.c
+	${CC} -c -I. ${CFLAGS} ../debug/machdep.c
+
+main.o:	../debug/main.c
+	${CC} -c -I. ${CFLAGS} ../debug/main.c
+
+s3map.o:	../debug/s3map.s
+	/lib/cpp -E -I. -DLOCORE -DKERNEL ${COPTS} ../debug/s3map.s > s3map.pp
+	${AS} -o s3map.o s3map.pp
+	${RM} s3map.pp
+
+support.o:	../debug/support.c
+	${CC} -c -I. ${CFLAGS} ../debug/support.c
+
+depend:
+	cp /dev/null x.c
+	${RM} makedep
+	for i in ${HFILES} ${CFILES} ${SFILES}; do \
+		(${GREP} '^#[ 	]*include' x.c $$i | sed \
+			-e 's,.//,$${DDIR}/,' \
+			-e 's,:[^"]*"\([^"]*\)".*,: \1,' \
+			-e 's,:[^<]*<\([^>]*\)>,: /usr/include/\1,' \
+			-e 's,^../[a-zA-Z0-9]*/\([^\:]*\):,\1:,' \
+			-e 's,^\([^\.]*\)\.[cs]:,\1.o:,' \
+			>> makedep);\
+	done
+	echo '/^# DO NOT DELETE THIS LINE/+2,$$d' >eddep
+	echo '$$r makedep' >>eddep
+	echo 'w' >>eddep
+	cp Makefile Makefile.bak
+	ed - Makefile < eddep
+	echo '# DEPENDENCIES MUST END AT END OF FILE' >> Makefile
+	echo '# IF YOU PUT STUFF HERE IT WILL GO AWAY' >> Makefile
+	echo '# see make depend above' >> Makefile
+	${RM} eddep makedep x.c
+
+
+# DO NOT DELETE THIS LINE -- make depend uses it
+
+debug.h: ../mon/sunromvec.h
+debugger.h: /usr/include/setjmp.h
+debugger.h: ../debug/debug.h
+kadb.o: ${DDIR}/adb.h
+kadb.o: ${DDIR}/symtab.h
+kadb.o: ../kadb/pf.h
+kadb.o: ../debug/debugger.h
+kadb.o: ../h/errno.h
+kadb.o: ../h/file.h
+kadb.o: ../h/ptrace.h
+kadb.o: ../machine/cpu.h
+genpf.o: pf.h
+genpf.o: /usr/include/stdio.h
+genpf.o: /usr/include/ctype.h
+machdep.o: ../h/param.h
+machdep.o: ../h/errno.h
+machdep.o: ../h/vmmac.h
+machdep.o: ../machine/buserr.h
+machdep.o: ../machine/enable.h
+machdep.o: ../machine/mmu.h
+machdep.o: ../machine/cpu.h
+machdep.o: ../machine/pte.h
+machdep.o: ../machine/reg.h
+machdep.o: ../machine/scb.h
+machdep.o: ../machine/psl.h
+machdep.o: ../machine/trap.h
+machdep.o: ../debug/debugger.h
+machdep.o: ../mon/keyboard.h
+machdep.o: ../sun3/clock.h
+machdep.o: ../sun3/interreg.h
+main.o: ../h/param.h
+main.o: ../h/reboot.h
+main.o: ../stand/saio.h
+main.o: ../machine/reg.h
+main.o: ../debug/debugger.h
+main.o: /usr/include/a.out.h
+support.o: ../h/param.h
+support.o: ../h/errno.h
+support.o: ../h/time.h
+support.o: ../h/ptrace.h
+support.o: ../machine/mmu.h
+support.o: ../machine/pte.h
+support.o: ../machine/reg.h
+support.o: ../debug/debugger.h
+locore.o: ../h/errno.h
+locore.o: ../h/param.h
+locore.o: ../machine/asm_linkage.h
+locore.o: ../machine/mmu.h
+locore.o: ../machine/psl.h
+s3map.o: ../h/param.h
+s3map.o: ../debug/debug.h
+s3map.o: ../sun3/asm_linkage.h
+s3map.o: ../sun3/mmu.h
+s3map.o: ../sun3/pte.h
+# DEPENDENCIES MUST END AT END OF FILE
+# IF YOU PUT STUFF HERE IT WILL GO AWAY
+# see make depend above

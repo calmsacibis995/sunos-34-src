@@ -1,0 +1,12 @@
+c       .data
+c       .asciz  "@(#)FFtanhs.ff 1.1 86/09/25 Copyr 1985 Sun Micro"
+c       .even
+c       .text
+
+c       Copyright (c) 1985 by Sun Microsystems, Inc.
+
+	real*4 function FFtanhs ( x )
+	real*4 x,t, FFexp1s, CopySign
+	t = FFexp1s(-2.0 * abs(x))
+	FFtanhs = CopySign(-t/(2.0+t),x)
+	end

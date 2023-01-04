@@ -1,0 +1,549 @@
+.de SX          \" call 'so' something else so derof
+.so \\$1
+..
+.po 1.5i
+.nr PO 1.5i
+.hy 14          \" don't hyphenate in bad places
+.pn 1           \" start page number at 'A'
+.af % A
+.ds PN "\\\\n%
+.nr sf 3        \" set section headings in bold face
+.nr si 2        \" indent nested sections 2 spaces
+.de $0          \" macro to enter section heading in to table of contents
+.(x C
+.if (\\$3=1) .sp
+\\$2   \\$1
+.)x \\*(PN
+..
+.de [R          \" routine declaration
+.ds RC \\$1
+.sp
+.ne 10
+.(l L
+.fi
+.na
+..
+.de *Q
+.ds RM \\$1 \\$2
+\\*(RM
+..
+.de *R
+.ds RN \\$1
+.(x R
+\\*(RN - \\*(RC
+.)x
+\\$1
+..
+.de {R
+\\*(RN
+.nf
+.ad
+..
+.de [R
+.)l
+..
+.de }R
+..
+.de {E                  \" possible errors sub-section
+.lp
+Possible errors:
+.nr ps 0n
+.LB \\(bu
+..
+.de }E
+.LE
+.nr ps 1n
+.lp
+..
+.de WP
+.lp
+\fb***\fp
+..
+.de IP
+.ip "\fB\\$1\fP"
+..
+.de EB
+.sp -1
+.nf
+\L'|\\$1-1'\h'-1n'\1'\\n(.lu'\h-1n'\L'-1\\$1+1'\1-\\ln(.lu'
+.fi
+..
+.nr ii 5
+.nr hm 3v
+.nr tm 6v
+.nr fm 4v
+.nr bm 7v
+.de $h
+.tl 'APPROVAL SECTION''\*(PN'
+..
+.de $f
+.tl '\*(td''DO NOT COPY'
+.tl 'SUN MICROSYSTEMS INC''COMPANY CONFIDENTIAL'
+..
+.bp
+.sp
+.ce 2
+\fBE X T E R N A L  S P E C I F I C A T I O N
+(User Perspective)
+.sp
+TITLE        :  Multi-Bus Scsi Board Diagnostic External Specification\fR
+.sp
+AUTHOR       :  Hai The Ngo
+.sp
+REPORT NO.   :  
+.sp
+REVISION NO. :   @(#)scsi.diag.txt 1.1 9/25/86
+.sp
+DATE         : \*(td    \"td=printing date if reformated
+.sp
+STATUS       :
+.sp 2
+.(l L
+APPROVALS    :                                          DATE
+.de SG                  \" Macro to define signiture lines
+.ip "\\$1" 20n          \" Position and signiture line
+------------------------------------------------------------
+.br
+\\$2                    \" Name Underneath
+..
+.SG "Originator" "Hai T Ngo"
+.SG "Manufacturing Engineering" " "
+.SG "Production" " "
+.SG "Test Engineering" " "
+.SG "Quality Control" " "
+.)l
+.bp
+.(l L
+.ce
+document Review Form
+.lp
+Please make note and initial on this page all corrections and/or
+proposed amendments by page number and/or section number.
+.sp
+.ce
+---------------------------------------------
+Recommendations, Differences, Construction Errors, and comments:
+.sp 36
+.ce 2
+---------------------------------------------
+Typographical Errors:
+.sp 4
+.ce 2
+---------------------------------------------
+Attach additional sheet(s) as needed.
+.)l
+.\" redefine headers for the body of the document
+.de $h
+.tl 'SCSI EXTERNAL SPECIFICATION''
+.tl'(User\'s Perspective)''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fBSCSI EXTERNAL SPECIFICATION\fR
+.sp
+.sh 1 "INTRODUCTION"
+.sp
+.sh 2 "Purpose"
+.lp
+\fISCSI\fR, the diagnostic,
+.np
+demonstrates correct functionality of the SCSI board,
+.np
+provides troubleshooting tools as debug features, and
+.np
+easy to use.
+.sp
+.sh 2 "Applicable Documents"
+.lp
+The following documents are useful in both understanding the diagnostic
+and the SCSI board:
+.np
+\fISun SCSI Programmers\' Manual\fR, W. M. Bradley
+.np
+\fISun SCSI Board Theory of Operation\fR, W. M. Bradley
+.np
+\fIIntroduction to he SASI/SCSI Interface and the Adaptec Controller\fR,
+5/23/83, Bill Stanley, Adaptec Inc.
+.np
+\fIAdaptec ACB 4000 and 5000 Series Disk Controllers OEM Manual\fR, 5/16/83,
+Adaptec Inc.
+.np
+\fIController/System Interface Specification\fR, 8/7/82 Adaptec Inc.
+.lp
+\fIAt this time the above specifications have not yet had assigned part
+numbers\fR.
+.sp 2
+.sh 1 "SYSTEM OVERVIEW"
+.sp
+.sh 2 "General Description"
+.lp
+The SCSI diagnostic is a boot only diagnostic. It is designed to specifically
+test the Sun 2 multibus or VME SCSI board. It is menu driven to provide a
+friendly user interface enviroment.
+.sp
+.sh 2 "Features "
+.lp
+The SCSI diagnostic tests the following:
+.np
+Interface control register.
+.np 
+DMA counter register.
+.np
+DMA address register.
+.np
+Device initial selection sequence.
+.np
+Device ready.
+.np
+DMA transfer.
+.np
+Interrupt vector.
+.np
+Data integrity.
+.np
+Timer.
+.np
+SCC (serial ports).
+.lp
+It also provides a complete set of tools for debugging the board.
+.sp
+.sh 2 "Required Configuration"
+.lp
+The following hardware is required for testing the SCSI multibus
+boards:
+.np
+A test station containing:
+.(l
+   *  a card-cage (PN: 340-0332),
+   *  a power supply (PN: 300-0135-03),
+   *  a Sun 2 processor board (PN: 501-1007-01),
+   *  one megabyte of memory (PN: 501-1013-01),
+   *  a means of booting the SCSI diagnostic, and
+   *  a monitor.
+.)l
+The monitor may either be a ``\fIdumb terminal\fR'' or a Sun monitor,
+video board, and keyboard.
+.np
+A \fBknown good\fR disk drive.
+.np
+A power cable for the disk (PN: 530-xxxx-x).
+.np
+A \fBknown good\fR Adaptec board (PN: 370-1010-01).
+.np
+A power cable for the Adaptec board (PN: 530-xxxx-x).
+.np
+The internal cable running from the SCSI board to the Adaptec board
+(PN: 530-1023-01).
+.sp
+.sh 2 "Error Handler"
+.lp
+Upon recieving an error indication, the test will immediately terminate
+and call the Error Handler routine.
+The Error Handler decodes the error log structure into
+neanningful and useful information such as
+the name of the test that failed,
+the condition under which error occurred, 
+the expected and actual results of the operation.
+.sp
+.sh 2 "Tools"
+.lp
+Tools are provided for debuging purposes and are available only when an error
+condition is detected.
+They are menu driven for ease of use.
+Each test has its own tool. 
+.lp
+
+.sp
+.sh 2 "General Performance Characteristics"
+.lp
+The whole SCSI diagnostic will take about 2 minutes to run on a bug-free board.
+Upon completion, it will ask the user whether to run again and for how many
+passes.
+.sp
+.sh 1 "RUN PROCEDURE"
+.sp
+.sh 2 "Pre-Loading"
+.lp
+Configure the workstation as described above.
+Immediately before loading the SCSI diagnostic, give the following PROM
+monitor command:
+
+	>k1
+
+This will reset the workstations memory management unit and allow the test
+to do its own mapping to the serial ports on the SCSI board.
+.sh 2 "Starting the Diagnostic"
+.lp
+enter the following PROM monitor command:
+
+	>bec(,nn)/stand/scsi.diag
+
+where nn is the ethernet server id in hexidecimal.
+.lp
+The diagnostic will display the following messages:
+.sp
+    SUN xxx SCSI Board Diagnostic  Rev. y.y 
+    Default to run on Micropolis 1340 disk.
+
+    Enter A for automatic or M for manual:
+
+where xxx is either "Multibus" or "VME," depending on the type of workstation
+being used and y.y is the revision number.
+The diagnostic assumes that the workstation is using a Micropolis 1340 disk.
+.lp
+"Automatic" mode means that the diagnostic will run all tests once and give
+results.
+"Manual" means that the diagnostic will ask the user to choose from the menu
+below.
+.lp
+    TESTS MENU:
+      1_ Test Interface Control Register
+      2_ Test DMA Counter Register
+      3_ Test DMA Address Register (VME only)
+      4_ Test Initial Selection Sequence
+      5_ Test Device Ready
+      6_ Test Bus Transfer
+      7_ Test DMA Transfer
+      8_ Test Status Interrupt
+      9_ Test DMA Overrun
+      10_ Test Data integrity
+      11_ Test Timer (VME only)
+      12_ Test SCC (Multibus only)
+      13_ Test all
+      Select One
+.lp
+After you enter one of the selection numbers, the test will ask for the
+number of times to run.
+After the test ran the requested number of times, the diagnostic will
+re-display the above menu.
+From any menu prompt, you can stop the diagnostic by entering 'x' or 'X'.
+.lp
+Once in manual mode, you cannot go to automatic mode (or vice versa) 
+without restarting the diagnostic.
+.lp
+If you chose selection 12, the SCC test will display another menu, where
+you can select which serial port to test, or all ports.
+Under automatic mode or under "Test all," the SCC test will cover all ports
+without giving any menu.
+.lp
+.sp
+.sh 1 "SCSI DIAGNOSTIC TOOLS"
+.lp
+When any test discovers an error condition, it gives an error message and
+gives the user the following message:
+.sp
+       Do you wish to use debug tools?
+.sp
+Enter 'Y' or 'y' to access the tools.
+The diagnostic will select the appropriate tools for debugging the failed
+part, and display a menu of options.
+.sp
+.sh 1 "SCSI DIAGNOSTIC SPECIFICATION"
+.sp
+.sh 2 "USER INTERFACE"
+.lp
+Every effort was made to make SCSI diagnostics easy to use.
+User interface is done with menus and simple prompts for the inputs required.
+A set of commands is avialable, allowing you to examine readable registers,
+reset the SCSI bus, display scb, alter cdb, ...etc.
+.lp
+If you entered a string starting with a character, the diagnostic
+will search a command list for that string.
+If the command exists, the diagnostic will execute it.
+Otherwise it will give a message indicating that it was an invalid command and
+ask the user to enter "help" or "?" for the command list.
+.ip
+If you entered a number, it will check to see if the number is within 
+the range of the menu.
+If so, it will execute the corresponding item.
+Otherwise it will give a message saying that the munber is not in the menu.
+.sp
+.sh 2 "TEST DESCRIPTIONS"
+.sp
+.lp
+Following sections describe all tests provided by the diagnostics:
+.sp
+.sh 3 "Test Interface Control Register"
+.lp
+Interface control register is tested by writing test patterns from 0x00 to 0x3F
+and the results are read back and compared with the expected results.
+It also checks for time out on read and write accesses to ICR.
+.lp
+This test covers the read/write part of the interface control register,
+the data path to ICR, and verifies that read and write accesses
+do not cause time out.
+.lp
+When an error is detected, an error message will be displayed indicating the
+condition under which the error occurred, the expected and actual results.
+At this point, the user will be prompted to ask if he/she wants to use 
+debugging tools.
+.sp
+.sh 3 "Test DMA Counter Register"
+.lp
+DMA counter register is tested by writing test pattern from 0x0000 to 0xFFFF
+and the results are read back and compared with the expected results.
+.lp
+This test verifies that the counter register can be accessed.
+However it does not test for counter operations.
+This is done on test DMA transfers.
+.lp
+Error messages are displayed upon error detection.
+At this point, the user will be prompted to ask if he/she wants to use 
+debugging tools.
+.sp
+.sh 3 "Test DMA Address Register (VME only)"
+.lp
+If system is a SUN2 multibus, this test will be skiped
+and testing of DMA address register is then done on test DMA transfers.
+.lp
+DMA address register is tested by writing test pattern from 0x0000 to 0xFFFFFF
+and the results are read back and compared with the expected results.
+.lp
+This test verifies that the address register can be access.
+However it does not
+test for counter operations.
+This is done on test DMA transfer.
+.lp
+Error messages are displayed upon error detection.
+At this point, the user will be prompted to ask if he/she wants to use 
+debugging tools.
+And the test menu is displayed again.
+.sp
+.sh 3 "Test Initial Selection Sequence"
+.lp
+Initial selection sequence is tested by setting select bit of interface
+control register and expecting the controller response with busy signal.
+.lp
+The test verifies the paths of select and busy bits in ICR between SCSI
+and the controller.
+.lp
+Error messages are displayed upon error detection.
+At this point, the user will be prompted to ask if he/she wants to use 
+debugging tools.
+.sp
+.sh 3 "Test Device Ready"
+.lp
+Test device ready is done by issuing the \fBtest unit ready\fR command to the
+controller, getting status and message back from the device.
+Then the test will issue the \fBrequest sense\fR command to the device.
+An evaluation on sense information is done.
+All bus transfers of commands, data, status, and messages are done using
+program \fBI/O\fR.
+.lp
+This test covers the following SCSI board hardware:
+.(l
+    * \fBREQ/ACK\fR handshaking mechanism for asynchronous transfer of
+      command, status, and data on the SCSI bus.
+    * Control lines on ICR, such as REQ, MSG, CMD, and I/O.
+    * Command/Status register.
+    * Data register.
+.)l
+.lp
+If error is detected, error message will be displayed.
+At this point, the user will be prompted to ask if he/she wants to use 
+debugging tools.
+.sp
+.sh 3 "Test DMA Transfer"
+.lp
+\fBWrite\fR and \fBread\fR operations on one block of data (512 bytes)
+to and from disk are performed using DMA transfers.
+After DMA transfers are completed, the status completion block is checked
+for any error indication.
+The DMA counter register is checked for correct functionality.
+The DMA address and data register are checked by comparing the expected
+data and the actual data.
+.lp
+This test covers the DMA circuitry which includes:
+.sp
+    DMA address register,
+    DMA counter register,
+    DMA control circuitries,
+    byte packaging mechanism.
+.lp
+If error is detected, error message will be displayed.
+At this point, the user will be prompted to ask if he/she wants to use 
+debugging tools.
+.sp
+.sh 3 "Test Interrupt Vector"
+.lp
+This test is devided into two parts:
+.ip
+The first part writes test patterns from 0x00 to 0x0F to the interrupt vector
+register and the results are read back and compared with the
+expected results.
+When complete, interrupt vector is then set to 26 before
+going to the next part of the test.
+This part of the test is executed only if the SCSI board under test is a
+VME SCSI board.
+.ip
+The second part verifies the occurrence of correct level of interrupt.
+This is done by enabling interrupts, doing a DMA transfer and expecting
+an interrupt to occur.
+.lp
+This test covers the interrupt vector register
+(if board under test is a VME SCSI board),
+and the interrupt circuitry.
+.sp
+Error is displayed if the expected interrupt did not occur or if interrupt
+was caused by BUS ERROR.
+At this point, the user will be prompted to ask if he/she wants to use 
+debugging tools.
+.sp
+.sh 3 "Test Data Integrity"
+.lp
+This test writes 1k block of data into the disk, using DMA transfer.
+Then the data are read back and compared with the expected values.
+.lp
+This test verifies that data transfered between disk device and
+main memory.
+.lp
+Error evaluation is done base on the error code and sense informations.
+If error is detected, error message will be displayed.
+Afterward, the user will be prompted to ask if he/she wants to use
+debugging tools.
+.sp
+.sh 3 "Test Timer"
+.lp
+Version 1.8 of the SCSI diagnostic does not have this test.
+If your version is newer, the following discussion is valid.
+.lp
+The SCSI timer is tested by writing a value to it and the result is read
+back and verified.
+.lp
+This test verifies the correct funtionality of the timer chip.
+.lp
+Error messages are displayed upon error detection.
+Afterward, the user will be prompted to ask if he/she wants to use 
+debugging tools.
+.sp
+.sh 3 "Test SCC"
+.lp
+This attempts to verify the correct functionality of both Zilog
+Z8530 SCC Serial Communications Controllers.
+.lp
+It is divided into two parts:
+.ip
+The first part verifies the time constant register (WR12/WR13)
+for both controllers.
+.ip
+The second part tests external loop back for all for serial ports in this
+manner:  a to b, b to a, c to d and d to c, at all possible baud rates.
+Then values of 0x0 through 0xFF are sent through.
+The value transmitted is then against the expected value.
+.lp
+Error messages are displayed upon error detection.
+The user will be prompted to ask if he/she wants to use 
+debugging tools.
+.de $h
+.tl 'TABLE OF CONTENTS''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fBTABLE OF CONTENTS\fR
+.sp 3
+.xp C
+

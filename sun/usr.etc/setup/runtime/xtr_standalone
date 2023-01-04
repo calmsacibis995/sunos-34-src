@@ -1,0 +1,45 @@
+#! /bin/sh
+#
+# @(#)xtr_standalone 1.1 86/09/25 SMI; from UCB X.X XX/XX/XX
+#
+#
+# Extract the usr files for a standalone workstation.
+#
+if [ $# != 3 ]; then
+	echo Usage: $0 tapedev fsf blocksize
+	exit 1
+fi
+tapedev=$1
+fsf=$2
+bs=$3
+
+if [ "$tapeserver" != "" ]; then
+	remote="rsh $tapeserver"
+fi
+
+#
+# At this point (examples in parens),
+#   tapedev	- raw tape device (/dev/rst0)
+#   fsf         - fsf this many files to get to the usr files (2)
+#   bs		- blocksize for this tape (126)
+#
+set -x
+
+# 
+# Make a file system for /usr and mount it.
+# Then extract the files from the tape.
+#
+cd /setup.root/usr
+$remote mt -f $tapedev rew
+$remote mt -f $tapedev fsf $fsf
+if [ "$tapeserver" = "" ]; then
+	tar xpfbv $tapedev $bs
+else 
+	$remote -n dd if=$tapedev bs=${bs}b | tar xpfBv -
+fi
+if [ $? != 0 ]; then
+	exit 13
+fi
+$remote mt -f $tapedev rew
+
+sync

@@ -1,0 +1,50 @@
+# !/bin/sh
+#
+#	Script to convert 3.0fcs rc.local to 3.2fcs rc.local
+#
+#       @(#)  3.0rclocal_3.2rclocal 1.1 86/09/25 
+#
+#       Copyright (c) 1986 by Sun Microsystems, Inc.
+#
+
+ed $1 <<NEW
+/UCB/
+s/1.1/1.2/
+s/85\/12\/18/86\/07\/22/
+/ypserv/
+i
+if [ -f /usr/etc/in.named -a -f /etc/named.boot ]; then
+	/usr/etc/in.named; echo -n ' named'			>/dev/console
+fi
+.
+/ypbind/
+-1
+i
+#	/usr/etc/ypserv -i; echo -n ' ypserv'			>/dev/console
+.
+/skyrc/
++1
+a
+if [ -f /dev/fpa ]; then
+        /usr/etc/fpa/fpa_download -q -u /usr/etc/fpa/fpa_micro_bin -m /usr/etc/fpa/fpa_micro_map -c /usr/etc/fpa/fpa_constants -r                  >/dev/console
+fi
+if [ -f /dev/fpa ]; then
+        /usr/etc/fpa/fparel                                     >/dev/console
+fi
+.
+/nfsd 4/
++1
+a
+#
+# start up status monitor and locking daemon if present
+#
+if [ -f /etc/rpc.statd ]; then
+        /etc/rpc.statd & echo -n ' statd'                       >/dev/console
+fi
+if [ -f /etc/rpc.lockd ]; then
+        /etc/rpc.lockd & echo -n ' lockd'                       >/dev/console
+fi
+.
+w
+q
+NEW

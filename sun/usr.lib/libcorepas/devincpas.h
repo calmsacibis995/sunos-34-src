@@ -1,0 +1,14 @@
+	     function bw1dd: integer; 
+	     external;
+	     function bw2dd: integer; 
+	     external;
+	     function cg1dd: integer; 
+	     external;
+	     function pixwindd: integer; 
+	     external;
+	     function cgpixwindd: integer; 
+	     external;
+	     function gp1dd: integer; 
+	     external;
+	     function gp1pixwindd: integer; 
+	     external;

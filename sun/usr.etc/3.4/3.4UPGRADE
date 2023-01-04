@@ -1,0 +1,832 @@
+#! /bin/sh
+# 
+# 3.4UPGRADE : script written to upgrade 3.2*, 3.3*, 3.4* systems 
+#		to FCS version 3.4.
+#
+#	    Supports
+#		1) standalone with local tape drive
+#		2) standalone with remote tape drive
+#		3) homogeneous server with local tape drive
+#		4) homogeneous server with remote tape drive
+#		5) heterogeneous server with local tape drive
+#		6) heterogeneous server with remote tape drive
+#
+#	@(#)  3.4UPGRADE 1.14 87/04/27
+#
+#       Copyright (c) 1987 by Sun Microsystems, Inc.
+#
+
+HOME=/; export HOME
+PATH=/bin:/usr/bin:/etc:/usr/etc:/usr/ucb
+
+CLIENTLIST10=""
+CLIENTLIST20=""
+CURRENTRELEASE="3.4"
+NDLOCAL=/etc/nd.local
+
+CMDNAME=$0
+#
+# Check architecture type
+#
+if [ -f /bin/sun2 ]; then
+        /bin/sun2
+        if [ "$?" = 0 ]; then
+                machtype="sun2"
+        fi
+fi
+if [ -f /bin/sun3 ]; then
+        /bin/sun3
+        if [ "$?" = 0 ]; then
+                machtype="sun3"
+        fi
+fi
+case  "$machtype" in
+        "sun2" )
+                ARCHTYPE="MC68010" ;;
+        "sun3" )
+                ARCHTYPE="MC68020" ;;
+        * )
+                echo;echo "${CMDNAME}: invalid architecture type."
+		exit 1 ;;
+esac
+#
+# Specify system type : standalone or server
+#
+while true; do
+	echo
+	echo -n "Enter system type ? [standalone | server]: "
+	read MACHINE;
+	case "$MACHINE" in
+		"standalone" )
+			break ;;
+		"server" )
+			while true; do
+        			echo
+        			echo -n "Enter server type ? [homo | heter]: "
+        			read SERVERTYPE;
+        			case "$SERVERTYPE" in
+                			"homo" )
+                        			break ;;
+                			"heter" )
+						case "$ARCHTYPE" in
+							"MC68010" )
+								OTHERARCH="MC68020" ;;
+							"MC68020" ) 
+                                                                OTHERARCH="MC68010" ;;
+						esac
+                        			break ;;
+                			* )
+                        			echo "${CMDNAME}: invalid server type \"${SERVERTYPE}\"." ;;
+        			esac
+			done
+			break ;;
+		* )
+			echo "${CMDNAME}: invalid machine type \"${MACHINE}\"." ;;
+	esac
+done
+#
+# Specify tape drive type : local or remote
+# If remote, specify tape host and ethernet type : ec, ie or le
+#
+while true; do
+        echo
+        echo -n "Enter tape drive type ? [local | remote]: "
+        read DRIVE;
+        case "$DRIVE" in
+                "local" )
+                        break ;;
+                "remote" )
+                        echo;echo -n "Enter host of remote drive ? "
+                        read TAPEHOST;
+                        while true; do
+                                echo
+                                echo -n "Enter ethernet type of this system ? [ec | ie | le] :"
+                                read ETHER;
+                                case "$ETHER" in
+                                        "ec" | "ie" | "le" )
+                                                break ;;
+                                        * )
+                                                echo "${CMDNAME}: invalid ether type \"${ETHER}\"." ;;
+                                esac
+                        done
+                        REMOTE="rsh $TAPEHOST -n"
+                        break ;;
+                * )
+                        echo "${CMDNAME}: invalid tape drive type \"${DRIVE}\"." ;;
+        esac
+done
+#
+# Specify tape type : ar, st, mt or xt
+#
+while true; do 
+	echo
+	echo -n "Enter tape type ? [ar | st | mt | xt]: "
+	read TAPE;
+	case "$TAPE" in
+        	"ar" | "st" )
+			BS=126
+			break ;;
+		"mt" | "xt" )
+			BS=20 
+			TAPE="mt"
+			break ;;
+        	* )
+                	echo "${CMDNAME}: invalid tape type \"${TAPE}\"." ;;
+	esac
+done
+
+grep "^/dev/*" /etc/fstab > /tmp/FSTAB
+if [ "$MACHINE" = "standalone" ]; then
+	cat /tmp/FSTAB|awk '$2 == "/usr" && $3 == "4.2" { print $1 }' > /tmp/user
+	TMP=`cat /tmp/user`
+	if [ "$TMP" = "" ]; then
+		echo "${CMDNAME}: can't find /usr in fstab !"
+        	exit 1
+	fi
+	ROOTPART=`cat /tmp/FSTAB|awk '$2 == "/" && $3 == "4.2" { print $1 }' `
+	ROOTDEV=`expr ${ROOTPART} : '/dev/\([a-z][a-z]\)[0-9][a-z]' '|' ${ROOTPART}`
+elif [ "$ARCHTYPE" = "MC68010" -a "$MACHINE" = "server" ]; then
+	cat /tmp/FSTAB|awk '$2 == "/usr.MC68010" && $3 == "4.2" { print $1 }' > /tmp/user
+	TMP=`cat /tmp/user`
+	if [ "$TMP" = "" ]; then
+		cat /tmp/FSTAB|awk '$2 == "/usr" && $3 == "4.2" { print $1 }' > /tmp/user
+		TMP=`cat /tmp/user`
+		if [ "$TMP" = "" ]; then
+                	echo "${CMDNAME}: can't find /usr.${ARCHTYPE} in fstab !"
+                	exit 1
+        	fi
+	fi
+elif [ "$ARCHTYPE" = "MC68020" -a "$MACHINE" = "server" ]; then
+	cat /tmp/FSTAB|awk '$2 == "/usr.MC68020" && $3 == "4.2" { print $1 }' > /tmp/user
+	TMP=`cat /tmp/user`
+	if [ "$TMP" = "" ]; then
+                cat /tmp/FSTAB|awk '$2 == "/usr" && $3 == "4.2" { print $1 }' > /tmp/user
+		TMP=`cat /tmp/user`
+		if [ "$TMP" = "" ]; then
+                        echo "${CMDNAME}: can't find /usr.${ARCHTYPE} in fstab !"
+                        exit 1
+                fi
+	fi
+fi
+USER=`expr ${TMP} : '/dev/\([a-z][a-z][0-9][a-z]\)' '|' ${TMP}`
+rm -f /tmp/user 2>/dev/null
+
+if [ "$MACHINE" = "server" -a "$SERVERTYPE" = "heter" ]; then
+	if [ "$ARCHTYPE" = "MC68010" ]; then
+		cat /tmp/FSTAB|awk '$2 == "/usr.MC68020" && $3 == "4.2" { print $1 }' > /tmp/otheruser
+		TMP=`cat /tmp/otheruser`
+		if [ "$TMP" = "" ]; then
+                        echo "${CMDNAME}: can't find /usr.MC68020 in fstab !"
+                        exit 1
+                fi
+		cat /tmp/FSTAB|awk '$2 == "/pub.MC68020" && $3 == "4.2" { print $1 }' > /tmp/otherpub
+		TMP=`cat /tmp/otherpub`
+		if [ "$TMP" = "" ]; then 
+                        echo "${CMDNAME}: can't find /pub.MC68020 in fstab !"
+                        exit 1 
+                fi
+       	elif [ "$ARCHTYPE" = "MC68020" ]; then    
+		cat /tmp/FSTAB|awk '$2 == "/usr.MC68010" && $3 == "4.2" { print $1 }' > /tmp/otheruser
+		TMP=`cat /tmp/otheruser`
+		if [ "$TMP" = "" ]; then
+                        echo "${CMDNAME}: can't find /usr.MC68010 in fstab !"
+                        exit 1
+                fi
+                cat /tmp/FSTAB|awk '$2 == "/pub.MC68010" && $3 == "4.2" { print $1 }' > /tmp/otherpub
+		TMP=`cat /tmp/otherpub` 
+                if [ "$TMP" = "" ]; then  
+                        echo "${CMDNAME}: can't find /pub.MC68010 in fstab !" 
+                        exit 1  
+                fi
+       	fi
+	TMP=`cat /tmp/otheruser`
+	OTHERUSER=`expr ${TMP} : '/dev/\([a-z][a-z][0-9][a-z]\)' '|' ${TMP}`
+	TMP=`cat /tmp/otherpub`
+       	OTHERPUB=`expr ${TMP} : '/dev/\([a-z][a-z][0-9][a-z]\)' '|' ${TMP}`
+       	rm -f /tmp/otheruser /tmp/otherpub 2>/dev/null
+	ROOTPART=`cat /tmp/FSTAB|awk '$2 == "/" && $3 == "4.2" { print $1 }' `
+	ROOTDEV=`expr ${ROOTPART} : '/dev/\([a-z][a-z]\)[0-9][a-z]' '|' ${ROOTPART}`
+	PUBPART=`cat /tmp/FSTAB|awk '$2 == "/pub.MC68020" && $3 == "4.2" { print $1 }' `
+elif [ "$MACHINE" = "server" -a "$SERVERTYPE" = "homo" ]; then
+	if [ "$ARCHTYPE" = "MC68020" ]; then
+		ROOTPART=`cat /tmp/FSTAB|awk '$2 == "/" && $3 == "4.2" { print $1 }' `
+		ROOTDEV=`expr ${ROOTPART} : '/dev/\([a-z][a-z]\)[0-9][a-z]' '|' ${ROOTPART}`
+		PUBPART=`cat /tmp/FSTAB|awk '$2 == "/pub.MC68020" && $3 == "4.2" { print $1 }' `
+	elif [ "$ARCHTYPE" = "MC68010" ]; then
+		ROOTPART=`cat /tmp/FSTAB|awk '$2 == "/" && $3 == "4.2" { print $1 }' `
+		ROOTDEV=`expr ${ROOTPART} : '/dev/\([a-z][a-z]\)[0-9][a-z]' '|' ${ROOTPART}`
+	fi
+fi
+rm -f /tmp/FSTAB
+#
+# Make devices
+#
+cd /dev
+USER_DISK=`expr ${USER} : '\([a-z][a-z][0-9]\)[a-z]'`
+/dev/MAKEDEV ${USER_DISK} 2> /dev/null
+if [ "$MACHINE" = "server" -a "$SERVERTYPE" = "heter" ]; then 
+	OTHERUSER_DISK=`expr ${OTHERUSER} : '\([a-z][a-z][0-9]\)[a-z]'`
+	/dev/MAKEDEV ${OTHERUSER_DISK} 2> /dev/null
+       	OTHERPUB_DISK=`expr ${OTHERPUB} : '\([a-z][a-z][0-9]\)[a-z]'`
+        /dev/MAKEDEV ${OTHERPUB_DISK} 2> /dev/null
+fi
+#
+# Check and mount file systems
+#
+echo
+fsck -p /dev/r${USER}
+if mount /dev/${USER} /usr
+then
+	:
+else
+	echo "${CMDNAME}: can't mount /dev/${USER}, get help!"
+	exit 1
+fi
+if [ "$MACHINE" = "server" -a "$SERVERTYPE" = "heter" ]; then
+	fsck -p /dev/r${OTHERUSER}
+	if mount /dev/${OTHERUSER} /usr.${OTHERARCH}
+	then
+       		:
+	else   
+       		echo "${CMDNAME}: can't mount /dev/${OTHERUSER}, get help!"
+       		exit 1
+	fi
+       	fsck -p /dev/r${OTHERPUB}
+    	if mount /dev/${OTHERPUB} /pub.${OTHERARCH}
+       	then
+       		:
+       	else
+       		echo "${CMDNAME}: can't mount /dev/${OTHERPUB}, get help!"
+       		exit 1
+	fi
+fi
+#
+# Determine current release
+#
+set `grep "UNIX" /etc/motd` >/dev/null
+RELEASE=$5
+TMP_REL=`expr $RELEASE : '\(3.[2-4]\).*' '|' $RELEASE`
+if [ "$TMP_REL" != "3.2" -a "$TMP_REL" != "3.3" -a "$TMP_REL" != "3.4" ]; then
+	RELEASE=`cat /usr/sys/conf/RELEASE`
+	TMP_REL=`expr $RELEASE : '\(3.[2-4]\).*' '|' $RELEASE`
+fi
+if [ "$TMP_REL" != "3.2" -a "$TMP_REL" != "3.3" -a "$TMP_REL" != "3.4" ]; then
+	echo "${CMDNAME}: \"${RELEASE}\" is not supported on \"${CURRENTRELEASE}\" upgrade."
+	echo "${CMDNAME}: upgrade procedure terminates."
+	exit 1
+fi
+#
+# Preliminary work before upgrade starts
+#
+HOST=`awk -F= '/hostname=/ { print $2 }' < /etc/rc.boot`
+
+if [ -f /etc/hosts ]; then
+	:
+else
+	echo "${CMDNAME}: can't find /etc/hosts !"
+	exit 1
+fi
+
+if [ "$DRIVE" = "remote" ]; then
+	set `grep "domainname" /etc/rc.local`
+	DOMAIN=$2
+	if [ "$DOMAIN" = "noname" ]; then
+		grep $TAPEHOST /etc/hosts > /dev/null 2>&1
+	else
+		/bin/domainname ${DOMAIN}
+		/etc/portmap
+		/etc/ypbind
+		ypmatch $TAPEHOST hosts > /dev/null 2>&1
+	fi
+	if [ "$?" != 0 ]; then
+		echo "${CMDNAME}: can't reach tapehost \"${TAPEHOST}\" !!"
+		exit 1
+	fi
+	/etc/ifconfig ${ETHER}0 ${HOST} -trailers up
+fi
+
+if [ "$MACHINE" = "server" ]; then
+        if [ -f /etc/ethers ]; then
+		:
+	else 
+        	echo "${CMDNAME}: can't find /etc/ethers !"
+        	exit 1
+        fi
+	#
+        # Create CLIENTLIST from /etc/nd.local
+        # Looks ugly but handles all possible cases
+        # nd.local format
+        #   user hostname hisunit mydev myoff mysize mylunit maxpkts
+        #
+        endsym=$
+        ind=0
+	CLIENTLIST=""
+        while true; do
+		grep " $ind $endsym" $NDLOCAL > /dev/null 2>&1
+                case "$?" in
+                   0)
+                      set `grep " $ind $endsym" $NDLOCAL` ;;
+                   1)
+                      grep " $ind    $endsym" $NDLOCAL > /dev/null 2>&1
+                      case "$?" in
+                         0)
+                            set `grep " $ind $endsym" $NDLOCAL` ;;
+                         1)
+                            grep " $ind$endsym" $NDLOCAL > /dev/null 2>&1
+                            case "$?" in
+                               0)
+                                  set `grep " $ind$endsym" $NDLOCAL` ;;
+                               1)
+                                  grep " $ind [0-9]$endsym" $NDLOCAL > /dev/null 2>&1
+                                  case "$?" in
+                                     0)
+                                        set `grep " $ind [0-9]$endsym" $NDLOCAL` ;;
+                                     1)
+		   			grep " $ind  [0-9]$endsym" $NDLOCAL > /dev/null 2>&1
+                                        case "$?" in
+                                           0)
+                                              set `grep " $ind       [0-9]$endsym" $NDLOCAL` ;;
+                                           1)
+                                              break ;;
+                                        esac ;;
+                                  esac ;;
+                            esac ;;
+                      esac ;;
+                esac
+                CLIENT=$2
+                case "$1" in
+                     "#user" )
+                             ;;
+                     "user"  )
+                             CLIENTLIST="${CLIENTLIST} ${CLIENT}" ;;
+                     * )
+                             ;;
+                esac
+                ind=`expr ${ind} + 1`
+        done
+	for CLIENT in $CLIENTLIST
+        do
+                set `grep "user $CLIENT 0" $NDLOCAL | sed s,\/," ",g`
+                ndl=ndl${8}
+                cd /dev
+                /dev/MAKEDEV ${ndl} 2> /dev/null
+        done
+	/etc/nd < $NDLOCAL > /dev/null 2>&1
+	if [ "$SERVERTYPE" = "homo" ]; then
+		if [ "$ARCHTYPE" = "MC68010" ]; then
+                        CLIENTLIST10=${CLIENTLIST}
+                elif [ "$ARCHTYPE" = "MC68020" ]; then
+                        CLIENTLIST20=${CLIENTLIST}
+                fi
+	elif [ "$SERVERTYPE" = "heter" ]; then
+		for HOSTNAME in ${CLIENTLIST}; do
+                        set `grep "user $HOSTNAME 0" $NDLOCAL | sed s,\/," ",g`
+                        DISK=ndl${8}
+                        mkdir /${HOSTNAME}
+                        if mount /dev/${DISK} /${HOSTNAME}; then
+                                cd /${HOSTNAME}
+				grep "^$HOST" /${HOSTNAME}/etc/fstab > /tmp/CLIENTFSTAB
+				
+				cat /tmp/CLIENTFSTAB|awk '$2 == "/usr" && $3 == "nfs" { print $1 }' > /tmp/userfilesystem
+        			TMP=`cat /tmp/userfilesystem`
+				user_file_system=`expr $TMP : '.*:/\(usr.*\)' '|' $TMP`
+				rm -f /tmp/userfilesystem
+				case "$user_file_system" in
+					"usr.MC68010" | "usr.MC68020" )
+						TYPE=`expr $user_file_system : 'usr.\(.*\)' '|' $user_file_system`
+						if [ "$TYPE" = "MC68010" ]; then
+							CLIENTLIST10="${CLIENTLIST10} ${HOSTNAME}"
+						elif [ "$TYPE" = "MC68020" ]; then
+                                        		CLIENTLIST20="${CLIENTLIST20} ${HOSTNAME}"
+						fi ;;
+					"usr" )
+						if [ "$ARCHTYPE" = "MC68010" ]; then
+							CLIENTLIST10="${CLIENTLIST10} ${HOSTNAME}"
+                                                elif [ "$ARCHTYPE" = "MC68020" ]; then
+                                                        CLIENTLIST20="${CLIENTLIST20} ${HOSTNAME}"
+                                                fi ;;
+				esac
+                                /bin/sync; cd /
+                                umount /dev/${DISK} 2>&1
+                        else
+                                echo "${CMDNAME}: can't reach client \"${HOSTNAME}\" disk partition /dev/${DISK}."
+                                rm -rf /${HOSTNAME}  > /dev/null 2>&1
+                                echo "${CMDNAME}: upgrade procedure aborting."
+                                exit 1
+        
+                        fi
+			rm -f /tmp/CLIENTFSTAB
+                        rm -rf /${HOSTNAME} > /dev/null 2>&1
+		done
+	fi
+fi
+#
+# Prompt user attention last time before starting to upgrade
+#
+while true; do
+        echo;echo -n "Are you ready to start the upgrade ? [y/n] :"
+        read READY;
+        case "${READY}" in
+                y | yes )
+                        break ;;
+                n | no )
+                        echo;echo "Upgrade procedure terminates."
+                        exit 1 ;;
+                * )
+                        echo;echo "Please answer only yes or no."
+        esac
+done
+
+#
+# Upgrade starts
+#
+if [ "$MACHINE" = "server" -a "$SERVERTYPE" = "heter" ]; then
+	ARCHLIST="${ARCHTYPE} ${OTHERARCH}"
+else
+	ARCHLIST="${ARCHTYPE}"
+fi	
+
+for CURRENTARCH in ${ARCHLIST}; do
+    while true; do
+	echo;echo -n "Do you want to install the new make(Sunpro)? [y/n] :"
+	read NEW_MAKE;
+	case "${NEW_MAKE}" in
+		y | yes | n | no )
+			break ;;
+		* )
+                        echo;echo "Please answer only yes or no."
+        esac
+    done
+ 
+    while true; do
+        echo;echo -n "Do you want to install the new window profiled libraries? [y/n] :"
+        read NEW_WIN_PROF;
+        case "${NEW_WIN_PROF}" in
+                y | yes | n | no )
+                        break ;; 
+                * )
+                        echo;echo "Please answer only yes or no."
+        esac
+    done
+
+	echo
+	echo "Beginning ${RELEASE} to ${CURRENTRELEASE} upgrade for the ${CURRENTARCH} architecture."
+	if [ "$CURRENTARCH" = "$ARCHTYPE" ]; then 
+        	#
+        	# extract root files from release tape
+        	#
+        	echo
+        	echo "Changing directory to \"/\". "
+        	cd /
+		#
+		# check the inserted tape for machine type and tape #
+		#
+		verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+		extracting /dev/nr${TAPE}0 3 ${BS} "root" ${TAPEHOST}
+                if [ "$MACHINE" = "server" ]; then
+                        echo
+                        echo "Changing directory to \"/pub\"."
+                        cd /pub
+                fi
+	elif [ "$CURRENTARCH" = "$OTHERARCH" ]; then
+                if [ "$MACHINE" = "server" ]; then
+                        echo
+                        echo "Changing directory to \"/pub.${OTHERARCH}\"."
+                        cd /pub.${OTHERARCH}
+                fi
+	fi
+        #
+        # extract pub from release tape
+        #
+        verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+        extracting /dev/nr${TAPE}0 4 ${BS} "pub" ${TAPEHOST}
+	
+
+	if [ "$MACHINE" = "server" ]; then
+                if [ "$CURRENTARCH" = "$ARCHTYPE" ]; then
+		#
+		# must copy vmunix,diag and boot from "pub" back to root,
+		# so the server can use it.
+		#
+			cp ./boot /boot
+			cp vmunix /vmunix
+			cp stand/* /stand
+			chmod 755 /vmunix /stand/*
+		fi
+	fi
+	#
+	# Upgrade client partitions
+	#
+        # extract client files from the release tape
+	#
+	if [ "$MACHINE" = "server" ]; then
+		echo
+		echo "Beginning ${RELEASE} to ${CURRENTRELEASE} upgrade on ${CURRENTARCH} diskless clients."
+		CLIENTLIST=""
+		if [ "$CURRENTARCH" = "MC68010" ]; then
+			CLIENTLIST=${CLIENTLIST10}
+		elif [ "$CURRENTARCH" = "MC68020" ]; then 
+                	CLIENTLIST=${CLIENTLIST20}
+		fi
+        	for HOSTNAME in ${CLIENTLIST}; do
+			set `grep "user $HOSTNAME 0" $NDLOCAL | sed s,\/," ",g`
+                	DISK=ndl${8}
+        		mkdir /${HOSTNAME}
+                	if mount /dev/${DISK} /${HOSTNAME}; then
+	
+				cd /${HOSTNAME}
+                        	echo
+                        	echo "Beginning ${RELEASE} to ${CURRENTRELEASE} upgrade on client ${HOSTNAME}."
+				verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+		                extracting /dev/nr${TAPE}0 5 ${BS} "client" ${TAPEHOST}
+				/bin/sync; cd /
+	
+                        	umount /dev/${DISK} 2>&1
+	
+                        	echo
+                        	echo "Completed ${RELEASE} to ${CURRENTRELEASE} upgrade on client ${HOSTNAME}."
+	
+                	else
+	
+                        	echo "${CMDNAME}: can't mount client \"${HOSTNAME}\" disk partition /dev/${DISK}."
+				rm -rf /${HOSTNAME}  > /dev/null 2>&1
+                        	echo "${CMDNAME}: upgrade procedure aborting."
+                        	exit 1
+	
+                	fi
+			rm -rf /${HOSTNAME} > /dev/null 2>&1
+		done
+	fi
+	#
+	# extract usr and sys software from release tape 
+	#
+	if [ "$CURRENTARCH" = "$ARCHTYPE" ]; then
+                echo
+                echo "Changing directory to \"/usr\"."
+                cd /usr
+        elif [ "$CURRENTARCH" = "$OTHERARCH" ]; then
+                echo
+                echo "Changing directory to \"/usr.${OTHERARCH}\"."
+                cd /usr.${OTHERARCH}
+        fi
+	#
+        # Because ar/st/mt do not always skip right number of files,
+        # we have to rewind to be safe.
+        #
+	verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+	extracting /dev/nr${TAPE}0 6 ${BS} "usr" ${TAPEHOST}
+
+	verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST} 
+        extracting /dev/nr${TAPE}0 7 ${BS} "sys" ${TAPEHOST}
+	#
+	# extract optional software from release tape:
+	# 	networking, debugging, sunview_users, sunview_prog,
+	# 	sunview_src, text, fortran, pascal,graphics,
+	# 	profiled, sysV, man, demo, games, sunpro
+	#
+	if [ "$MACHINE" = "standalone" ]; then
+		if [ -f /usr/etc/ping -o -f /usr/etc/rarpd ]; then
+			verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+			extracting /dev/nr${TAPE}0 8 ${BS} "Networking" ${TAPEHOST}
+		fi
+		if [ -f /usr/bin/dbxtool -o -f /usr/ucb/dbx ]; then
+			verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 9 ${BS} "Debugging" ${TAPEHOST}
+		fi
+		if [ -f /usr/bin/cmdtool -o -f /usr/bin/shelltool ]; then
+			verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+			extracting /dev/nr${TAPE}0 10 ${BS} "SunView_user" ${TAPEHOST}
+		fi
+		if [ -f /usr/include/images/terminal.icon ]; then
+			verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 11 ${BS} "SunView_prog" ${TAPEHOST}
+		fi
+		if [ -f /usr/src/sun/suntool/cmdtool.c ]; then
+			verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST} 
+                        extracting /dev/nr${TAPE}0 12 ${BS} "SunView_src" ${TAPEHOST}
+		fi
+		if [ -f /usr/bin/tbl -o -f /usr/lib/vgrindefs ]; then
+                	verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+	                extracting /dev/nr${TAPE}0 13 ${BS} "Text_processing" ${TAPEHOST}
+        	fi
+		if [ -f /usr/bin/f77 ]; then
+			verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 14 ${BS} "Fortran" ${TAPEHOST}
+                fi
+        	if [ -f /usr/lib/pc0 ]; then
+                	verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+	                extracting /dev/nr${TAPE}0 15 ${BS} "Pascal" ${TAPEHOST}
+        	fi
+		if [ -f /usr/lib/libcgi.a -o -f /usr/lib/libcore.a ]; then
+			verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 16 ${BS} "Graphics" ${TAPEHOST}
+		fi
+        	if [ -f /usr/lib/libpc_p.a -o -f /usr/lib/libcurses_p.a ]; then
+                	verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+	                extracting /dev/nr${TAPE}0 17 ${BS} "Profiled" ${TAPEHOST}
+        	fi
+		#
+		# two tapes per set for quarter inch tape
+		#
+	        if [ "$TAPE" = "st" -o "$TAPE" = "ar" ]; then
+		   if [ -f /usr/5lib/libcurses.a ]; then
+			verify_tapevol_arch ${CURRENTARCH} 2 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 2 ${BS} "sysV" ${TAPEHOST}
+                   fi
+		   if [ -f /usr/demo/SRC/maze.c ]; then
+			verify_tapevol_arch ${CURRENTARCH} 2 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 3 ${BS} "Demo" ${TAPEHOST}
+                   fi
+        	   if [ -f /usr/man/man8/ifconfig.8c ]; then
+                	verify_tapevol_arch ${CURRENTARCH} 2 /dev/nr${TAPE}0 ${TAPEHOST}
+	                extracting /dev/nr${TAPE}0 4 ${BS} "man" ${TAPEHOST}
+        	   fi
+		   if [ -f /usr/games/chesstool ]; then
+			verify_tapevol_arch ${CURRENTARCH} 2 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 5 ${BS} "Games" ${TAPEHOST}
+                   fi
+		   if [ "${NEW_MAKE}" = "y" -o "${NEW_MAKE}" = "yes" ]; then
+			mkdir sunpro
+			verify_tapevol_arch ${CURRENTARCH} 2 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 6 ${BS} "Sunpro" ${TAPEHOST}
+		   fi
+
+		   if [ "${NEW_WIN_PROF}" = "y" -o "${NEW_WIN_PROF}" = "yes" ]; then
+                        verify_tapevol_arch ${CURRENTARCH} 2 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 7 ${BS} "Window_profiled" ${TAPEHOST}
+                   fi
+		#
+		# one tape per set for half inch tape
+		#
+		elif [ "$TAPE" = "mt" ]; then
+		   if [ -f /usr/5lib/libcurses.a ]; then
+			verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 18 ${BS} "sysV" ${TAPEHOST}
+                   fi
+		   if [ -f /usr/demo/SRC/maze.c ]; then
+			verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 19 ${BS} "Demo" ${TAPEHOST}
+                   fi
+        	   if [ -f /usr/man/man8/ifconfig.8c ]; then
+                	verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+	                extracting /dev/nr${TAPE}0 20 ${BS} "man" ${TAPEHOST}
+        	   fi
+		   if [ -f /usr/games/chesstool ]; then
+			verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 21 ${BS} "Games" ${TAPEHOST}
+                   fi
+		   if [ "${NEW_MAKE}" = "y" -o "${NEW_MAKE}" = "yes" ]; then
+			mkdir sunpro
+			verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 22 ${BS} "Sunpro" ${TAPEHOST}
+		   fi
+
+		   if [ "${NEW_WIN_PROF}" = "y" -o "${NEW_WIN_PROF}" = "yes" ]; then
+                        verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 23 ${BS} "Window_profiled" ${TAPEHOST}
+                   fi
+		fi
+	elif [ "$MACHINE" = "server" ]; then
+		if [ -f /usr.${CURRENTARCH}/etc/ping -o -f /usr.${CURRENTARCH}/etc/rarpd ]; then
+			verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+        		extracting /dev/nr${TAPE}0 8 ${BS} "Networking" ${TAPEHOST}
+		fi
+		if [ -f /usr.${CURRENTARCH}/bin/dbxtool -o -f /usr.${CURRENTARCH}/ucb/dbx ]; then
+                	verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                	extracting /dev/nr${TAPE}0 9 ${BS} "Debugging" ${TAPEHOST}
+        	fi
+		if [ -f /usr.${CURRENTARCH}/bin/cmdtool -o -f /usr.${CURRENTARCH}/bin/shelltool ]; then
+                        verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 10 ${BS} "SunView_user" ${TAPEHOST}
+		fi
+		if [ -f /usr.${CURRENTARCH}/include/images/terminal.icon ]; then
+                        verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+			extracting /dev/nr${TAPE}0 11 ${BS} "SunView_prog" ${TAPEHOST}
+		fi
+		if [ -f /usr.${CURRENTARCH}/src/sun/suntool/cmdtool.c ]; then
+                        verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST} 
+                        extracting /dev/nr${TAPE}0 12 ${BS} "SunView_src" ${TAPEHOST}
+		fi
+		if [ -f /usr.${CURRENTARCH}/bin/tbl -o -f /usr.${CURRENTARCH}/lib/vgrindefs ]; then
+                	verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                	extracting /dev/nr${TAPE}0 13 ${BS} "Text_processing" ${TAPEHOST}
+        	fi
+		if [ -f /usr.${CURRENTARCH}/bin/f77 ]; then
+			verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 14 ${BS} "Fortran" ${TAPEHOST}
+		fi
+		if [ -f /usr.${CURRENTARCH}/lib/pc0 ]; then
+			 verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 15 ${BS} "Pascal" ${TAPEHOST}
+                fi
+		if [ -f /usr.${CURRENTARCH}/lib/libcgi.a -o -f /usr.${CURRENTARCH}/lib/libcore.a ]; then
+                	verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                	extracting /dev/nr${TAPE}0 16 ${BS} "Graphics" ${TAPEHOST}
+        	fi
+		if [ -f /usr.${CURRENTARCH}/lib/libpc_p.a -o -f /usr.${CURRENTARCH}/lib/libcurses_p.a ]; then
+                        verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 17 ${BS} "Profiled" ${TAPEHOST}
+                fi
+                #
+                # two tapes per set for quarter inch tape
+                #
+		if [ "$TAPE" = "st" -o "$TAPE" = "ar" ]; then
+		   if [ -f /usr.${CURRENTARCH}/5lib/libcurses.a ]; then
+                        verify_tapevol_arch ${CURRENTARCH} 2 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 2 ${BS} "sysV" ${TAPEHOST}
+		   fi
+		   if [ -f /usr.${CURRENTARCH}/demo/SRC/maze.c ]; then
+                        verify_tapevol_arch ${CURRENTARCH} 2 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 3 ${BS} "Demo" ${TAPEHOST}
+		   fi
+		   if [ -f /usr.${CURRENTARCH}/man/man8/ifconfig.8c ]; then
+                	verify_tapevol_arch ${CURRENTARCH} 2 /dev/nr${TAPE}0 ${TAPEHOST}
+                	extracting /dev/nr${TAPE}0 4 ${BS} "man" ${TAPEHOST}
+        	   fi
+		   if [ -f /usr.${CURRENTARCH}/games/chesstool ]; then
+                        verify_tapevol_arch ${CURRENTARCH} 2 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 5 ${BS} "Games" ${TAPEHOST}
+		   fi
+		   if [ "${NEW_MAKE}" = "y" -o "${NEW_MAKE}" = "yes" ]; then 
+			mkdir sunpro
+                        verify_tapevol_arch ${CURRENTARCH} 2 /dev/nr${TAPE}0 ${TAPEHOST} 
+                        extracting /dev/nr${TAPE}0 6 ${BS} "Sunpro" ${TAPEHOST}
+		   fi
+		   if [ "${NEW_WIN_PROF}" = "y" -o "${NEW_WIN_PROF}" = "yes" ]; then
+                        verify_tapevol_arch ${CURRENTARCH} 2 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 7 ${BS} "Window_profiled" ${TAPEHOST}
+                   fi
+		#
+                # one tape per set for half inch tape
+                #
+                elif [ "$TAPE" = "mt" ]; then
+		   if [ -f /usr.${CURRENTARCH}/5lib/libcurses.a ]; then
+                        verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 18 ${BS} "sysV" ${TAPEHOST}
+		   fi
+		   if [ -f /usr.${CURRENTARCH}/demo/SRC/maze.c ]; then
+                        verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 19 ${BS} "Demo" ${TAPEHOST}
+		   fi
+		   if [ -f /usr.${CURRENTARCH}/man/man8/ifconfig.8c ]; then
+                	verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                	extracting /dev/nr${TAPE}0 20 ${BS} "man" ${TAPEHOST}
+        	   fi
+		   if [ -f /usr.${CURRENTARCH}/games/chesstool ]; then
+                        verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 21 ${BS} "Games" ${TAPEHOST}
+		   fi
+		   if [ "${NEW_MAKE}" = "y" -o "${NEW_MAKE}" = "yes" ]; then 
+			mkdir sunpro
+                        verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST} 
+                        extracting /dev/nr${TAPE}0 22 ${BS} "Sunpro" ${TAPEHOST}
+		   fi
+		   if [ "${NEW_WIN_PROF}" = "y" -o "${NEW_WIN_PROF}" = "yes" ]; then
+                        verify_tapevol_arch ${CURRENTARCH} 1 /dev/nr${TAPE}0 ${TAPEHOST}
+                        extracting /dev/nr${TAPE}0 23 ${BS} "Window_profiled" ${TAPEHOST}
+                   fi
+	       fi
+	fi
+done
+/bin/sync;/bin/sync
+#
+# Installing the new boot block
+#
+echo; echo "Installing new root boot block ..."
+if [ "$MACHINE" = "standalone" ]; then
+	/usr/mdec/installboot /usr/mdec/boot${ROOTDEV} ${ROOTPART}
+elif [ "$MACHINE" = "server" -a "$SERVERTYPE" = "homo" ]; then
+	/usr/mdec/installboot /usr/mdec/boot${ROOTDEV} ${ROOTPART}
+	if [ "$ARCHTYPE" = "MC68020" ]; then
+		/usr/mdec/installboot /usr/mdec/bootpr ${PUBPART}
+	fi
+elif [ "$MACHINE" = "server" -a "$SERVERTYPE" = "heter" ]; then
+	/usr/mdec/installboot /usr/mdec/boot${ROOTDEV} ${ROOTPART} 
+        /usr/mdec/installboot /usr.MC68020/mdec/bootpr ${PUBPART}
+fi
+/bin/sync;/bin/sync
+${REMOTE} mt -f /dev/nr${TAPE}0 rew
+#
+# Unmount files systems
+#
+cd /
+umount /dev/${USER} 2>&1
+if [ "$MACHINE" = "server" -a "$SERVERTYPE" = "heter" ]; then
+       	umount /dev/${OTHERUSER} 2>&1
+       	umount /dev/${OTHERPUB} 2>&1
+fi
+#
+# Check file systems
+#
+echo 
+fsck -p /dev/r${USER}
+if [ "$MACHINE" = "server" -a "$SERVERTYPE" = "heter" ]; then
+       	fsck -p /dev/r${OTHERUSER}
+       	fsck -p /dev/r${OTHERPUB}
+fi
+echo
+echo "${RELEASE} to ${CURRENTRELEASE} upgrade completed."
+echo "Reboot your system and configure a kernel for your system."
+rm -f /etc/extracting /etc/verify_tapevol_arch /etc/3.4UPGRADE
+sync;sync
+exit 0

@@ -1,0 +1,794 @@
+#! /bin/sh
+#	MAKEDEV	1.6	86/05/04
+#
+# Device "make" file.  Valid arguments:
+#	std	standard devices
+#	local	configuration specific devices
+# Tapes:
+#	tm*	Tapemaster 1/2" tape
+#	ar*	Archive 1/4" tape
+#	st*	SCSI (Archive) 1/4" tape
+#	xt*	Xylogics 472 1/2" tape
+# Disks:
+#	ip*	Interphase 2180
+#	xy*	Xylogics 450 & 451
+#	ndp*	Public Network Disk
+#	ndl*	Logical Network Disk
+#	nd*	Network Disk
+#	sd*	SCSI Disk
+#	sf*	SCSI Floppy Disk
+# Terminal multiplexors:
+#	ttys	First SCSI board UARTS ttys0-ttys3
+#	ttyt	Second SCSI board UARTS ttyt0-ttyt3
+#	oct*	Central Data Octal card
+#	mti*	Systech MTI-800A/1600A
+# Pseudo terminals:
+#	pty*	set of 16 master and slave pseudo terminals
+# Printers:
+#	vpc*	Versatec and Centronics (Systech VPC-2200)
+#	vp*	Versatec (Ikon interface)
+# Graphics/windows:
+#	cgone*	Sun 1 color graphics board
+#	cgtwo*	Sun 2 (high res) color graphics board
+#	cgfour*	Sun 3 color graphics frame buffer
+#	gpone*	Sun 2 graphics processor
+#	bwone*	Sun 1 black & white graphics board
+#	bwtwo*	Sun 2 black & white graphics board
+#	win*	(up to) 128 windows (32 default)
+# Misc:
+#	sky	Sky FPP board
+#	fpa	Sun FPA board
+#	ingres	Ingres lock driver
+#	des	des chip driver
+#	pc*	Sun ATI driver
+umask 77
+for i
+do
+case $i in
+
+std)
+        /etc/mknod console      c 0 0   ; chmod 622 console
+        /etc/mknod tty          c 2 0   ; chmod 666 tty
+        /etc/mknod mem          c 3 0   ; chmod 644 mem
+        /etc/mknod kmem         c 3 1   ; chmod 644 kmem
+        /etc/mknod null         c 3 2   ; chmod 666 null
+        /etc/mknod mbmem        c 3 3   ; chmod 600 mbmem	# Sun-2 only
+        /etc/mknod mbio         c 3 4   ; chmod 600 mbio	# Sun-2 only
+        /etc/mknod vme16d16     c 3 5   ; chmod 600 vme16d16
+        /etc/mknod vme24d16     c 3 6   ; chmod 600 vme24d16
+        /etc/mknod vme32d16     c 3 7   ; chmod 600 vme32d16	# Sun-3 only
+        /etc/mknod vme16d32     c 3 8   ; chmod 600 vme16d32	# Sun-3 only
+        /etc/mknod vme24d32     c 3 9   ; chmod 600 vme24d32	# Sun-3 only
+        /etc/mknod vme32d32     c 3 10  ; chmod 600 vme32d32	# Sun-3 only
+        /etc/mknod eeprom       c 3 11  ; chmod 644 eeprom	# Sun-3 only
+        /etc/mknod drum         c 7 0   ; chmod 644 drum
+        /etc/mknod ttya         c 12 0  ; chmod 666 ttya
+        /etc/mknod ttyb         c 12 1  ; chmod 666 ttyb
+        /etc/mknod mouse        c 13 0  ; chmod 666 mouse
+        /etc/mknod fb           c 22 0  ; chmod 666 fb
+        /etc/mknod ropc         c 23 0  ; chmod 666 ropc
+        /etc/mknod kbd          c 29 0  ; chmod 666 kbd
+        ln vme16d16 vme16
+        ln vme24d16 vme24
+        ln vme32d32 vme32					# Sun-3 only
+        ;;
+
+ar*)
+        umask 0 ; unit=`expr $i : '..\(.*\)'`
+        case $i in
+        ar*) chr=8 ;;
+        esac
+        case $unit in
+        0|1|2|3)
+		rew=`expr $unit '*' 4`
+		norew=`expr $rew + 16`
+                /etc/mknod rar$unit    c $chr $rew
+                /etc/mknod nrar$unit   c $chr $norew
+                umask 77
+                ;;
+        *)
+                echo "bad unit number in: $i; use ar0 thru ar3"
+                ;;
+        esac
+        ;;
+
+mti*)
+        unit=`expr $i : 'mti\(.*\)'`
+        case $unit in
+        [0-7]) ;; 
+        *) echo "bad unit for mti in: $i, use mti0 thru mti7" ;;
+        esac
+	eval `echo $unit | awk ' { unit = $1; u = 16 * $1 } END {
+	    for (i = 0; i < 16; i++)
+		printf("/etc/mknod tty%s%x c 10 %d; ",unit,i,u+i); }'`
+        ;;
+
+mt*|xt*)
+        umask 0 ; unit=`expr $i : '..\(.*\)'`
+        case $i in
+        mt*) blk=1; chr=5 ;;
+        xt*) blk=8; chr=30 ;;
+        esac
+        case $unit in
+        0|1|2|3|4|5|6|7)
+                four=`expr $unit + 4`
+		eight=`expr $unit + 8`
+                twelve=`expr $unit + 12`
+                /etc/mknod mt$unit     b $blk $unit
+                /etc/mknod mt$four     b $blk $four
+                /etc/mknod mt$eight    b $blk $eight
+                /etc/mknod mt$twelve   b $blk $twelve
+                /etc/mknod nmt$unit    b $blk $four;: sanity w/std pdp11 v7
+                /etc/mknod nmt$eight   b $blk $twelve ;: ditto
+                /etc/mknod rmt$unit     c $chr $unit
+                /etc/mknod rmt$four     c $chr $four
+                /etc/mknod rmt$eight    c $chr $eight
+                /etc/mknod rmt$twelve   c $chr $twelve
+                /etc/mknod nrmt$unit    c $chr $four;: sanity w/std pdp11 v7
+                /etc/mknod nrmt$eight   c $chr $twelve ;: ditto
+                umask 77
+                ;;
+        *)
+		dev=`expr $i : '\(..\).*'`
+                echo "bad unit for tape in: $i; use ${dev}0 thru ${dev}7"
+                ;;
+        esac
+        ;;
+
+st*)
+        umask 0 ; unit=`expr $i : '..\(.*\)'`
+        case $i in
+        st*) chr=18 ;;
+        esac
+        case $unit in
+        0|1|2|3)
+		rew=$unit
+		norew=`expr $rew + 4`
+		eight=`expr $rew + 8`
+                twelve=`expr $rew + 12`
+                /etc/mknod rst$unit    c $chr $rew
+		/etc/mknod rst$eight   c $chr $eight
+                /etc/mknod nrst$unit   c $chr $norew
+                /etc/mknod nrst$eight  c $chr $twelve
+                umask 77
+                ;;
+        *)
+                echo "bad unit number in: $i; use st0 thru st3"
+                ;;
+        esac
+        ;;
+
+ip*|xy*|sd*)
+        unit=`expr $i : '..\(.*\)'`
+        case $i in
+        ip*) name=ip; blk=0; chr=4;;
+        xy*) name=xy; blk=3; chr=9;;
+	sd*) name=sd; blk=7; chr=17;;
+        esac
+	/etc/mknod ${name}${unit}a      b $blk `expr $unit '*' 8 + 0`
+	/etc/mknod ${name}${unit}b      b $blk `expr $unit '*' 8 + 1`
+	/etc/mknod ${name}${unit}c      b $blk `expr $unit '*' 8 + 2`
+	/etc/mknod ${name}${unit}d      b $blk `expr $unit '*' 8 + 3`
+	/etc/mknod ${name}${unit}e      b $blk `expr $unit '*' 8 + 4`
+	/etc/mknod ${name}${unit}f      b $blk `expr $unit '*' 8 + 5`
+	/etc/mknod ${name}${unit}g      b $blk `expr $unit '*' 8 + 6`
+	/etc/mknod ${name}${unit}h      b $blk `expr $unit '*' 8 + 7`
+	/etc/mknod r${name}${unit}a     c $chr `expr $unit '*' 8 + 0`
+	/etc/mknod r${name}${unit}b     c $chr `expr $unit '*' 8 + 1`
+	/etc/mknod r${name}${unit}c     c $chr `expr $unit '*' 8 + 2`
+	/etc/mknod r${name}${unit}d     c $chr `expr $unit '*' 8 + 3`
+	/etc/mknod r${name}${unit}e     c $chr `expr $unit '*' 8 + 4`
+	/etc/mknod r${name}${unit}f     c $chr `expr $unit '*' 8 + 5`
+	/etc/mknod r${name}${unit}g     c $chr `expr $unit '*' 8 + 6`
+	/etc/mknod r${name}${unit}h     c $chr `expr $unit '*' 8 + 7`
+        ;;
+
+sf*)
+	unit=`expr $i : 'sf\(.*\)'`
+	/etc/mknod sf$unit	b 9 $unit
+	/etc/mknod rsf$unit	c 33 $unit
+	;;
+
+oct*)
+        unit=`expr $i : 'oct\(.*\)'`
+        case $unit in
+        0) ch=m ;; 
+	1) ch=n ;; 
+	2) ch=o ;;
+        *) echo "bad unit for oct in: $i, use oct0 thru oct2" ;;
+        esac
+        case $ch in
+        m|n|o)
+                eval `echo $ch $unit | awk ' { ch = $1; u = 8 * $2 } END {
+                    for (i = 0; i < 8; i++)
+                        printf("/etc/mknod tty%s%d c 1 %d; ",ch,i,u+i); }'`
+                ;;
+        esac
+        ;;
+
+ttys)
+	/etc/mknod ttys0 c 12 4
+	/etc/mknod ttys1 c 12 5
+	/etc/mknod ttys2 c 12 6
+	/etc/mknod ttys3 c 12 7
+	;;
+
+ttyt)
+	/etc/mknod ttyt0 c 12 8
+	/etc/mknod ttyt1 c 12 9
+	/etc/mknod ttyt2 c 12 10
+	/etc/mknod ttyt3 c 12 11
+	;;
+
+
+cgone|cgone0)
+	/etc/mknod cgone0 c 14 0	; chmod 666 cgone0
+	;;
+
+cgtwo|cgtwo0)
+	/etc/mknod cgtwo0 c 31 0	; chmod 666 cgtwo0
+	;;
+
+cgfour|cgfour0)
+	/etc/mknod cgfour0 c 39 0	; chmod 666 cgfour0
+	;;
+
+gpone|gpone0)
+	/etc/mknod gpone0a c 32 0	; chmod 666 gpone0a
+	/etc/mknod gpone0b c 32 1	; chmod 666 gpone0b
+	/etc/mknod gpone0c c 32 2	; chmod 666 gpone0c
+	/etc/mknod gpone0d c 32 3	; chmod 666 gpone0d
+	;;
+
+bwone|bwone0)
+	/etc/mknod bwone0 c 26 0	; chmod 666 bwone0
+	;;
+
+bwtwo*)
+	unit=`expr $i : 'bwtwo\(.*\)'`
+	case $unit in
+	0|1)
+		/etc/mknod bwtwo$unit c 27 $unit	; chmod 666 bwtwo$unit
+		;;
+	*)
+		echo "bad unit number in: $i; use bwtwo0 or bwtwo1"
+	esac
+	;;
+
+ingres|iilock|iidr)
+	/etc/mknod iilock c 16 0	; chmod 600 iilock
+	/etc/chown ingres iilock
+	;;
+
+vpc*)
+        unit=`expr $i : 'vpc\(.*\)'`
+	/etc/mknod vpc$unit c 28 `expr $unit \* 2`
+	/etc/mknod lp$unit c 28 `expr $unit \* 2 + 1`
+	chmod 666 vpc$unit lp$unit
+	;;
+
+vp*)
+        unit=`expr $i : 'vp\(.*\)'`
+	/etc/mknod vp$unit c 6 $unit
+	;;
+
+ndp*)
+	blk=5
+	chr=19
+	pbase=64
+        unit=`expr $i : 'ndp\(.*\)'`
+	case $unit in
+	0|1)
+		/etc/mknod  ndp$unit b $blk `expr $pbase + $unit`
+		/etc/mknod rndp$unit c $chr `expr $pbase + $unit`
+		chmod 400 ndp$unit rndp$unit
+		;;
+	*)
+		echo "bad unit number in: $i; use ndp0 thru ndp1"
+		;;
+	esac
+	;;
+
+ndl*)
+	blk=5
+	chr=19
+	lbase=128
+        unit=`expr $i : 'ndl\(.*\)'`
+	if [ $unit -ge 20 -o $unit -lt 0 ]; then
+                echo "bad unit number in: $i; use ndl0 thru ndl19"
+	else
+		/etc/mknod  ndl$unit b $blk `expr $unit + $lbase`
+		/etc/mknod rndl$unit c $chr `expr $unit + $lbase`
+		chmod 600 ndl$unit rndl$unit
+	fi
+	;;
+
+nd*)
+	blk=5
+	chr=19
+	lbase=128
+        unit=`expr $i : 'nd\(.*\)'`
+	case $unit in
+	0|1|2)
+		/etc/mknod  nd$unit b $blk $unit
+		/etc/mknod rnd$unit c $chr $unit
+		chmod 600 nd$unit rnd$unit
+		;;
+	*)
+		echo "bad unit number in: $i; use nd0 thru nd2"
+		;;
+	esac
+	;;
+
+pty*)
+        class=`expr $i : 'pty\(.*\)'`
+        case $class in
+        0) offset=0 name=p;;
+        1) offset=16 name=q;;
+        2) offset=32 name=r;;
+        *) echo "bad unit for pty in: $i; use pty0 thru pty2";;
+        esac
+        case $class in
+        0|1|2)
+                umask 0
+                eval `echo $offset $name | awk ' { b=$1; n=$2 } END {
+                        for (i = 0; i < 16; i++)
+                                printf("/etc/mknod tty%s%x c 20 %d; \
+                                        /etc/mknod pty%s%x c 21 %d; ", \
+                                        n, i, b+i, n, i, b+i); }'`
+                umask 77
+                ;;
+        esac
+        ;;
+
+win*)
+        class=`expr $i : 'win\(.*\)'`
+        case $class in
+        0) offset=0 ;;
+        1) offset=32 ;;
+        2) offset=64 ;;
+        3) offset=96 ;;
+        *) echo "bad unit for win in: $i; use win0 thru win3";;
+        esac
+        case $class in
+        0|1|2|3)
+                eval `echo $offset | awk ' { b=$1 } END {
+                        for (i = b; i < (b + 32); i++)
+                                printf("/etc/mknod win%d c 15 %d;", i, i); \
+                }'`
+                chmod 666 win*
+        esac
+        ;;
+
+sky)
+	/etc/mknod sky c 24 0		; chmod 666 sky
+	;;
+
+fpa)
+	/etc/mknod fpa c 34 32		; chmod 666 fpa
+	;;
+
+des)
+	/etc/mknod des c 11 0		; chmod 666 des
+	;;
+
+pc*)
+	unit=`expr $i : 'pc\(.*\)'`
+	case $unit in
+	0|1|2|3|4|5|6|7)
+		/etc/mknod pc$unit c 38 $unit
+		chmod 666 pc$unit
+		;;
+	*)
+		echo "bad unit number in: $i; use pc0 thru pc7"
+		;;
+	esac
+	;;
+
+
+local)
+	sh MAKEDEV.local
+	;;
+
+*)
+	echo "I don't know how to MAKEDEV $i."
+	;;
+esac
+done
+#! /bin/sh
+#	MAKEDEV	1.6	86/05/04
+#
+# Device "make" file.  Valid arguments:
+#	std	standard devices
+#	local	configuration specific devices
+# Tapes:
+#	tm*	Tapemaster 1/2" tape
+#	ar*	Archive 1/4" tape
+#	st*	SCSI (Archive) 1/4" tape
+#	xt*	Xylogics 472 1/2" tape
+# Disks:
+#	ip*	Interphase 2180
+#	xy*	Xylogics 450 & 451
+#	ndp*	Public Network Disk
+#	ndl*	Logical Network Disk
+#	nd*	Network Disk
+#	sd*	SCSI Disk
+#	sf*	SCSI Floppy Disk
+# Terminal multiplexors:
+#	ttys	First SCSI board UARTS ttys0-ttys3
+#	ttyt	Second SCSI board UARTS ttyt0-ttyt3
+#	oct*	Central Data Octal card
+#	mti*	Systech MTI-800A/1600A
+# Pseudo terminals:
+#	pty*	set of 16 master and slave pseudo terminals
+# Printers:
+#	vpc*	Versatec and Centronics (Systech VPC-2200)
+#	vp*	Versatec (Ikon interface)
+# Graphics/windows:
+#	cgone*	Sun 1 color graphics board
+#	cgtwo*	Sun 2 (high res) color graphics board
+#	cgfour*	Sun 3 color graphics frame buffer
+#	gpone*	Sun 2 graphics processor
+#	bwone*	Sun 1 black & white graphics board
+#	bwtwo*	Sun 2 black & white graphics board
+#	win*	(up to) 128 windows (32 default)
+# Misc:
+#	sky	Sky FPP board
+#	fpa	Sun FPA board
+#	ingres	Ingres lock driver
+#	des	des chip driver
+#	pc*	Sun ATI driver
+umask 77
+for i
+do
+case $i in
+
+std)
+        /etc/mknod console      c 0 0   ; chmod 622 console
+        /etc/mknod tty          c 2 0   ; chmod 666 tty
+        /etc/mknod mem          c 3 0   ; chmod 644 mem
+        /etc/mknod kmem         c 3 1   ; chmod 644 kmem
+        /etc/mknod null         c 3 2   ; chmod 666 null
+        /etc/mknod mbmem        c 3 3   ; chmod 600 mbmem	# Sun-2 only
+        /etc/mknod mbio         c 3 4   ; chmod 600 mbio	# Sun-2 only
+        /etc/mknod vme16d16     c 3 5   ; chmod 600 vme16d16
+        /etc/mknod vme24d16     c 3 6   ; chmod 600 vme24d16
+        /etc/mknod vme32d16     c 3 7   ; chmod 600 vme32d16	# Sun-3 only
+        /etc/mknod vme16d32     c 3 8   ; chmod 600 vme16d32	# Sun-3 only
+        /etc/mknod vme24d32     c 3 9   ; chmod 600 vme24d32	# Sun-3 only
+        /etc/mknod vme32d32     c 3 10  ; chmod 600 vme32d32	# Sun-3 only
+        /etc/mknod eeprom       c 3 11  ; chmod 644 eeprom	# Sun-3 only
+        /etc/mknod drum         c 7 0   ; chmod 644 drum
+        /etc/mknod ttya         c 12 0  ; chmod 666 ttya
+        /etc/mknod ttyb         c 12 1  ; chmod 666 ttyb
+        /etc/mknod mouse        c 13 0  ; chmod 666 mouse
+        /etc/mknod fb           c 22 0  ; chmod 666 fb
+        /etc/mknod ropc         c 23 0  ; chmod 666 ropc
+        /etc/mknod kbd          c 29 0  ; chmod 666 kbd
+        ln vme16d16 vme16
+        ln vme24d16 vme24
+        ln vme32d32 vme32					# Sun-3 only
+        ;;
+
+ar*)
+        umask 0 ; unit=`expr $i : '..\(.*\)'`
+        case $i in
+        ar*) chr=8 ;;
+        esac
+        case $unit in
+        0|1|2|3)
+		rew=`expr $unit '*' 4`
+		norew=`expr $rew + 16`
+                /etc/mknod rar$unit    c $chr $rew
+                /etc/mknod nrar$unit   c $chr $norew
+                umask 77
+                ;;
+        *)
+                echo "bad unit number in: $i; use ar0 thru ar3"
+                ;;
+        esac
+        ;;
+
+mti*)
+        unit=`expr $i : 'mti\(.*\)'`
+        case $unit in
+        [0-7]) ;; 
+        *) echo "bad unit for mti in: $i, use mti0 thru mti7" ;;
+        esac
+	eval `echo $unit | awk ' { unit = $1; u = 16 * $1 } END {
+	    for (i = 0; i < 16; i++)
+		printf("/etc/mknod tty%s%x c 10 %d; ",unit,i,u+i); }'`
+        ;;
+
+mt*|xt*)
+        umask 0 ; unit=`expr $i : '..\(.*\)'`
+        case $i in
+        mt*) blk=1; chr=5 ;;
+        xt*) blk=8; chr=30 ;;
+        esac
+        case $unit in
+        0|1|2|3|4|5|6|7)
+                four=`expr $unit + 4`
+		eight=`expr $unit + 8`
+                twelve=`expr $unit + 12`
+                /etc/mknod mt$unit     b $blk $unit
+                /etc/mknod mt$four     b $blk $four
+                /etc/mknod mt$eight    b $blk $eight
+                /etc/mknod mt$twelve   b $blk $twelve
+                /etc/mknod nmt$unit    b $blk $four;: sanity w/std pdp11 v7
+                /etc/mknod nmt$eight   b $blk $twelve ;: ditto
+                /etc/mknod rmt$unit     c $chr $unit
+                /etc/mknod rmt$four     c $chr $four
+                /etc/mknod rmt$eight    c $chr $eight
+                /etc/mknod rmt$twelve   c $chr $twelve
+                /etc/mknod nrmt$unit    c $chr $four;: sanity w/std pdp11 v7
+                /etc/mknod nrmt$eight   c $chr $twelve ;: ditto
+                umask 77
+                ;;
+        *)
+		dev=`expr $i : '\(..\).*'`
+                echo "bad unit for tape in: $i; use ${dev}0 thru ${dev}7"
+                ;;
+        esac
+        ;;
+
+st*)
+        umask 0 ; unit=`expr $i : '..\(.*\)'`
+        case $i in
+        st*) chr=18 ;;
+        esac
+        case $unit in
+        0|1|2|3)
+		rew=$unit
+		norew=`expr $rew + 4`
+		eight=`expr $rew + 8`
+                twelve=`expr $rew + 12`
+                /etc/mknod rst$unit    c $chr $rew
+		/etc/mknod rst$eight   c $chr $eight
+                /etc/mknod nrst$unit   c $chr $norew
+                /etc/mknod nrst$eight  c $chr $twelve
+                umask 77
+                ;;
+        *)
+                echo "bad unit number in: $i; use st0 thru st3"
+                ;;
+        esac
+        ;;
+
+ip*|xy*|sd*)
+        unit=`expr $i : '..\(.*\)'`
+        case $i in
+        ip*) name=ip; blk=0; chr=4;;
+        xy*) name=xy; blk=3; chr=9;;
+	sd*) name=sd; blk=7; chr=17;;
+        esac
+	/etc/mknod ${name}${unit}a      b $blk `expr $unit '*' 8 + 0`
+	/etc/mknod ${name}${unit}b      b $blk `expr $unit '*' 8 + 1`
+	/etc/mknod ${name}${unit}c      b $blk `expr $unit '*' 8 + 2`
+	/etc/mknod ${name}${unit}d      b $blk `expr $unit '*' 8 + 3`
+	/etc/mknod ${name}${unit}e      b $blk `expr $unit '*' 8 + 4`
+	/etc/mknod ${name}${unit}f      b $blk `expr $unit '*' 8 + 5`
+	/etc/mknod ${name}${unit}g      b $blk `expr $unit '*' 8 + 6`
+	/etc/mknod ${name}${unit}h      b $blk `expr $unit '*' 8 + 7`
+	/etc/mknod r${name}${unit}a     c $chr `expr $unit '*' 8 + 0`
+	/etc/mknod r${name}${unit}b     c $chr `expr $unit '*' 8 + 1`
+	/etc/mknod r${name}${unit}c     c $chr `expr $unit '*' 8 + 2`
+	/etc/mknod r${name}${unit}d     c $chr `expr $unit '*' 8 + 3`
+	/etc/mknod r${name}${unit}e     c $chr `expr $unit '*' 8 + 4`
+	/etc/mknod r${name}${unit}f     c $chr `expr $unit '*' 8 + 5`
+	/etc/mknod r${name}${unit}g     c $chr `expr $unit '*' 8 + 6`
+	/etc/mknod r${name}${unit}h     c $chr `expr $unit '*' 8 + 7`
+        ;;
+
+sf*)
+	unit=`expr $i : 'sf\(.*\)'`
+	/etc/mknod sf$unit	b 9 $unit
+	/etc/mknod rsf$unit	c 33 $unit
+	;;
+
+oct*)
+        unit=`expr $i : 'oct\(.*\)'`
+        case $unit in
+        0) ch=m ;; 
+	1) ch=n ;; 
+	2) ch=o ;;
+        *) echo "bad unit for oct in: $i, use oct0 thru oct2" ;;
+        esac
+        case $ch in
+        m|n|o)
+                eval `echo $ch $unit | awk ' { ch = $1; u = 8 * $2 } END {
+                    for (i = 0; i < 8; i++)
+                        printf("/etc/mknod tty%s%d c 1 %d; ",ch,i,u+i); }'`
+                ;;
+        esac
+        ;;
+
+ttys)
+	/etc/mknod ttys0 c 12 4
+	/etc/mknod ttys1 c 12 5
+	/etc/mknod ttys2 c 12 6
+	/etc/mknod ttys3 c 12 7
+	;;
+
+ttyt)
+	/etc/mknod ttyt0 c 12 8
+	/etc/mknod ttyt1 c 12 9
+	/etc/mknod ttyt2 c 12 10
+	/etc/mknod ttyt3 c 12 11
+	;;
+
+
+cgone|cgone0)
+	/etc/mknod cgone0 c 14 0	; chmod 666 cgone0
+	;;
+
+cgtwo|cgtwo0)
+	/etc/mknod cgtwo0 c 31 0	; chmod 666 cgtwo0
+	;;
+
+cgfour|cgfour0)
+	/etc/mknod cgfour0 c 39 0	; chmod 666 cgfour0
+	;;
+
+gpone|gpone0)
+	/etc/mknod gpone0a c 32 0	; chmod 666 gpone0a
+	/etc/mknod gpone0b c 32 1	; chmod 666 gpone0b
+	/etc/mknod gpone0c c 32 2	; chmod 666 gpone0c
+	/etc/mknod gpone0d c 32 3	; chmod 666 gpone0d
+	;;
+
+bwone|bwone0)
+	/etc/mknod bwone0 c 26 0	; chmod 666 bwone0
+	;;
+
+bwtwo*)
+	unit=`expr $i : 'bwtwo\(.*\)'`
+	case $unit in
+	0|1)
+		/etc/mknod bwtwo$unit c 27 0	; chmod 666 bwtwo$unit
+		;;
+	*)
+		echo "bad unit number in: $i; use bwtwo0 or bwtwo1"
+	esac
+	;;
+
+ingres|iilock|iidr)
+	/etc/mknod iilock c 16 0	; chmod 600 iilock
+	/etc/chown ingres iilock
+	;;
+
+vpc*)
+        unit=`expr $i : 'vpc\(.*\)'`
+	/etc/mknod vpc$unit c 28 `expr $unit \* 2`
+	/etc/mknod lp$unit c 28 `expr $unit \* 2 + 1`
+	chmod 666 vpc$unit lp$unit
+	;;
+
+vp*)
+        unit=`expr $i : 'vp\(.*\)'`
+	/etc/mknod vp$unit c 6 $unit
+	;;
+
+ndp*)
+	blk=5
+	chr=19
+	pbase=64
+        unit=`expr $i : 'ndp\(.*\)'`
+	case $unit in
+	0|1)
+		/etc/mknod  ndp$unit b $blk `expr $pbase + $unit`
+		/etc/mknod rndp$unit c $chr `expr $pbase + $unit`
+		chmod 400 ndp$unit rndp$unit
+		;;
+	*)
+		echo "bad unit number in: $i; use ndp0 thru ndp1"
+		;;
+	esac
+	;;
+
+ndl*)
+	blk=5
+	chr=19
+	lbase=128
+        unit=`expr $i : 'ndl\(.*\)'`
+	if [ $unit -ge 20 -o $unit -lt 0 ]; then
+                echo "bad unit number in: $i; use ndl0 thru ndl19"
+	else
+		/etc/mknod  ndl$unit b $blk `expr $unit + $lbase`
+		/etc/mknod rndl$unit c $chr `expr $unit + $lbase`
+		chmod 600 ndl$unit rndl$unit
+	fi
+	;;
+
+nd*)
+	blk=5
+	chr=19
+	lbase=128
+        unit=`expr $i : 'nd\(.*\)'`
+	case $unit in
+	0|1|2)
+		/etc/mknod  nd$unit b $blk $unit
+		/etc/mknod rnd$unit c $chr $unit
+		chmod 600 nd$unit rnd$unit
+		;;
+	*)
+		echo "bad unit number in: $i; use nd0 thru nd2"
+		;;
+	esac
+	;;
+
+pty*)
+        class=`expr $i : 'pty\(.*\)'`
+        case $class in
+        0) offset=0 name=p;;
+        1) offset=16 name=q;;
+        2) offset=32 name=r;;
+        *) echo "bad unit for pty in: $i; use pty0 thru pty2";;
+        esac
+        case $class in
+        0|1|2)
+                umask 0
+                eval `echo $offset $name | awk ' { b=$1; n=$2 } END {
+                        for (i = 0; i < 16; i++)
+                                printf("/etc/mknod tty%s%x c 20 %d; \
+                                        /etc/mknod pty%s%x c 21 %d; ", \
+                                        n, i, b+i, n, i, b+i); }'`
+                umask 77
+                ;;
+        esac
+        ;;
+
+win*)
+        class=`expr $i : 'win\(.*\)'`
+        case $class in
+        0) offset=0 ;;
+        1) offset=32 ;;
+        2) offset=64 ;;
+        3) offset=96 ;;
+        *) echo "bad unit for win in: $i; use win0 thru win3";;
+        esac
+        case $class in
+        0|1|2|3)
+                eval `echo $offset | awk ' { b=$1 } END {
+                        for (i = b; i < (b + 32); i++)
+                                printf("/etc/mknod win%d c 15 %d;", i, i); \
+                }'`
+                chmod 666 win*
+        esac
+        ;;
+
+sky)
+	/etc/mknod sky c 24 0		; chmod 666 sky
+	;;
+
+fpa)
+	/etc/mknod fpa c 34 32		; chmod 666 fpa
+	;;
+
+des)
+	/etc/mknod des c 11 0		; chmod 666 des
+	;;
+
+pc*)
+	unit=`expr $i : 'pc\(.*\)'`
+	case $unit in
+	0|1|2|3|4|5|6|7)
+		/etc/mknod pc$unit c 38 $unit
+		chmod 666 pc$unit
+		;;
+	*)
+		echo "bad unit number in: $i; use pc0 thru pc7"
+		;;
+	esac
+	;;
+
+
+local)
+	sh MAKEDEV.local
+	;;
+
+*)
+	echo "I don't know how to MAKEDEV $i."
+	;;
+esac
+done

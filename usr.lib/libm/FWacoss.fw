@@ -1,0 +1,11 @@
+c       .data
+c       .asciz  "@(#)FWacoss.fw 1.1 86/09/25 Copyr 1985 Sun Micro"
+c       .even
+c       .text
+
+c       Copyright (c) 1985 by Sun Microsystems, Inc.
+
+	real*4 function FWacoss ( x )
+	real*4 x
+	FWacoss = atan2( sqrt((1.0-x)*(1.0+x)), x)
+	end

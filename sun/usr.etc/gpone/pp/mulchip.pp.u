@@ -1,0 +1,38 @@
+| "@(#)mulchip.pp.u 1.1 86/09/25 SMI"
+
+| Copyright 1985 by Sun Microsystems, Inc.
+
+|   Multiplier routine.
+|   Multiplier arrives in r[2].  It should have fewer one bits than
+|   multiplicand which arrives in acc.  The result is computed and
+|   in r[0,1] with the low order bits in r[0].  The algorithm is a
+|   simple shift-add.  It was chosen because the majority of
+|   multipliers will not have many bits.
+
+#define Mulcand	acc
+#define Multiplier	r[2]
+#define LoRslt	r[0]
+#define HiRslt	r[1]
+
+
+multiply:;			USMul->mulmode;	;				| 
+	movw Multiplier, y;	am->mulx;	;				| 
+	movw Mulcand, y;	am->muly;	;				| 
+	;			;		;				| 
+	movw d, LoRslt;		mulres->am;	;				| 
+	movw d, HiRslt;		mulres->am;	crtn, go;			| 
+
+#undef HiBit
+#undef Mask
+
+#ifndef SWIDTH
+#define SWIDTH 1152
+#endif
+
+#if SWIDTH == 1152
+#include "m1152.pp.u"
+#endif
+
+#if SWIDTH == 1024
+#include "m1024.pp.u"
+#endif

@@ -1,0 +1,293 @@
+.LP
+.B
+.ps 14
+.nf
+SUN  Microsystems
+.sp 16
+.ce 100
+.ps 20
+Sky FFP Board Diagnostic
+.sp 3
+.ps 20
+User's Document
+.sp 14
+.ps 14
+Sunny Kirsten
+.sp 2
+\*(DY
+.sp 2
+Revision A
+.ce 0
+.fi
+.R
+.bp 1
+.ps 12
+.EH 'SUN  Microsystems''Sky.diag'
+.OH 'SUN  Microsystems''Sky.diag'
+.EF '\*(DY'Revision A'page \\\\n(PN'
+.OF '\*(DY'Revision A'page \\\\n(PN'
+.P1
+.\"       @(#)sky.diag.msun 1.1 86/09/25 Copyright Sun Micro
+.H 1 "Preface"
+.PP
+The Sky Board Diagnostic User's Guide is presented.
+.H 2 "Purpose"
+.PP
+The purpose of this document is to describe the Sky board
+program (\fIsky.diag\fR). This diagnostic serves
+as the primary tool in determining the functionality of the Sky FFP
+Board. 
+.PP
+The intention of this release is to give a detailed description of each
+test.
+.H 2 "Audience"
+.PP
+Members of any of the following departments may find 
+this document of interest for various reasons: (1) Design 
+Engineering, (2) Manufacturing, (3) Field Service, (4) 
+Diagnostics, (5) Training and (6) Documentation.  
+.H 1 "Revision History"
+.LP
+Revision A     86/09/25     Intial release of this document.
+.H 1 "Glossary"
+.LP
+\fIsky.diag\fR  -  Sky Board Diagnostics.
+.sp 1
+\fIFFP\fR  - Fast Floating-Point Processor
+.H 1 "References"
+.PP
+For further information on the Sky Board hardware please
+refer to:
+.RS
+.IP I.
+\fISky Fast Floating-Point Processor System Integration Manual p/n 800-1104-01\fR
+.PP
+This Sky document describes the Sky board, and its installation
+in a Multibus system.
+It would be useful if you wanted to decipher hardware
+bit patterns mentioned in error messages, to isolate problems within the
+Sky board. Since Sun does not repair these boards in-house,
+internal fault isolation is not intended.
+.IP II.
+\fISystem Internals Manual for the Sun Workstation p/n 800-1117-01\fR
+.PP
+This Sun document contains a section on the CPU PROM Monitor, which is
+used to boot the diagnostic.
+.RE
+.H 1 "Introduction"
+.PP
+\fISky.diag\fR is a standalone diagnostic program
+used as a stand-alone board test.
+It is a quick Go/NoGo test of the Sky board hardware.
+It is not intended to thoroughly exercise the Sky microcode,
+but instead focuses on functional testing of sufficient level as to
+reject an obviously bad piece of hardware.
+.H 1 "Hardware Requirements"
+.PP
+The minimum hardware configuration required is listed below.
+.RS
+.IP 1.
+A Sun Workstation model 100U, 150, 120, 170, 160, or 50.
+.IP 2.
+A Sky FFP board
+.RE
+.H 1 "Software Requirements"
+.PP
+\fI Sky.diag\fR is a standalone diagnostic.
+It does not run with the UNIX operating system.
+.H 1 "Booting Instructions"
+.PP
+This section gives an example of how to boot and run \fIsky.diag\fR.
+If \fI UNIX\fR is running, use /etc/shutdown, /etc/halt or /etc/fasthalt
+to shut it down. The ">" monitor program prompt is displayed.
+.sp
+To boot \fIsky.diag\fR from SCSI disk issue the following prom monitor 
+command:
+.nf
+      bsd() stand/sky.diag
+.fi
+.sp 1
+To abort \fISky.diag\fR enter either L1 -a or BREAK, and to start it again
+enter \fI"g4000"\fR.
+.sp 1
+The \fBCpu Prom Monitor\fR manual contains more detailed directions for booting from devices.
+.sp 1
+Upon booting, \fIsky.diag\fR identifies itself with:
+.sp 1
+\fB"@(#)sky.diag.c 1.27 85/05/09 Copyright Sun Microsystems"\fR
+.sp 1
+and a line indicating which type of bus the program thinks it's executing on:
+.sp 1
+\fB"StandAlone Sky Fast Floating Point Processor Board Diagnostic (Multibus)"\fR
+.sp 1
+or
+.sp 1
+\fB"StandAlone Sky Fast Floating Point Processor Board Diagnostic (VME-bus)"\fR
+.sp 1
+Then the program attempts to locate a Sky board on the bus, and if it fails:
+.sp 1
+\fB"sky.diag:	can't find Sky board!  Check configuration."\fR
+.sp 1
+Check the jumpers on the Sky Board versus the Sky Manual.
+The diagnostic will only test one board in any system.  
+.H 2 "User Interface"
+.PP
+.sp 1
+The program interacts with the user via the standard system console using
+simple ASCII prompts and replies.  Typically this will be the Sun video and
+keyboard, but on systems which have no video board, and which instead used a
+dumb terminal configured as the console, this will work also.
+.H 3 "Parameters"
+.PP
+\fISky.diag\fR next prompts for the number of passes to run.
+.sp 1
+\fB"How many passes? (CR=5; 0=forever):  "\fR
+.sp 1
+Respond with a \fB"<carriage-return>"\fR to test for 5 passes.
+.sp 1
+Respond with a \fB"0<carriage-return>"\fR to test forever.
+.sp 1
+Respond with a \fB"n<carriage-return>"\fR to test for \fBn\fR passes.
+.sp 1
+The test proceeds to try to load microcode into the board's RAM, and
+if it fails it displays:
+.sp 1
+\fB"sky.diag:	ucode verify error +0x%x exp(0x%x) obs(0x%x)"\fR
+.sp 1
+where +0x%x is a hexadecimal number showing the address offset from the
+beginning of the microcode,
+.sp 1
+where exp(0x%x) is a hexadecimal number showing the expected data,
+.sp 1
+where obs(0x%x) is a hexadecimal number showing the observed data,
+.sp 1
+\fB"sky.diag:	microcode load FAILED"\fR
+.sp 1
+If the load succeeds, the message indicated is:
+.sp 1
+\fB"sky.diag:	loaded n words of ucode"\fR
+.H 3 "Test"
+.PP
+.sp 1
+Then the program indicates the pass count and begins looping for the number of
+passes specified:
+.sp 1
+\fB"sky.diag:0"\fR
+.sp 1
+If a failure occurs, after displaying details of the secific error, the program
+displays this message and quits:
+.sp 1
+\fB"sky.diag:	FAILED on pass n\fR"
+.sp 1
+If the test finds no errors before reaching the specified pass count, the 
+program displays this message and quits:
+.sp 1
+\fB"\rsky.diag:n passes PASSED"\fR
+.PP
+The test loops in a cycle of performing a context restore/save operation
+followed by a series of math operations.
+.sp 1
+The beginning of the context test is indicated by the message:
+.sp 1
+\fB"context restore/save"\fR
+.sp 1
+If this fails, these messages indicate the details:
+.sp 1
+\fB"FAILED
+.sp 1
+0x%x exp(0x%x) obs(0x%x)"\fR
+.sp 1
+where exp(0x%x) is a hexadecimal number showing the expected data,
+.sp 1
+where obs(0x%x) is a hexadecimal number showing the observed data,
+.sp 1
+\fB"sky.diag:	context restore/save FAILED"\fR
+.sp 1
+If the program has difficulty getting the board to respond during a test, the
+following message will be displayed:
+.sp 1
+\fB"sky.diag:	skyop timed out on 0x%x opcode"\fR
+.sp 1
+where exp(0x%x) is a hexadecimal number showing the expected data,
+.sp 1
+where obs(0x%x) is a hexadecimal number showing the observed data,
+.sp 1
+where skyop is a routine used by the rest of the test to genericaly execute
+a math operation via the sky board.
+.PP
+The math operations performed are, Log, Add, Subtract, Multiply, and Divide,
+all in single precision.  As each cycle of 256 math operations of each type
+is started, the type of operation is indicated with:
+.sp 1
+\fB"LOG  ADD  SUB  MUL  DIV  "\fR
+.sp 1
+If the log operation fails, the nature of the failure is indicated:
+.sp 1
+\fB"timed out on log(1.0) read"\fR
+.sp 1
+\fB"sky.diag:	hung in I/O busy state:  FAILED"\fR
+.sp 1
+\fB"FAILED on log(1.0) (0x%x)"\fR
+.sp 1
+where (0x%x) is a hexadecimal number showing the observed data,
+when 0 was expected
+.sp 1
+\fB"sky.diag:	FAILED on logarithm of 1.0"\fR
+.sp 1
+.sp 1
+If the math operation from the set Add, Subtract, Multiply, Divide fails:
+.sp 1
+\fB"op = 0x%x FAILED"\fR
+.sp 1
+where 0x%x is the hexadecimal operation code, detailed in the Sky manual.
+The operation is also displayed in english as (log, add, sub, mul, or div)
+.sp 1
+\fB"sky.diag:	argument 1    argument 2    s software    h hardware"\fR
+.sp 1
+\fB"sky.diag:	0x%x          0x%x          s 0x%x        h 0x%x"\fR
+.sp 1
+\fB"sky.diag:	FAILED on single precision arithmetic"\fR
+.sp 1
+where 0x%x is a hexadecimal number
+where the operation was (argument 1) op (argument 2)
+where s=software results of the operation
+where h=hardware results of the operation
+.H 1 "Error Handling"
+.PP
+.sp 1
+All errors are considered terminal, i.e. the test will output an error message
+and quit.
+.H 2 "Message Interpretation"
+.PP
+.sp 1
+Error messages include enough english text to indicate which function of the
+board failed.
+.H 2 "Failure Analyses"
+.PP
+.sp 1
+Log the error message to include with the board when it is returned to Sky.
+.H 2 "Field Replaceable Units"
+.PP
+.sp 1
+The entire Sky FFP board is the Field Replaceable Unit.  The board is ultimately
+sent to Sky for repair.
+.H 1 "Recommended Test Procedure"
+.PP
+.sp 1
+In an incoming inspection environment, the typical usage will be to use the
+default 5-pass test.
+.H 1 "Future Considerations"
+.PP
+.sp 1
+Beta testing has indicated sufficient coverage by the existing diagnostic to
+sort out the bad boards on incoming inspection.
+.H 1 "Summary"
+.PP
+.\"
+.\" I: A brief Summary of the document is to replace "Summary" below.
+.\"
+.sp 1
+The Sky Fast Floating-Point Processor Board Diagnostic \fB"sky.diag"\fR is a
+fast and simple test of the overall functioning of either the Multibus or
+VME-bus version of the Sky board used in Sun's Sun-1 and Sun-2 architecture
+machines.

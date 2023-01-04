@@ -1,0 +1,2 @@
+#tftp	udp	/usr/etc/in.tftpbootd
+finger	tcp	/usr/etc/in.fingerd

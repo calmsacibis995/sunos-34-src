@@ -1,0 +1,1473 @@
+.LP
+.B
+.ps 14
+.nf
+S U N  Microsystems
+.sp 16
+.ce 100
+.ps 20
+Sun 2 Color Board Diagnostics
+.sp 3
+.ps 20
+User's Document
+.sp 14
+.ps 14
+Susan Rohani
+.sp 2
+\*(DY
+.sp 2
+Revision C
+.ce 0
+.fi
+.R
+.bp 1
+.ps 12
+.EH 'S U N  Microsystems''Sc.diag'
+.OH 'S U N  Microsystems''Sc.diag'
+.EF '\*(DY'Revision C'page \\\\n(PN'
+.OF '\*(DY'Revision C'page \\\\n(PN'
+.P1
+.\"       @(#)sc.diag.msun 1.1 86/09/25 Copyright Sun Micro
+.H 1 "Preface"
+.PP
+The Sun_2 Color Board Diagnostic User's Guide is presented.
+.H 2 "Purpose"
+.PP
+The purpose of this document is to describe the Sun_2 Color Video board
+program (\fIsc.diag\fR). This diagnostic serves
+as the primary tool in determining the functionality of Sun_2 's
+Color Video Board. 
+.PP
+The intention of this release is to give a detailed description of each
+test.
+.H 2 "Audience"
+.PP
+Members of any of the following departments may find 
+this document of interest for various reasons: (1) Design 
+Engineering, (2) Manufacturing, (3) Field Service, (4) 
+Diagnostics, (5) Training and (6) Documentation.  
+.H 1 "Revision History"
+.LP
+Revision C     May 14, 1985      Third release, added more detail information.
+.LP
+Revision B     May 1, 1985       Second release of this document.
+.LP
+Revision A     Feb. 27, 1985     Intial release of this document.
+.H 1 "Glossary"
+.LP
+\fIsc.diag\fR  -  Sun_2 Color Board Diagnostics.
+.sp 1
+\fIROPC\fR  - RasterOP Chip.
+.H 1 "References"
+.PP
+For further information on the Sun_2 Color Video Board hardware please
+refer to:
+.RS
+.IP I.
+\fISun_2 Color Video Board Engineering Manual\fR
+.IP II.
+\fISun_2 Color Video Board User's Manual\fR
+.IP III.
+\fISun_2/160 Diagnostics Manual Part# 800-1236-01\fR
+.IP IV.
+\fISun_2/50 Service Manual \fR
+.IP V.
+\fI160 Color Workstation System Support Manual \fR
+.RE
+.H 1 "Introduction"
+.PP
+\fISc.diag\fR is a standalone diagnostic program dedicated totally
+for testing the Sun_2 Color Video Board and capable of performing diagnostics
+on a maximum of four boards. Section 8 includes the booting and running
+the program on Sun_2 Color Board(s).
+Sections 9 and 10 cover the detailed information for each diagnostic test.
+.H 1 "Hardware Requirements"
+.PP
+The minimum hardware configuration required is listed below.
+.RS
+.IP 1.
+A Sun-2 VMEbus based system.
+.IP 2.
+A Sun-2 Color Video Board.
+.IP 3.
+A dumb terminal (TeleVideo, Wyse, etc.) attached to CPU serial port a.
+.RE
+.H 1 "Software Requirements"
+.PP
+\fI Sc.diag\fR is a standalone diagnostic.
+It does not run with the UNIX operating system.
+.H 1 "Booting Instructions"
+.PP
+This section describes how to boot and run \fIsc.diag\fR.
+If \fI UNIX\fR is running, use either /etc/fasthalt or /etc/halt to shut
+ it down. Once the ">" monitor program prompt is displayed, then
+redirect input and output to an auxillary terminal
+so that the user communication is not obstructed by the video display.
+The prom monitor command \fIu a\fR redirects the I/O.
+.sp
+To boot \fIsc.diag\fR from local disk issue the following prom monitor 
+command:
+.nf
+      b stand/sc.diag
+From tape, type:
+      bst() stand/sc.diag
+
+From Ethernet, type:
+      bie(,nn) /stand/sc.diag 
+where nn is the server Ethernet address.
+.fi
+.sp 1
+The \fBCpu Prom Monitor\fR manual contains more detailed directions for booting from devices.
+.sp 1
+Upon booting, \fIsc.diag\fR attempts to locate all color boards configured
+in the system.  Each board's base address is displayed, and if there are
+any differences between this address and switch setting then follow the proced\
+ure below:
+.RS
+.IP *
+power down system
+.IP *
+check jumpers -- Refer to documents in section 4 for details on jumpers.
+.IP *
+reinsert board
+.IP *
+power up
+.IP *
+again boot \fIsc.diag\fR
+.RE
+.sp 1
+\fISc.diag\fR next requests whether to proceed with an automatic or manual
+test of the configured board(s).  Respond with an \fB"a"\fR to
+select the automatic diagnostics or \fB"m"\fR to choose the manual/interactive
+mode.
+Refer to section 9 and 10 for descriptions of automatic and manual
+diagnostics.
+.sp 1
+To exit from \fISc.diag\fR enter either L1 -a or BREAK, and to start it again
+enter \fI"g4000"\fR.
+.H 1 "Description Of Automatic Mode"
+.PP
+If option \fI"a"\fR or \fI"A"\fR is selected, then 
+\fISc.diag\fR performs extensive tests on the Sun_2 Color Board(s).
+The following sections include test descriptions and possible test
+error messages that are generated during the automatic testing.
+The automatic diagnostic repeats until halted.
+.H 2 "Digital-to-Analog Converter Verification"
+.PP
+After each DAC Verification test, any key may be struck to continue to the next
+test. This test is only executed once and is useful for adjusting the color
+monitor. These tests require visual verification by the user.
+The following tests are executed in the order of presentation:
+.sp 1
+First the frame buffer is loaded with a single horizontal ramp as defined
+below:
+.nf
+   if    0 <= column <= 63     then pixel-value = (63 - column)/2
+   if   64 <= column <= 573    then pixel-value = (column - 62)/2
+   if  574 <= column <= 1082   then pixel-value = (1082 - column)/2
+   if 1083 <= column <= 1151   then pixel-value = (column - 1081)/2
+
+   column       0 .. 63, 64 .. 573, 574 .. 1082, 1083 .. 1151
+   pixel-value 31 ..  0,  1 .. 255, 254 ..    0,    1 ..   35
+.fi
+.RS
+.IP 1.
+Check Red ramp monotonicity -- The red intensity is greatest at the center
+and least at the edges.
+The color map is loaded with the following ramp function:
+.nf
+    red   [i] = i, blue  [i] = 0, green [i] = 0, for 0 <= i <= 255
+.fi
+.IP 2.
+Check Green ramp monotoncity -- The green intensity is greatest at the center
+and least at the edges.
+The color map is loaded with the following ramp function:
+.nf
+    red   [i] = 0, blue  [i] = 0, green [i] = i, for 0 <= i <= 255
+.fi
+.IP 3.
+Check Blue ramp monotonicity -- The Blue intensity is greatest at the center
+and least at the edges. The color map is loaded with the following ramp function:
+.nf
+    red   [i] = 0, blue  [i] = i, green [i] = 0, for 0 <= i <= 255
+.fi
+.IP 4.
+Check White ramp monotonicity --The white intensity is greatest at the center
+and least at the edges.
+The color map is loaded with the following ramp function:
+.nf
+    red   [i] = i, blue  [i] = i, green [i] = i, for 0 <= i <= 255
+.fi
+.IP 5.
+Adjust -5.2 precision voltage to remove DAC glitches -- Verifies that DAC
+works correctly with small changes of intensity.
+First the color map is loaded with the following function:
+.nf
+    red   [i] = 0xFF, blue  [i] = 0, green [i] = 0, for 0 <= i <= 255
+    
+    Secondly the color map is loaded with the function:
+    red   [i] = 0, blue  [i] = 0 for 0 <= i <= 255
+    green [i] = 0, for 0 <= i <= 126 and 81 <= i <= 255
+    green [7F] = 0x7F
+    green [80] = 0x80
+
+    The frame buffer is loaded with:
+
+    pixel [i,j] = 0x7F,    for  j/16 modulo 2 = 0
+    pixel [i,j] = 0x80,    for  j/16 modulo 2 = 1
+.fi
+.IP 6.
+Verify that DAC output is a stable gray pattern --The color map is loaded with the following function:
+.fn
+    red   [i] = 0xFF, blue  [i] = 0, green [i] = 0 for 0 <= i <= 255
+    red   [FF] = 0xFF, blue [FF] = 0xFF, green [FF] = 0xFF
+
+    The frame buffer is loaded with the following function:
+    pixel [i,j] = 0x55
+.fi
+.IP 7.
+Verify that all screen borders are visible -- The color map is loaded with the following monochrome ramp function:
+.fn
+    red   [i] = i, blue  [i] = i, green [i] = i, for 0 <= i <= 255
+    The frame buffer is cleared except that the following lines are set to 255.
+    line between the points (0,0) and (1150,0)
+    line between the points (1150,0) and (1150,899)
+    line between the points (1150,899) and (0,899)
+    line between the points (0,899) and (0,0)
+
+.fi
+.RE
+\fB    No error messages are printed for this series of tests.\fR
+.PP
+The next diagnostic test is executed automatically.
+.H 2 "Test On-board Registers"   
+.PP
+The registers below are tested by writing, reading and comparing with 
+pre_determined values:
+.RS
+.IP 1.
+.nf
+Status register --
+   value = (0x3F - 3*i) & 0x3F    0 <= i <= 21
+   After the test 0xFF is loaded.
+.fi
+.IP 2.
+Per_plane mask register --
+.nf
+   value = (0xFF - 3*i) & 0xFF    0 <= i <= 85
+   After the test 0x00 is loaded.
+.fi
+.IP 3.
+.nf
+Word pan register --
+   value = (0xFFFF - 3*i) & 0xFFFF    0 <= i <= 21845
+   After the test 0x00 is loaded.
+.fi
+.IP 4.
+.nf
+Line Offset and zoom register --
+   value = (0xFF - 3*i) & 0xFF    0 <= i <= 85
+   After the test 0x00 is loaded.
+.fi
+.IP 5.	
+.nf
+Pixel Pan register --
+   value = (0xFF - 3*i) & 0xFF    0 <= i <= 85
+   After the test 0x00 is loaded.
+.fi
+.IP 6.
+.nf
+Variable Zoom Register --
+   value = (0xFF - 3*i) & 0xFF    0 <= i <= 85
+   After the test 0xFF is loaded.
+   After the test 0x54 is loaded.
+.fi
+.IP 7.
+.nf
+Interrupt Vector Register --
+   value = (0xFF - 3*i) & 0xFF    0 <= i <= 85
+   After the test 0x54 is loaded.
+.fi
+.RE
+.sp 1
+\fBAn error occurring during this test appears as follows:\fR
+.sp l
+\fBDevice #\fId\fB @\fIx\fB Wrote \fIvalue1\fB Read \fIvalue2\fR
+.sp l
+d - specifies the board address causing the error, x is the register 
+address, value1 and value2 are the hex values written and read respectively.
+.PP
+The next diagnostic test is executed automatically.
+.H 2 "Test Interrupts"
+.PP
+The Interrupt circuitry check is done via the following steps.
+.RS
+.nf
+   1) Interrupt level is set to 1.
+   2) Check if retrace bit in status register toggles
+   3) Check 50 times, if retrace interrupt occurs.
+        a) Wait for end of retrace
+        b) Enable interrupts
+        c) Wait for retrace to begin
+        d) Wait for end of retrace
+        e) Check if interrupt occured.
+   4) Interrupt level is set to 7.
+.fi
+.RE
+.sp 1
+An error occurring during this test appears as follows:
+.sp l
+\fBDevice #\fId\fB Retrace bit in Status Register never toggles.
+.sp 1
+\fBDevice #\fId\fB No interrupt when expected.
+.sp l
+d - specifies the board address causing the error.
+.PP
+The next diagnostic test is executed automatically.
+.H 2 "Test Color Map"
+.PP
+First a checker-board pattern is written to video memory.
+The checker-board pattern is pixel[i,j] = 16(I/56) + J/72.
+The following
+ten  different color maps are loaded  and verified automatically:
+.sp l
+.RS
+.IP 1.
+red [i] = 0xAA, green [i] = 0x55, blue [i] = 0xCC
+.IP 2.
+red [i] = 0x00, green [i] = 0xFF, blue [i] = 0xC3
+.IP 3.
+red [i] = 0xC3, green [i] = 0x28, blue [i] = 0xB7
+.IP 4.
+Red ramp:
+red [i] = i, green [i] = 0, blue [i] = 0,  for 0 <= i <= 255
+.IP 5.
+Green ramp:
+red [i] = 0, green [i] = i, blue [i] = 0,  for 0 <= i <= 255
+.IP 6.
+Blue ramp:
+red [i] = 0, green [i] = 0, blue [i] = i,  for 0 <= i <= 255
+.IP 7.
+Monchrome ramp:
+red [i] = i, green [i] = i, blue [i] = i,  for 0 <= i <= 255
+.IP 8.
+The color map is loaded with the following series of eight checker-board patterns:
+.nf
+
+  red [i] = 0x55, green [i] = 0x3C, blue [i] = 0xD7, for (i/2^N modulo 2) = 0
+  red [i] = 0xAA, green [i] = 0xC3, blue [i] = 0x28, for (i/2^N modulo 2) = 1
+  For 0 <= i <= 255, and for N = 0,1,2,3,4,5,6,7
+
+.IP 9.
+The Color map is loaded with the following series of eight checker-board patterns:
+.nf
+  red [i] = 0x9C, green [i] = 0xAA, blue [i] = 0x33, for (i/2^N modulo 2) = 0
+  red [i] = 0x63, green [i] = 0x55, blue [i] = 0xCC, for (i/2^N modulo 2) = 1
+  For 0 <= i <= 255, and for N = 0,1,2,3,4,5,6,7,
+
+
+.fi
+.sp l
+An error occuring during this test appears as follows:
+.RE
+.sp l
+\fITesting Shadow Color Map\fB
+\fBEntry #\fIn\fB. BLU. Read #\fIn1\fB. Compare w/ #\fIn2\fB. XOR #\fIn3\fR
+.sp 1
+\fITesting Shadow Color Map\fB
+\fBEntry #\fIn\fB. RED. Read #\fIn1\fB. Compare w/ #\fIn2\fB. XOR #\fIn3\fR
+.sp 1
+\fITesting Shadow Color Map\fB
+\fBEntry #\fIn\fB. GRN. Read #\fIn1\fB. Compare w/ #\fIn2\fB. XOR #\fIn3\fR
+.sp l
+n = shadow color map entry number, n1 = value read back, n2 = value written,
+n3 = n1 XOR n2
+.PP
+The next diagnostic test is executed automatically.
+.H 2 "Frame Buffer Tests: Word mode and Pixel mode"
+.PP
+The frame buffer test does a series of tests in pixel mode, and then repeats 
+the same set of tests in word mode; however, first the  color map is loaded 
+with the following quad ramp function:
+.nf
+    red[i] = 4*i, blue[i] = 0,        green[i] = 0,         for   0 <= i <=  63
+    red[i] = 0,   blue[i] = 4*(i-64), green[i] = 0,         for  64 <= i <= 127
+    red[i] = 0,   blue[i] = 0,        green[i] = 4*(i-128), for 128 <= i <= 191
+    red[i] = 4*(i-192), blue[i] = 4*(i-192), green[i] = 4*(i-192), for 192 <= i <= 255
+.fi
+The set of 10 tests are detailed below:
+.RS
+.IP 1-6.
+A constant data test is performed six times, and the data used are 0x0000000,
+0XFFFF000, 0XFFFFFFFF, 0XAA55CC33, 0X00FF3355 and 0xAA33CCEF.
+The following two error messages could occur.
+.sp 1
+Error: constant data test; Expected \fIn1\fB, got \fIn2\fB at address \fIn3\fB
+.sp 1
+Spurious Read Error. Constant Data Test
+Error: constant data test; Expected \fIn1\fB, got \fIn2\fB at address \fIn3\fB
+.IP 7.
+The address test fills each 32 bit word with its address, then 
+reads and compares data read with the data written.
+The following error message could occur.
+.sp 1
+Error: variable data test; Expected \fIn1\fB, got \fIn2\fB at address \fIn3\fB
+.IP 8.
+Check the frame buffer with the random data test.
+The following random number generator is used in this test. The first random 
+number is set to 433. Each random number after this is generated with:
+r = r + 4*r + 17623. To discover why this is a good random number generator read Knuth, "The Art Of Computer Programming", VOL 2, Chapter 3.
+The following error message could occur.
+.sp 1
+Error: Random data test; Expected \fIn1\fB, got \fIn2\fB at address \fIn3\fB
+.IP 9.
+Checker tests find the stuck_at_0's and stuck_at_1's via filling (word) the
+memory with a checker-board pattern of increasing size.
+If an error occurs the following message will be displayed:
+.sp 1
+Error: Checker (aX) data test; Expected \fIn1\fB, got \fIn2\fB at address \fIn3\fR
+.nf
+The checker-board patterns used are:
+
+Memory-location [address] = 0xA53C5AC3, If [address/(2^N) modulo 2] = 0
+Memory-location [address] = 0x5AC3A53C, If [address/(2^N) modulo 2] = 1
+Where N ranges from 2 to 19.
+.fi
+Where N is the power of 2 which equals half the period of the repeating checker-board.
+.sp l
+.IP 10.
+Checker tests find the stuck_at_0's and stuck_at_1's via filling the
+memory (byte) with a checker-board pattern of increasing size.
+.RE
+.sp 1
+If an error occurs the following message will be displayed:
+.sp 1
+Error: Checker (aX) data test; Expected \fIn1\fB, got \fIn2\fB at address \fIn3\fR
+.nf
+The checker-board patterns used are:
+Memory-location [address] = 0x00, If [address/(2^N) modulo 2] = 0
+Memory-location [address] = 0xFF, If [address/(2^N) modulo 2] = 1
+Where N ranges from 0 to 19.
+.fi
+.sp 1
+Where N is the power of 2 which equals half the period of the repeating checker-board.
+.sp l
+If errors occured in any of the tests 0-A, the following is printed:
+" n Errors." Where n is the number of errors that occured.
+Otherwise the message "No errors" is printed.
+.PP
+The next diagnostic test is executed automatically.
+.H 2 "Digital-to-Analog Converter Verification"
+.PP
+First the frame buffer is loaded with a single horizontal ramp as defined
+below:
+.nf
+.DS L
+      if    0 <= column <= 63     then pixel-value = (63 - column)/2
+      if   64 <= column <= 573    then pixel-value = (column - 62)/2
+      if  574 <= column <= 1082   then pixel-value = (1082 - column)/2
+      if 1083 <= column <= 1151   then pixel-value = (column - 1081)/2
+
+      column       0 .. 63, 64 .. 573, 574 .. 1082, 1083 .. 1151
+      pixel-value 31 ..  0,  1 .. 255, 254 ..    0,    1 ..   35
+.DE
+.fi
+The following tests are executed in the following order:
+.RS
+.IP 1.
+Check Red ramp monotonicity -- The red intensity is greatest at the center
+and least at the edges.
+The color map is loaded with the following ramp function:
+.nf
+      red   [i] = i, blue  [i] = 0, green [i] = 0, for 0 <= i <= 255
+.fi
+.IP 2.
+Check Green ramp monotoncity -- The green intensity is greatest at the center
+and least at the edges.
+The color map is loaded with the following ramp function:
+.nf
+      red   [i] = 0, blue  [i] = 0, green [i] = i, for 0 <= i <= 255
+.fi
+.IP 3.
+Check Blue ramp monotonicity -- The blue intensity is greatest at the center
+and least at the edges.
+The color map is loaded with the following ramp function:
+.nf
+      red   [i] = 0, blue  [i] = i, green [i] = 0, for 0 <= i <= 255
+.fi
+.IP 4.
+Check White ramp monotonicity --
+The color map is loaded with the following ramp function:
+.nf
+      red   [i] = i, blue  [i] = i, green [i] = i, for 0 <= i <= 255
+.fi
+.IP 5.
+The following color map is loaded with the following quad ramp function:
+.nf
+      red[i] = 4*i, blue[i] = 0,        green[i] = 0,         for   0 <= i <=  63
+      red[i] = 0,   blue[i] = 4*(i-64), green[i] = 0,         for  64 <= i <= 127
+      red[i] = 0,   blue[i] = 0,        green[i] = 4*(i-128), for 128 <= i <= 191
+      red[i] = 4*(i-192), blue[i] = 4*(i-192), green[i] = 4*(i-192), for 192 <= i <= 255
+
+The frame buffer is loaded with four horizontal ramps, red, blue, green and 
+white. Each ramp is defined below:
+
+Red horizontal ramp
+
+      if    0 <= column <= 63     then pixel-value = 0
+      if   64 <= column <= 567    then pixel-value = (column - 56)/8
+      if  568 <= column <= 1077   then pixel-value = (1077 - column)/8
+      if 1078 <= column <= 1151   then pixel-value = 0
+
+      column       0 .. 63, 64 .. 567, 568 .. 1077, 1078 .. 1151
+      pixel-value  0 ..  0,  1 ..  63,  63 ..    0,    0 ..    0
+
+Blue horizontal ramp
+
+      if    0 <= column <= 63     then pixel-value = 0
+      if   64 <= column <= 567    then pixel-value = 64 + (column - 56)/8
+      if  568 <= column <= 1077   then pixel-value = 64 + (1077 - column)/8
+      if 1078 <= column <= 1151   then pixel-value = 0
+
+      column       0 .. 63, 64 .. 567, 568 .. 1077, 1078 .. 1151
+      pixel-value  0 ..  0, 65 .. 127, 127 ..   64,    0 ..    0
+
+Green horizontal ramp
+
+      if    0 <= column <= 63     then pixel-value = 0
+      if   64 <= column <= 567    then pixel-value = 128 + (column - 56)/8
+      if  568 <= column <= 1077   then pixel-value = 128 + (1077 - column)/8
+      if 1078 <= column <= 1151   then pixel-value = 0
+
+      column       0 .. 63,  64 .. 567, 568 .. 1077, 1078 .. 1151
+      pixel-value  0 ..  0, 129 .. 191, 191 ..  128,    0 ..    0
+
+White horizontal ramp
+
+      if    0 <= column <= 63     then pixel-value = 0
+      if   64 <= column <= 567    then pixel-value = 192 + (column - 56)/8
+      if  568 <= column <= 1077   then pixel-value = 192 + (1077 - column)/8
+      if 1078 <= column <= 1151   then pixel-value = 0
+
+      column       0 .. 63,  64 .. 567, 568 .. 1077, 1078 .. 1151
+      pixel-value  0 ..  0, 193 .. 255, 255 ..  192,    0 ..    0
+.fi
+.IP 6.
+Verify that DAC output is a stable gray pattern --
+The color map is loaded with the following function:
+.fn
+      red   [i] = 0xFF, blue  [i] = 0, green [i] = 0 for 0 <= i <= FE
+      red   [FF] = 0xFF, blue [FF] = 0xFF, green [FF] = 0xFF
+
+The frame buffer is loaded with the following function:
+      pixel [i,j] = 0x55
+.fi
+.IP 7.
+Verify that all screen borders are visible --
+The color map is loaded with the following monochrome function:
+.fn
+   red   [i] = i, blue  [i] = i, green [i] = i for 0 <= i <= 255
+
+The frame buffer is cleared except that the following lines are set to 255.
+   line between the points (0,0) and (1150,0)
+   line between the points (1150,0) and (1150,899)
+   line between the points (1150,899) and (0,899)
+   line between the points (0,899) and (0,0)
+.fi
+.RE
+.sp l
+No error messages are printed during this test phase.
+.PP
+The next diagnostic test is executed automatically.
+.H 2 "Zoom and Pan Tests"
+.PP
+First a checker-board pattern is displayed, then for
+each zoom factor the origin pans down and up, to lower-right and back,
+to right, and left to original starting point.
+Next a check is done for the \fIn\fR lower lines zoom disable function.
+.PP
+The next diagnostic test is executed automatically.
+.H 2 "ROPC Tests"
+.PP
+The following series of tests are repeated for each ROPC plane 0 through 7.
+Each of the tests except 3 and 4 are executed for pixel mode.
+The ROPC tests include;
+.RS
+.IP 1.
+Register tests    :  Dst, Src1, Src2, Pattern, Mask1, Mask2, Shift, Function,
+                       Width, Op_count and Flag are tested.
+
+.nf
+Ropc Dst Register -- 
+   value = (0xFFFF - 3*i) & 0xFFFF    0 <= i <= 21845
+
+Ropc Src1 Register -- 
+   value = (0xFFFF - 3*i) & 0xFFFF    0 <= i <= 21845
+
+Ropc Src2 Register -- 
+   value = (0xFFFF - 3*i) & 0xFFFF    0 <= i <= 21845
+
+Ropc Pat Register -- 
+   value = (0xFFFF - 3*i) & 0xFFFF    0 <= i <= 21845
+
+Ropc Msk1 Register -- 
+   value = (0xFFFF - 3*i) & 0xFFFF    0 <= i <= 21845
+
+Ropc Msk2 Register -- 
+   value = (0xFFFF - 3*i) & 0xFFFF    0 <= i <= 21845
+
+Ropc SftVal Register -- 
+   value = (0x010F - 3*i) & 0xFFFF    0 <= i <= 90
+
+Ropc Func Register -- 
+   value = (0x00FF - 3*i) & 0xFFFF    0 <= i <= 85
+
+Ropc Width Register -- 
+   value = (0xFFFF - 3*i) & 0xFFFF    0 <= i <= 21845
+
+Ropc OpCnt Register -- 
+   value = (0xFFFF - 3*i) & 0xFFFF    0 <= i <= 21845
+
+Ropc Flag Register -- 
+   value = (0x00FF - 3*i) & 0xFFFF    0 <= i <= 85
+.fi
+If errors occur then the following message is printed:
+.sp 1
+Device #n1. ROPC Plane n2. Addr a. Wr w. Rd r1 r2 r3.
+.sp 1
+Where n1 = device number, n2 = ROPC Plane, w = data written, r1 = r2 = r3 = data read
+back on the first, second and third tries.
+.IP 2.
+Random Data Function Test
+.sp 1
+This test writes random patterns to the src1, src2, dst, pattern and function
+registers. All possible shift amounts are tried. The results of the operation 
+are read back from the frame buffer, and compared with computed results. 
+.sp 1
+\fBError messages have the following format:\fR
+.nf
+
+   Device d. Testing Function Unit on ROPC Plane N.
+   Shifting from SRC1 to SRC2. 
+   Shift Amount  = x
+   Source2       = x  Source1     = x
+   Extracted Src = x  Destination = x
+   Pattern       = x  Function    = x
+   Func Output   = x  FBuf Read   = x
+   Expected        x
+
+   Device d. Testing Function Unit on ROPC Plane N.
+   Shifting from SRC2 to SRC1. 
+   Shift Amount  = x
+   Source2       = x  Source1     = x
+   Extracted Src = x  Destination = x
+   Pattern       = x  Function    = x
+   Func Output   = x  FBuf Read   = x
+   Expected        x
+   Where shift amount, source1, source2, destination, pattern, function are
+   the values written to the shift-amount, source1, source2, destination, 
+   pattern and function registers respectively. Func Output, FBuf Read and
+   Expected are the value read from the function output register, the value
+   read from the frame buffer, and the expected result of the ROPC operation.
+.fi
+.IP 3.
+Implicit word mode Tests, For each bit plane: Test Dst Mode 0,2,4,6.
+For each addressing mode 800 patterns are written and the results are read 
+back. If results read back do not match excepted results then error messages
+are printed.
+.sp 1
+\fBError messages for the Destination tests have the following format:\fR
+.nf
+
+Device #d. Testing Dst. Addressing Mode N. ROPC Plane M
+     Dst:  x  Expected: x
+     Src1: x  Expected: x
+     Src2: x  Expected: x
+Where d = device number, N = ROPC addressing mode, and M = ROPC plane
+
+Device #d. Test SRC2->SRC1 on Write. Addr Mode M. ROPC Plane N.
+    SRC1: x  Expected: x  SRC2: x  Expected: x
+    FB: x  Expected: x
+
+Device #d. Testing SRC load on Read. Addr Mode M. ROPC Plane.
+    SRC1: x  Expected: x  SRC2: x  Expected: x
+    FB: x  Expected: x
+. fi
+.IP 4.
+The test tests the proper decrement and reload of the Opcounter, and
+verifies that the right and left masks are enabled at the proper time. 
+Possible error messages are shown below:
+.sp 1
+.nf
+Device #d. Error Testing Masks on ROPC plane N.
+   ROPC Opcounter reads x. Expected x
+   
+   Device #d. Error Testing Masks on ROPC plane N.
+      ROPC Func Output Reg = x. FB reads x.
+      
+   Device #d. Error Testing Masks on ROPC plane N.
+      Count = x. TCount = x. Msk1 = x. Msk2 = x
+      FB Reads x. Expected x
+.fi	    
+.sp 1
+The next diagnostic test is executed automatically.
+.H 2 "Per-plane Masking ROPC tests"
+.PP
+Test the mask register for all bit combinations in pixel mode.
+For each mask bit combination, M the two tests are performed: 1) 0xFF is
+written through mask = M and read back through mask = 0xFF, and 2) 0xFF is
+written through mask = 0xFF and read back through mask = M. If the results
+read back are incorrect then the following error message is printed.
+.nf
+
+   Device #d. Testing Plane Mask.
+      Wrote 0xFF through Mask x. Read x through Mask x
+		     
+.fi
+.sp 1
+The next diagnostic test is executed automatically.
+.H 2 "Per_plane Loading of ROPC tests"
+Test the plane mask register in word-mode. An error occuring in this 
+test appears as following:
+.nf
+Device #d. Testing Plane Mask in word-mode. Plane d.
+	Mask x. Wrote 0x5555. Read x.
+.fi
+.sp 1
+Then tests 9.1 through 9.10 are repeated automatically.
+.bp
+.H 1 "Manual/Interactive Mode"
+.PP 
+This diagnostic includes all the functions of the Automatic tests. In 
+addition, the following features are provided: add a device to device
+list, select a device for manual operation and write continuously to the board.
+.H 2 "Add a Device to Device List"
+.PP
+This menu adds a device to the device list, and requests the monitor type 
+(1152x900 or 1024x1024) and device address. Up to four devices can be added to the device list. Device selection is explained in the following section.
+.H 2 "Select a Device for Manual Test"
+.PP
+If multiple Color Boards are included in the device list, then an individual 
+Color Board must be selected for diagnostic testing.
+The devices, color boards, in the device list are shown, and then an 
+opportunity is provided to enter a device to be tested.
+NOTE: The device must first be added to the device list before being selected, see the section on adding devices.
+.H 2 "Access Board Continously"
+.PP
+The user must select to read or write continuously. In read continuously 
+the word-pan register is read until the machine is  rebooted. In write 
+continuously 0xAAAA is written to the word-pan register until the machine is\
+ rebooted. These two tests primarily check the color board  VME bus interface.
+ An error message is displayed if a bus error occurs.
+.H 2 "Test Control Registers"
+.PP
+One of the following registers can be selected; however, only one register may be selected at a time.
+.nf
+   1: Status Register
+   2: Per_Plane Mask Register
+   3: Word Pan Register
+   4: Pixel Pan Register
+   5: Line Offset and Zoom Register
+   6: Variable Zoom Register
+   7: Interrupt Vector Register
+
+   After selecting a register for testing the following two lines are printed.
+         Testing Address x.
+         Test Register 'name'. 
+   Where register 'name' is one of the above registers.
+   Then a choice must be made between one of the following 11 tests.
+
+   1: Read Once
+      The message is printed: "Register 'name'. Read: x."
+   2: Read Continuously
+      The message is printed: "Register 'name'. First Read: x."
+      If data read back does not equal the first data read back, "E" is printed.
+      Note: Machine must be rebooted to terminate this test.
+   3: Write Once
+      Enter Datum(hex): 
+      Register 'name'. Wrote: x.
+   4: Write Continuously
+      Enter Datum(hex): 
+      Register 'name'. First Write: x.
+      Note: Machine must be rebooted to terminate this test.
+   5: Write/Read Once
+      Enter Datum(hex): 
+      Register 'name'. Wrote: x. Read: x.
+   6: Write/Read Continuously
+      Enter Datum(hex): 
+      Register. First Write: x. First Read: x.
+      If data read back does not equal the first data read back, "E" is printed.
+      Note: Machine must be rebooted to terminate this test.
+   7: Write/Read/Compare and decrement data by 3
+      Starting with data = 0xFFFF(register bits set to 1) is written to the
+      register and read back, the data is decremented by 3 each time
+      through the loop. If the data read and written are not equal then
+      the register is read twice more and the following message is
+      printed: 
+         Device d. Register 'name'. Wrote x. Read x1, x2, x3. 
+      Note this loop will terminate when data = 0.      
+   8: Write/Read & Increment Data Continuously
+      Starting with data = 0, and incrementing by 1 modulo 0xFFFF, data is 
+      written to the chosen register. Note: the system must be rebooted to 
+      terminate this test.
+   9: Write/Read/Compare and stop/read-forever on error
+      Starting with data = 0xFFFF, and decrementd  by 1 each time, data is 
+      written to the chosen register. Data is written, read and compared 
+      until data = 0. If an error should occur the following message
+      appears:
+         Device d. Register 'name'. Wrote x. Read x.
+         Hit any Character to Continue (r to read forever) 
+         If r is entered then the program reads and prints the register 
+	 contents until the system is rebooted.
+   A: Write/Read/Compare and increment data by n
+      Enter increment(hex): 
+      Starting with data = 0, and incrementing by n. Data is 
+      written/read/compared to the chosen register until data = 0xFFFF.
+      If an error occurs the following message is printed:
+         Device d. Register 'name'. Wrote x. Read x.
+   B: Write/Read alternating data
+      Enter first Datum(hex): 
+      Enter second Datum(hex): 
+      Print Error Messages (y/n)? 
+         Datum 1 is written and read to chosen register
+         Datum 2 is written and read to same register
+         If error messages are enabled,the data written is compared with
+         read back data, and if errors do occur the following message is 
+         printed: 
+            Device d. Register 'name'. Wrote x. Read x.
+.fi
+.H 2 "Interrupt Tests"
+.PP
+The following tests check the interrupt part of VME Color Board interface. 
+If interrupts are failing then a useful test is "Enable, trap and Reset
+interrupts. Repeat forever".
+
+.nf
+
+   1: Enable interrupts on CPU -- no error message is printed.
+
+   2: Disable interrupts on CPU -- no error message is printed.
+
+   3: Enable, Trap, & Reset interrupts. -- Do the auto interrupt test
+      one time which is descriped in section 9.3. If no errors were detected
+      then the message "Done. No Errors." is displayed.
+
+   4: Enable, Trap, & Reset interrupts. Repeat Forever. -- Repeat the 
+      auto interrupt test of section 9.3 until the system is rebooted.
+
+   5: Set User Interrupt vector. -- the vector number is entered, and 
+      the address of an interrupt service routine is written to the interrupt 
+      vector table at address 0x100 + vector << 2. If
+      requested the color board interrupt vector is set to the vector number
+      entered.
+
+   6: Set All User Interrupt vectors -- Set all entries in the vector table
+      to the address of the interrupt service routine used  by the  manual
+      interrupt diagnostics routine. No error messages are printed.
+
+      Address (0x100 + 4*i), for 0 <= i <= 0x100 is set to the address of the
+      manual interrupt diagnostics routine. No error messages are printed.
+.f
+.H 2 "Color Map Tests"
+.PP
+To display the image in the Sun_2 color frame buffer memory, each 8 bit
+pixel is used as an index into a 256 element color lookup table. Each element of
+the table is 24 bits, 8 bits drive the red DAC, 8 drive the green, and 8 for
+the blue.
+The color lookup tables consist of a high speed ECL lookup table used during
+video display, and a TTL shadow color lookup table that can be accessed at any
+time. The TTL shadow color lookup table is loaded into ECL lookup table
+during vertical blanking.
+    
+.PP
+NOTE: to activate the shadow map it must be loaded into ECL map (i.e. third 
+menu choice).
+.RS
+.nf
+   1: Acquire access to TTL cmap -- enable writting of shadow map to ECL map
+
+   2: Relinquish access to TTL cmap -- disable writting of shadow map to ECL map
+
+   3: Load TTL -> ECL cmap once:
+         Wait for Retrace to end.
+         Enable loading of ECL color map from TTL map.
+         Wait for Retrace to begin.
+         Wait for Retrace to end.
+         Disable loading of ECL color map from TTL map.
+      
+      For example to load the default array into the ECL color map
+      first select menu item four which loads the shadow map.
+      Then,  load the ECL map by selecting menu item three.
+
+   4: Load cmap with default arrays, the default arrays are:
+sc_red[256] = { 
+        0,255, 85,170,
+    
+        3,  6,  9, 12,     6, 12, 18, 24,     9, 18, 27, 36,
+       12, 24, 36, 48,    15, 30, 45, 60,    18, 36, 54, 72,
+       21, 42, 63, 84,    24, 48, 72, 96,    27, 54, 81,108, 
+       30, 60, 90,120,    33, 66, 99,132,    36, 72,108,144,
+       39, 78,117,156,    42, 84,126,168,    45, 90,135,180,   
+       48, 96,144,192,    51,102,153,204,    54,108,162,216,  
+       57,114,171,228,    60,120,180,240,    63,126,189,252,  
+
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+
+       60,120,180,240,    57,114,171,228,    54,108,162,216,    
+       51,102,153,204,    48, 96,144,192,    45, 90,135,180,   
+       42, 84,126,168,    39, 78,117,156,    36, 72,108,144,  
+       33, 66, 99,132,    30, 60, 90,120,    27, 54, 81,108,   
+       24, 48, 72, 96,    21, 42, 63, 84,    18, 36, 54, 72,    
+       15, 30, 45, 60,    12, 24, 36, 48,     9, 18, 27, 36,    
+        6, 12, 18, 24,     3,  6,  9, 12,     0,  0,  0,  0 };
+
+ushort sc_grn[256] = { 
+        0,255, 85,170,
+
+       60,120,180,240,    57,114,171,228,    54,108,162,216,    
+       51,102,153,204,    48, 96,144,192,    45, 90,135,180,   
+       42, 84,126,168,    39, 78,117,156,    36, 72,108,144,  
+       33, 66, 99,132,    30, 60, 90,120,    27, 54, 81,108,   
+       24, 48, 72, 96,    21, 42, 63, 84,    18, 36, 54, 72,    
+       15, 30, 45, 60,    12, 24, 36, 48,     9, 18, 27, 36,    
+        6, 12, 18, 24,     3,  6,  9, 12,     0,  0,  0,  0,
+    
+        3,  6,  9, 12,     6, 12, 18, 24,     9, 18, 27, 36,
+       12, 24, 36, 48,    15, 30, 45, 60,    18, 36, 54, 72,
+       21, 42, 63, 84,    24, 48, 72, 96,    27, 54, 81,108, 
+       30, 60, 90,120,    33, 66, 99,132,    36, 72,108,144,
+       39, 78,117,156,    42, 84,126,168,    45, 90,135,180,   
+       48, 96,144,192,    51,102,153,204,    54,108,162,216,  
+       57,114,171,228,    60,120,180,240,    63,126,189,252,  
+
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240 };
+
+ushort sc_blu[256] = { 
+        0,255, 85,170,
+
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+	0, 80,160,240,     0, 80,160,240,     0, 80,160,240,
+       
+       60,120,180,240,    57,114,171,228,    54,108,162,216,    
+       51,102,153,204,    48, 96,144,192,    45, 90,135,180,   
+       42, 84,126,168,    39, 78,117,156,    36, 72,108,144,  
+       33, 66, 99,132,    30, 60, 90,120,    27, 54, 81,108,   
+       24, 48, 72, 96,    21, 42, 63, 84,    18, 36, 54, 72,    
+       15, 30, 45, 60,    12, 24, 36, 48,     9, 18, 27, 36,    
+        6, 12, 18, 24,     3,  6,  9, 12,     0,  0,  0,  0,
+    
+        3,  6,  9, 12,     6, 12, 18, 24,     9, 18, 27, 36,
+       12, 24, 36, 48,    15, 30, 45, 60,    18, 36, 54, 72,
+       21, 42, 63, 84,    24, 48, 72, 96,    27, 54, 81,108, 
+       30, 60, 90,120,    33, 66, 99,132,    36, 72,108,144,
+       39, 78,117,156,    42, 84,126,168,    45, 90,135,180,   
+       48, 96,144,192,    51,102,153,204,    54,108,162,216,  
+       57,114,171,228,    60,120,180,240,    63,126,189,252 };
+
+   5: Verify cmap with default arrays. -- Verify the TTL color map contains
+      the default arrays that were loaded in test four. Possible error messages
+      follow:
+
+         Entry x. RED. Read x. Compare w/ x. Xor x
+         Entry x. GRN. Read x. Compare w/ x. Xor x
+         Entry x. BLU. Read x. Compare w/ x. Xor x
+         Total Errors: error-count
+
+   6: Load cmap with solid value
+      Enter Red Intensity (0x0-0xFF): 
+      Enter Grn Intensity (0x0-0xFF): 
+      Enter Blu Intensity (0x0-0xFF): 
+      For range (low:high), Enter Low  (0-255): 
+      For range (low:high), Enter High (0-255): 
+
+      The Color maps are loaded with the selected constants, from
+      color-map-entry [low] to color-map-entry [high].
+
+      No error messages are printed.
+
+   7: Verify cmap with solid value
+      Enter Red Intensity (0x0-0xFF): 
+      Enter Grn Intensity (0x0-0xFF): 
+      Enter Blu Intensity (0x0-0xFF): 
+      For range (low:high), Enter Low  (0-255): 
+      For range (low:high), Enter High (0-255): 
+
+      This test verifies that the Color maps are loaded with the selected 
+      constants, from color-map-entry [low] to color-map-entry [high].
+
+      Possible error messages are:
+         Entry x. RED. Read x. Compare w/ x. Xor x
+         Entry x. GRN. Read x. Compare w/ x. Xor x\n",
+         Entry x. BLU. Read x. Compare w/ x. Xor x\n",
+         Total Errors: error-count
+
+   8: Set 0-255 red, 256-511 grn, 512-767 blue -- Load TTL color maps with
+      the following triple ramp:
+
+         red[i] = 3*i, grn[i] = 0,        blu[i] = 0,         for 0 <= i <= 84
+         red[i] = 0,   grn[i] = 3*(i-85), blu[i] = 0,         for 85 <= i <= 169
+         red[i] = 0,   grn[i] = 0,        blu[i] = 3*(i-170), for 170 <= i <= 254
+         red[255] = 0, grn[255] = 0,      blu[255] = 0
+
+
+      No error messages are printed.
+
+   9: Test single location
+      Red, Grn, or Blu cmap (rgb):  
+      Offset (0x0-0xFF): 
+
+      The selected color map (r=red, g=green, b=blue) entry (offset) is tested
+      by the method selected by the user. The choices are the same as provided
+      in the register tests, see section 10.4 for details.
+
+   A: Auto test -- the auto color map test of section 9.4 is executed one
+      time only. After the test  completes the total error count is printed.
+
+   B: Continous auto test -- the auto color map test of section 9.4 is 
+      executed one until the system is rebooted.
+      Each time the test is repeated the total error count is 
+      printed.
+
+   C: Load cmap with ramp -- The TTL color map is loaded with the following 
+      monochrome ramp:
+  
+      red [i] = i, grn [i] = i, blu [i] = i, for 0 <= i <= 255	
+
+   D: Verify cmap with ramp -- The color map ramp loaded in "C" is verified.
+      The following error messages are possible:
+         Entry x. RED. Read x. Compare w/ x. Xor x
+         Entry x. GRN. Read x. Compare w/ x. Xor x
+         Entry x. BLU. Read x. Compare w/ x. Xor x
+.fi
+.H 2 "Frame Buffer Tests"
+.PP
+The Frame Buffer Memory Tests allow reading/writing from/to frame buffer memory. 
+These tests are useful for checking word or pixel mode addressing and frame
+buffer data or address line stuck_at conditions. 
+.sp 1
+.nf
+      1: write checkerboard. --  This test  draws a 16 x 16 grid on the 
+         frame buffer. Each is rectangle 72 x 56 pixels on a side. Each
+         box is numbered from zero moving left to right, top to bottom.
+
+      2: Write a vertical line. -- A column and color are requested, and
+         then a vertical line is drawn in the selected column with the 
+         selected color. No error messages are printed.
+
+      3: Write a horizontal line. -- A row and color are requested, and
+         then a horizontal line is drawn in the selected row with the 
+         selected color. No error messages are printed.
+
+      4: Verify a vertical line. -- A column and color are requested, and
+         then a vertical line is verified  in the selected column with 
+         the selected color. This provides a method of verifing that test
+         2, write vertical line, worked correctly. A possible error message 
+         is the following:
+
+            Error. X = x. Y = x. Rd x.
+
+      5: Verify horizontal line. -- A row and color are requested, and
+         then a horizontal line is verified  in the selected row with 
+         the selected color. This provides a method of verifing that test
+         3, write horizontal line, worked correctly. A possible error message 
+         is the following:
+
+            Error. X = x. Y = x. Rd x.
+
+      6: Fill Region with constant. -- The upper left corner, width and
+	 height of a frame buffer rectangle are requested with a color. Then
+         that rectangle is filled with the selected constant color. No
+         error messages are printed.
+
+      7: Print all vertical lines. -- This test will fill every column 
+         with its column number ANDed with 0xFF. No error messages
+         are printed.
+
+      8: Print all horizontal lines. -- This test will fill every row 
+         with its row number ANDed with 0xFF. No error messages
+         are printed.
+
+      9: Test single Location. -- This tests a given memory location using a
+         chosen addressing mode. The addressing modes posssible are the 
+         following:
+
+            0: Word-Mode Memory
+            1: Pixel-Mode Memory
+            2: Word-Mode with RasterOp
+            3: Pixel-Mode with RasterOp
+            4: Word-Mode with RasterOp and Hidden Read
+            5: Pixel-Mode with RasterOp and Hidden Read
+            6: Parallel Word-Mode with RasterOp
+            7: Parallel Pixel-Mode with RasterOp
+            8: Parallel Word-Mode with RasterOp and Hidden Read
+            9: Parallel Pixel-Mode with RasterOp and Hidden Read
+   
+         If a word mode is selected then the diagnostic requests the plane
+	 number, x and y; otherwise, only x and y are requested for pixel
+         mode addressing. From this point forward the test proceeds as the 
+         manual register test in 10.4 except a register is not selected.
+
+      D: Auto Test. -- First word or pixel mode addressing is selected,
+         and then auto frame buffer tests 0-A, section 9.5, are performed.
+         When the test completes the error total is printed.
+
+      E: Continuous Auto Test. -- This test repeats the tests described in
+	 section  9.5 for both word and pixel mode addressing, until the 
+         system is rebooted. After each iteration of the auto test the 
+         total number of word and pixel errors are displayed.
+
+      F: Fill Frame Buffer in Word-Mode. -- A 32-bit constant is requested,
+         and then it is written to every location in word mode memory.
+         No error messages are printed for this test.
+
+      G: Fill One Ram. -- A plane number and ram column are requested. Then
+         the choice between patterns of 0x00's, 0x01's or alternating 0x00's
+         and 0x01's is made. No error messages are printed for this test.
+
+      K: Write horizontal line in word mode. -- the Plane, the row and data are 
+         entered. Then the data entered written to entire line specified
+         by the plane and row. No error messages are printed  for this test.
+
+      L: Write even vertical lines in frame buffer. -- This test fills even 
+         columns of the frame buffer with a chosen color, no error messages.
+
+      M: Write odd vertical lines in frame buffer. -- This test fills odd
+         columns of the frame buffer with a chosen color, no error messages.
+
+      N: Access word-mode location 0. Trap on Bus error. -- This test
+         continues until the system is rebooted. If read is chosen 
+         word-mode location 0 is continuously read. If write mode is chosen
+         0xAAAA is written continuously, and if read and write is picked
+         then 0xAAAA is written to location 0 followed by a read. 
+
+      O: Pound alternating word locations with data. Address #1, data #1,
+         address #2 and data #2 are entered, data is 32 bits. Next a choice
+         between write continously and write/read continously is made. If
+         write/read continously is chosen then the following message is 
+         printed after each iteration:
+
+            data1 d1 datab1 db1 data2 d2, datab2 db2
+
+         Where d1, db1, d2, and db2 are data #1, data read back #1,
+         data #2 and data read back #2 respectively. 
+
+      S: Scan word mode memory for a value. -- After the value is entered
+         the entire word mode memory is scanned for the value. For each
+         address with a value  that matchs the following is printed.
+
+            Data matches value at address x
+   
+      T: Fill frame buffer with addresses. -- Each word of word mode
+         memory is filled with its (address - starting address of word mode
+         memory plane 0). No errors messages are printed.
+
+      U: Verify frame buffer with addresses. -- Verify that test "T" 
+         did its job. The following message is printed for each error.
+
+            Error: Expected: x, Read x, Addr x.
+
+.fi
+.RE 1
+.H 2 "ROPC Tests "
+There is a ROPC for each bit plane in the frame buffer. Since the data 
+paths connecting and coordinating these per_plane RasterOp units are 
+somewhat complex refer to the Sun-2 Color Board Engineering manual for
+detailed information.
+.nf
+   1: Select Ropc (Default = 7) -- select a ropc plane 0-8
+      Before selecting a ropc plane here, rop-plane defaults to
+      seven.
+
+   2: Register Tests -- the choices are many:
+      1: Destination Register
+      2: Source 1 Register
+      3: Source 2 Register
+      4: Pattern Register
+      5: Mask 1 Register
+      6: Mask 2 Register
+      7: Shift Value Register
+      8: Function Register
+      9: Width Register
+      A: Op Count Register
+      B: Function Output Register
+      C: Manual Load Destination Register
+      D: Manual Load Source Register
+      E: Flag Register
+
+   After selecting a register for testing the following two lines are printed.
+      Testing Address x.
+      Test register 'name'. 
+
+   Next the user is presented with a number  of register tests to chose from,
+   the possibilities are found in section 10.4
+
+   3: Auto Register Tests -- Test number 1 of section 9.8 is
+      executed once.
+
+   4: Auto Function Unit Tests -- Test number 2 of section 9.8 is 
+      executed once.
+
+   5: Auto Destination Register Tests -- One of the ten addressing 
+      modes is selected. Next an address is selected, which must be
+      even if one of the word modes was selected. This test is similar
+      to destination part of test number 3 of section 9.8.
+      Note: addressing modes  3, 5, and 7 are not tested.
+
+   6: Auto Source Register Tests -- One of the ten addressing 
+      modes is selected. Next an address is selected, which must be
+      even if one of the word modes was selected. This test is similar
+      to source  part of test number 3 of section 9.8.
+      Note: addressing modes  3, 5, and 7 are not tested.
+
+   7: Auto Mask Tests -- This test is identical with test number 4
+      of section 9.8.
+
+   8: Continuous Auto Tests -- Repeat forever or until the system
+      is rebooted, all the tests of section 9.8.
+
+   9: Continuous Auto Function Unit Tests -- Repeat forever test number
+      2 of section 9.8.
+
+   A: Test Per-Plane Mask Register -- Execute the tests of section 9.9
+      and 9.10.
+.fi
+.sp l
+.H 2 "Zoom and Pan Tests"
+.PP
+The use of hardware zoom and pan does not change the addressing 
+of the color frame buffer; it alters the region of the frame 
+buffer that is actually displayed. Thus a frame buffer memory
+scan line is not necessarily equivalent to a displayed scan line.
+The Sun-2 Color Board supports pixel pan and zoom in integer 
+magnification of zero to 8.
+.RS
+.IP 1
+Alter Zoom -- change the magnification factor.
+.IP 2.
+Alter Origin (Absolute) -- set frame buffer coordinates for center
+                                   of region to be displayed while zooming.
+.IP 3.
+Alter Origin (Relative) -- add a relative offset to the current origin.
+.IP 4.
+Set No Zoom Line Number -- set line number below which zoom is disabled.
+.IP 5.
+Excercise Pan -- this test automatically moves the zoom origin around
+                      the frame buffer.
+.IP 6.
+Auto Test -- draw  a checker-board pattern first and then repeats exercise
+                  pan test for zoom factors 0 to 7.
+.IP 7.
+Toggle Origin -- toggles between two zoom origins forever.
+.RE
+.H 2 "DAC and Monitor Tests"
+.PP 
+The following tests load various ramps and patterns to the frame buffer,
+and thus are usefull for debugging the video DAC and monitor.
+.RS
+.nf
+     1: Print Horizontal Red Ramp -- The color map is loaded with a
+        red ramp and then the frame buffer is loaded with a horizotnal
+        ramp. Both the color map ramp and frame buffer ramp are defined 
+        below:
+
+        if    0 <= column <= 63     then pixel-value = (63 - column)/2
+        if   64 <= column <= 573    then pixel-value = (column - 62)/2
+        if  574 <= column <= 1082   then pixel-value = (1082 - column)/2
+        if 1083 <= column <= 1151   then pixel-value = (column - 1081)/2
+
+        column       0 .. 63, 64 .. 573, 574 .. 1082, 1083 .. 1151
+        pixel-value 31 ..  0,  1 .. 255, 254 ..    0,    1 ..   35
+
+        red   [i] = i, blue  [i] = 0, green [i] = 0, for 0 <= i <= 255
+
+     2: Print Horizontal Grn Ramp -- The color map is loaded with a
+        green ramp and then the frame buffer is loaded with a horizotnal
+        ramp. Both the color map ramp and frame buffer ramp are defined 
+        below:
+
+        if    0 <= column <= 63     then pixel-value = (63 - column)/2
+        if   64 <= column <= 573    then pixel-value = (column - 62)/2
+        if  574 <= column <= 1082   then pixel-value = (1082 - column)/2
+        if 1083 <= column <= 1151   then pixel-value = (column - 1081)/2
+
+        column       0 .. 63, 64 .. 573, 574 .. 1082, 1083 .. 1151
+        pixel-value 31 ..  0,  1 .. 255, 254 ..    0,    1 ..   35
+
+        red   [i] = 0, blue  [i] = 0, green [i] = i, for 0 <= i <= 255
+
+     3: Print Horizontal Blu Ramp -- The color map is loaded with a
+        blue ramp and then the frame buffer is loaded with a horizotnal
+        ramp. Both the color map ramp and frame buffer ramp are defined 
+        below:
+
+        if    0 <= column <= 63     then pixel-value = (63 - column)/2
+        if   64 <= column <= 573    then pixel-value = (column - 62)/2
+        if  574 <= column <= 1082   then pixel-value = (1082 - column)/2
+        if 1083 <= column <= 1151   then pixel-value = (column - 1081)/2
+
+        column       0 .. 63, 64 .. 573, 574 .. 1082, 1083 .. 1151
+        pixel-value 31 ..  0,  1 .. 255, 254 ..    0,    1 ..   35
+
+        red   [i] = 0, blue  [i] = i, green [i] = 0, for 0 <= i <= 255
+
+
+     4: Print Horizontal White Ramp -- The color map is loaded with a
+        monochrome ramp and then the frame buffer is loaded with a horizotnal
+        ramp. Both the color map ramp and frame buffer ramp are defined 
+        below:
+
+        if    0 <= column <= 63     then pixel-value = (63 - column)/2
+        if   64 <= column <= 573    then pixel-value = (column - 62)/2
+        if  574 <= column <= 1082   then pixel-value = (1082 - column)/2
+        if 1083 <= column <= 1151   then pixel-value = (column - 1081)/2
+
+        column       0 .. 63, 64 .. 573, 574 .. 1082, 1083 .. 1151
+        pixel-value 31 ..  0,  1 .. 255, 254 ..    0,    1 ..   35
+
+        red   [i] = i, blue  [i] = i, green [i] = i, for 0 <= i <= 255
+
+     9: Print Vertical Red Ramp -- The color map is loaded with a
+        red ramp and then the frame buffer is loaded with a vertical 
+        ramp. Both the color map ramp and frame buffer ramp are defined 
+        below:
+
+        if    0 <= row <= 511    then pixel-value = row/2
+        if  512 <= row <= 899    then pixel-value = (1021-row)/2
+
+        row          0 .. 511, 512 .. 899
+        pixel-value  0 .. 255, 254 ..  61
+
+        red   [i] = i, blue  [i] = 0, green [i] = 0, for 0 <= i <= 255
+
+     A: Print Vertical Green Ramp -- The color map is loaded with a
+        green ramp and then the frame buffer is loaded with a vertical 
+        ramp. Both the color map ramp and frame buffer ramp are defined 
+        below:
+
+        if    0 <= row <= 511    then pixel-value = row/2
+        if  512 <= row <= 899    then pixel-value = (1021-row)/2
+
+        row          0 .. 511, 512 .. 899
+        pixel-value  0 .. 255, 254 ..  61
+
+        red   [i] = 0, blue  [i] = 0, green [i] = i, for 0 <= i <= 255
+
+     B: Print Vertical Blue Ramp -- The color map is loaded with a
+        blue ramp and then the frame buffer is loaded with a vertical 
+        ramp. Both the color map ramp and frame buffer ramp are defined 
+        below:
+
+        if    0 <= row <= 511    then pixel-value = row/2
+        if  512 <= row <= 899    then pixel-value = (1021-row)/2
+
+        row          0 .. 511, 512 .. 899
+        pixel-value  0 .. 255, 254 ..  61
+
+        red   [i] = 0, blue  [i] = i, green [i] = 0, for 0 <= i <= 255
+
+     C: Print Vertical White Ramp -- The color map is loaded with a
+        white ramp and then the frame buffer is loaded with a vertical 
+        ramp. Both the color map ramp and frame buffer ramp are defined 
+        below:
+
+        if    0 <= row <= 511    then pixel-value = row/2
+        if  512 <= row <= 899    then pixel-value = (1021-row)/2
+
+        row          0 .. 511, 512 .. 899
+        pixel-value  0 .. 255, 254 ..  61
+
+        red   [i] = i, blue  [i] = i, green [i] = i, for 0 <= i <= 255
+
+     D: Print Simultaneous RGBW horizontal Ramps -- The following ramps
+        are loaded:
+
+        The following color map is loaded with the following function:
+            red[i] = 4*i, blue[i] = 0,        green[i] = 0,         for   0 <= i <=  63
+            red[i] = 0,   blue[i] = 4*(i-64), green[i] = 0,         for  64 <= i <= 127
+            red[i] = 0,   blue[i] = 0,        green[i] = 4*(i-128), for 128 <= i <= 191
+            red[i] = 4*(i-192), blue[i] = 4*(i-192), green[i] = 4*(i-192), for 192 <= i <= 255
+        
+        The frame buffer is loaded with four horizontal ramps in sequence,
+        red, blue, green and white. Each ramp is defined below:
+        .nf
+        Red horizontal ramp
+        
+        if    0 <= column <= 63     then pixel-value = 0
+        if   64 <= column <= 567    then pixel-value = (column - 56)/8
+        if  568 <= column <= 1077   then pixel-value = (1077 - column)/8
+        if 1078 <= column <= 1151   then pixel-value = 0
+        
+        column       0 .. 63, 64 .. 567, 568 .. 1077, 1078 .. 1151
+        pixel-value  0 ..  0,  1 ..  63,  63 ..    0,    0 ..    0
+        
+        Blue horizontal ramp
+        
+        if    0 <= column <= 63     then pixel-value = 0
+        if   64 <= column <= 567    then pixel-value = 64 + (column - 56)/8
+        if  568 <= column <= 1077   then pixel-value = 64 + (1077 - column)/8
+        if 1078 <= column <= 1151   then pixel-value = 0
+        
+        column       0 .. 63, 64 .. 567, 568 .. 1077, 1078 .. 1151
+        pixel-value  0 ..  0, 65 .. 127, 127 ..   64,    0 ..    0
+        
+        Green horizontal ramp
+        
+        if    0 <= column <= 63     then pixel-value = 0
+        if   64 <= column <= 567    then pixel-value = 128 + (column - 56)/8
+        if  568 <= column <= 1077   then pixel-value = 128 + (1077 - column)/8
+        if 1078 <= column <= 1151   then pixel-value = 0
+        
+        column       0 .. 63,  64 .. 567, 568 .. 1077, 1078 .. 1151
+        pixel-value  0 ..  0, 129 .. 191, 191 ..  128,    0 ..    0
+        
+        White horizontal ramp
+        
+        if    0 <= column <= 63     then pixel-value = 0
+        if   64 <= column <= 567    then pixel-value = 192 + (column - 56)/8
+        if  568 <= column <= 1077   then pixel-value = 192 + (1077 - column)/8
+        if 1078 <= column <= 1151   then pixel-value = 0
+        
+        column       0 .. 63,  64 .. 567, 568 .. 1077, 1078 .. 1151
+        pixel-value  0 ..  0, 193 .. 255, 255 ..  192,    0 ..    0
+ 
+     E: Print Screen Borders x=(0:1151) y=(0:899) -- This is identical to
+        test #7 of section 9.6.
+
+     G: Write alternating bars of color to test DAC glitches -- This is
+        identical to test #5 of section 9.1.
+	  
+     K: Continuous auto tests -- Repeat the auto tests of section 9.6
+        until the system is rebooted.
+
+     L: Test Screen Stability -- This is identical to test #6 of section
+        9.6.
+.fi
+.RE
+.H 2 "Brief monitor Tests"
+.lp
+Brief monitor Tests are mainly visual diagnostics and help identify the
+screen purity, convergence, ringing and bleeding monitor problems. Once in 
+the menu use <cr> to continue to next test. Error messages are not displayed
+for these tests, since they are visual tests only.
+.H 2 "Perform Auto Test"
+.lp
+refer to section 3.1
+
+

@@ -1,0 +1,4 @@
+#@(#)rename.syscall	1.1 9/24/86. 86/01/17 SMI
+int	rename(!from, !to) char *from; char *to; {return(0);}
+rw_read
+rw_write

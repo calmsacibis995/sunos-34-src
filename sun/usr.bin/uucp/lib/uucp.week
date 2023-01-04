@@ -1,0 +1,32 @@
+# execute every week early in the morning
+
+# clean up UUCP logfiles
+uulogdir=/usr/spool/uucp/OLD
+cd $uulogdir
+
+# Get current month from date command
+set `date`
+month=$2
+
+# save the current SYSLOG in a monthly summary
+mv SYSLOG.week SYSLOG.$$
+cat SYSLOG.$$ >>SYSLOG.month
+rm -f SYSLOG.$$
+
+# Create monthly name file if necessary
+if [ ! -f logmonth ]
+then
+	echo $month >logmonth
+	curmonth=$month
+else
+	curmonth=`cat logmonth`
+fi
+
+# If the month has wrapped around, save the monthly
+# summary by the name of the month
+  
+if [ $month != $curmonth ]
+then
+	mv SYSLOG.month SYSLOG.$curmonth
+	echo $month >logmonth
+fi

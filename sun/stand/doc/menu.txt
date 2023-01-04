@@ -1,0 +1,418 @@
+.de SX		\" call 'so' something else so derof
+.so \\$1
+..
+.\" .SX /usr/lib/tmac/tmac.e
+.po 1.5i
+.nr PO 1.5i
+.hy 14		\" don't hyphenate in bad places
+.pn 1		\" start page number at 'A'
+.af % A
+.ds PN "\\\\n%
+.nr sf 3	\" set section headings in bold face
+.nr si 2	\" indent nested sections 2 spaces
+.de $0		\" macro to enter section heading in to table of contents
+.(x C
+.if (\\$3=1) .sp
+\\$2   \\$1
+.)x \\*(PN
+..
+.de [R		\" routine declaration
+.ds RC \\$1
+.sp
+.ne 10
+.(l L
+.fi
+.na
+..
+.de *Q
+.ds RM \\$1 \\$2
+\\*(RM
+..
+.de *R
+.ds RN \\$1
+.(x R
+\\*(RN - \\*(RC
+.)x
+\\$1
+..
+.de {R
+\\*(RN
+.nf
+.ad
+..
+.de [R
+.)l
+..
+.de }R
+..
+.de {E			\" possible errors sub-section
+.lp
+Possible errors:
+.nr ps 0n
+.LB \\(bu
+..
+.de }E
+.LE
+.nr ps 1n
+.lp
+..
+.de WP
+.lp
+\fb***\fp
+..
+.de IP
+.ip "\fB\\$1\fP"
+..
+.de EB
+.sp -1
+.nf
+\L'|\\$1-1'\h'-1n'\1'\\n(.lu'\h-1n'\L'-1\\$1+1'\1-\\ln(.lu'
+.fi
+..
+.nr ii 5
+.nr hm 3v
+.nr tm 6v
+.nr fm 4v
+.nr bm 7v
+.de $h
+.tl 'APPROVAL SECTION''\*(PN'
+..
+.de $f
+.tl '\*(td''DO NOT COPY'
+.tl 'SUN MICROSYSTEMS INC''COMPANY CONFIDENTIAL'
+..
+.bp
+.sp
+.ce 2
+\fBE X T E R N A L  S P E C I F I C A T I O N
+(User Perspective)
+.sp
+.\" Fill in you project's name in place of the dot below and elsewhere
+.\" in this file.
+TITLE	     : 	Menu External Specification\fR
+.sp
+AUTHOR	     :	Kevin Sheehan
+.sp
+REPORT NO.   :	950-1015-01
+.sp
+REVISION NO. :	A for 1.1 @(#)menu.txt 1.1 9/25/86
+.sp
+DATE         : \*(td	\"td=printing date if reformated
+.sp
+STATUS       :  Ongoing
+.sp 2
+.(l L
+APPROVALS    :						DATE
+.de SG			\" Macro to define signiture lines
+.ip "\\$1" 20n		\" Position and signiture line
+------------------------------------------------------------
+.br
+\\$2			\" Name Underneath
+..
+.SG "Originator" "Kevin Sheehan"
+.SG "Test Engineering"
+.SG "Manufacturing"
+.SG "Production"
+.SG "Quality Control"
+.)l
+.bp
+.(l L
+.ce
+Document Review Form
+.lp
+Please make note and initial on this page all corrections and/or
+proposed amendments by page number and/or section number.
+.sp
+.ce
+---------------------------------------------
+Recommendations, Differences, Construction Errors, and comments:
+.sp 36
+.ce 2
+---------------------------------------------
+Typographical Errors:
+.sp 4
+.ce 2
+---------------------------------------------
+Attach additional sheet(s) as needed.
+.)l
+.\" redefine headers for the body of the document
+.de $h
+.tl 'Menu EXTERNAL SPECIFICATION ''
+.tl '(User\'s Perspective)''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fB. EXTERNAL SPECIFICATION\fR
+.sh 1 "INTRODUCTION"
+.sh 2 "Purpose"
+.\"	1.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+This document describes the usage of the diagnostic \fImenu\fR and
+the tests in it.  As tests are added to \fImenu\fR, this document
+will be updated.
+.sh 2 "Applicable Documents"
+.\"	1.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.(l
+Sun 2 Processor Manuals (PN nnn-nnnn)
+Rasterop Chip Specification (PN nnn-nnnn)
+The Am9513 System Timing Controller Handbook (AMD PN 3402B-MMP)
+.)l
+.sh 2 "Definitional Conventions"
+.\"	1.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+The terms ropchip and timerchip will occasionally
+be used for the rasterop chip and Am9513 respectively.
+.sh 3 "Notations"
+.\"	1.3.1
+.lp
+The use of C notation for hexadecimal is used here, meaning \fI0xnnnn\fR is
+\fInnnn\fR in base 16. Operator input on menus will be in boxes.
+.sh 3 "Terminology"
+.\"	1.3.3
+.lp
+The term operator or user refers to you.  The term booting refers to the 
+loading of the program \fImenu\fR from the various media SUN supports.
+If you are unfamiliar with booting, refer the System Manager\`s manual.
+.sp 2
+.sh 1 "SYSTEM OVERVIEW"
+.\"	2.
+.sh 2 "General Description"
+.\"	2.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+The diagnostic \fImenu\fR is a menu oriented system with a number of
+tests and options selectable from the top level.  The tests now
+under the menu are the rasterop chip test, and the user timer test.
+.sh 2 "Features"
+.\"	2.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+\fImenu\fR allows the operator to test the rasterop chip once, or to
+let the timer test accumulate until told to stop.  At the top level,
+you may either select the tests, or quit back to the monitor.
+.sh 2 "Required Configuration"
+.\"	2.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+For the rasterop chip test:
+.(l
+A Sun 2 Processor with Raster op chip installed. (PN nnn-nnnn)
+At least 1MB of low power memory (PN nnn-nnnn)
+Some means of loading \fImenu\fR (ethernet, disk, tape, etc.)
+.)l
+.lp
+For the user timer test:
+.(l
+A Sun 2 Processor with user timer modification installed. (PN nnn-nnnn Rev ?)
+At least 1MB of low power memory (PN nnn-nnnn)
+Some means of loading \fImenu\fR (ethernet, disk, tape, etc.)
+NO, repeat \fBNO\fR active DMA devices in the cardcage.
+.)l
+.sh 2 "Error Handling"
+.\"	2.4
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 3 "Rasterop"
+.lp
+If the rasterop registers do not respond as planned, the contents are
+printed out.  If the two rasterop memory tests do not produce the
+desired results, the value expected and observed are printed, and the
+test waits for operator input to continue.
+.sh 3 "User Timer"
+.lp
+If the observed timing values exceed the limits given, the test stops
+with the bad values, and waits for operator input to continue.
+.sh 2 "General Performance Characteristics"
+.\"	2.5
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+The rasterop test takes about 1 sec to complete and return to the menu.
+The user timer test takes 200 milliseconds per pass,
+and waits or returns to the menu at the operators request.
+.sh 2 "Planned Extensions"
+.\"	2.5
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+Tests which do not require prom based operation or verification of
+memory will probably end up in \fImenu\fR.
+.sh 2 "Limitations"
+.\"	2.7
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+The verification of the rasterop chip is not exhaustive, and the user timer
+check is still subject to change.
+.sp 2
+.\" Replace the dot below with the name of the major component you are
+.\" describing.  Repeat the entire section for each of your major components.
+.\" The subsections below are some of the ones that may be applicable.
+.\" Delete the ones that do not apply, and add new ones as necessary.
+.sh 1 "Menu SPECIFICATION"
+.sh 2 "User Interface"
+.\"	3.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+There are three levels at which the operator has input.  At the top
+level of menu, some list of tests needs to be input.  At the test level,
+some values may be required (or defaulted).  During the test, the
+operator may have the ability to alter test actions, and or respond
+to error messages as they appear.
+.sh 2 "Input/Output"
+.\"	3.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 3  "Menu"
+.lp
+When the menu starts executing, or you return to the top level, this
+menu will appear. The box indicates user input.
+.(l
+SUN Menu Diagnostics REV 1.1 10/27/83
+
+
+Option Menu:
+
+        r - rasterop test
+        t - user timer test
+        q - leave the game
+
+.)l
+ : 
+.bx flags
+.sh 2 "Operation"
+.\"	3.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 3 "Menu"
+.lp
+The operator must type the letters of the tests he wishes to run.  For
+example, to run four rasterop test the operator should type \'rrrr\'. To
+run two rasterop tests, then the timertest, \'rrt\' should be input.  To
+run the rasterop test, then the timer test, then quit, \'rtq\' should
+be input.
+.sh 3 "Rasterop test"
+.lp
+No input is required for this test until an error occurs.
+.sh 3 "User Timer test"
+.lp
+When this test starts executing, it prints the following:
+.lp
+minimum clock [0x7944] : 
+.bx nnnn
+.lp
+maximum clock [0x7947] : 
+.bx nnnn
+.lp
+You may either enter a hexadecimal value for both of these, or
+press return to default them.  Defaults have been chosen as the
+current best known limits. When you have done this, the test starts.
+As the test runs, you may stop output by pressing the space bar. To
+start output, press the space bar again. If you wish to stop the test
+and return to the menu, type a \'q\'. As this test continues forever,
+you will have to do this eventually.
+.sh 2 "Error Handling"
+.\"	3.4
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 3 "Rasterop test"
+.lp
+When an error is found on the memory rasterop cycles, the test stops
+and prints the values of the count, the observed data, and the
+expected data.  If you type \'n\', the test skips to the next portion
+of the test.  If you type \'q\', the test returns to the menu.  Any
+other key will continue the current test.
+.sh 3 "User Timer test"
+.lp
+If the timer value exceeds the input limits, the test prints
+.lp
+oops #n press any key
+.lp
+and waits for input.  A space will print the next value and wait, a
+\'q\' will return to the menu, any other key will continue the test.
+.sh 2 "Performance"
+.\"	3.5
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 3 "Rasterop test"
+.lp
+The test first checks to see if the registers respond, then performs
+a copy rasterop of aligned 16-bit words.  After this, it does an
+invert of the data it just copied.  This test is very short and
+returns immediately to the menu.
+.sh 3 "User timer test"
+.lp
+This test sets up timer 4 as a user timer, and timer 5 as a counter.
+It then toggles between user an supervisor mode on a 1 millisecond
+interval for 200 milliseconds.
+ Due to the time it spends getting back to user mode, the
+value is skewed towards supervisor mode (0x7946 instead of 0x7800).
+The values printed out are pass number, the real time the test took
+(uses the real time clock to find this), the values for counter 4,
+and the value for counter 5.  For counter 4, we print the current
+value, the max and min, the avg and standard deviation.  For
+counter 5, we only print the current value, as it should never
+be anything but 0xefff (we check this).
+.\" Redefine headers for the appendix.
+.ds PN "A-\\\\n%
+.de $h
+.tl 'Menu APPENDIX''\*(PN'
+..
+.pn 1	\" restart page numbering beginning with 'A-1'
+.af % 1
+.bp	\" NOW we can begin the new page
+.ce
+\fBAPPENDIX\fR
+.sh 1 "APPENDIX SECTION"
+.sh 2 "Sample output for rasterop test"
+.(l
+ROP @ 0x9800
+source @ 0x80000
+dest @ 0xa0000
+start copy .. stop
+start invert .. stop
+.)l
+\fIreturns to menu\fR
+.sh 2 "Sample output for user timer test"
+.lp
+Question marks are don\'t cares.
+.(l
+pass 1 time 0.201 4(0x7946 max 0x7946 min 0x7945 avg 0x7946 dev 0) 5(0xefff)
+pass 2 time 0.201 4(0x7945 max 0x7946 min 0x7945 avg 0x7946 dev 0) 5(0xefff)
+pass 3 time 0.201 4(0x79aa max 0x79aa min 0x7945 avg 0x79?? dev ?) 5(0xefff)
+oops #1 press any key
+.)l
+\fInow waiting for operator input\fR
+.ds PN "I-\\\\n%	\" redefine headers for the index.
+.de $h
+.tl '. INDEX''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fBINDEX\fR
+.sh 1 "INDEX SECTION"
+.ds PN "\\\\n%
+.de $h
+.tl 'TABLE OF CONTENTS''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fBTABLE OF CONTENTS\fR
+.sp 3
+.xp C

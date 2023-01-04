@@ -1,0 +1,91 @@
+#
+#	@(#)rc.local 1.1 86/09/24 SMI; from UCB 4.2
+#
+# Note that all "echo" commands are in parentheses.  This is done
+# because all commands that redirect the output to "/dev/console"
+# must be done in a child of the main shell, so that the main shell
+# does not open a terminal and get its process group set.  Since
+# "echo" is a builtin command, redirection for it will be done
+# in the main shell unless the command is run in a subshell.
+#
+/bin/domainname noname
+#
+# hostname now set in rc.boot
+#
+(echo -n 'starting rpc and net services:')			>/dev/console
+if [ -f /etc/portmap ]; then
+	/etc/portmap; (echo -n ' portmap')	 		>/dev/console
+fi
+if [ -f /usr/etc/in.named -a -f /etc/named.boot ]; then
+	/usr/etc/in.named; (echo -n ' named')			>/dev/console
+fi
+if [ -f /usr/etc/ypserv -a -d /usr/etc/yp/`domainname` ]; then
+	/usr/etc/ypserv; (echo -n ' ypserv')			>/dev/console
+#	/usr/etc/ypserv -i; (echo -n ' ypserv')			>/dev/console
+fi
+if [ -f /etc/ypbind ]; then
+	/etc/ypbind; (echo -n ' ypbind')			>/dev/console
+fi
+if [ -f /etc/in.routed ]; then
+	/etc/in.routed & (echo -n ' router')			>/dev/console
+fi
+if [ -f /etc/biod ]; then
+	/etc/biod 4; (echo -n ' biod')		 		>/dev/console
+fi
+(echo '.')							>/dev/console
+/etc/mount -vat nfs						>/dev/console
+#(echo -n 'check quotas: ')					>/dev/console
+#	/usr/etc/quotacheck -a					>/dev/console
+#(echo 'done.')							>/dev/console
+#/usr/etc/quotaon -a
+/etc/dmesg | grep UNIX | /usr/ucb/tail -1 | sed -e "s/^.*Sun UNIX/Sun UNIX/" \
+	>/tmp/t1
+grep -v UNIX /etc/motd >>/tmp/t1
+mv /tmp/t1 /etc/motd
+#
+# Default is to not do a savecore
+# Diskless clients should dump to /usr2 since
+# this will generally have more free space than /usr
+#
+#mkdir /usr2/crash/`hostname`
+#/usr/etc/savecore /usr2/crash/`hostname`			>/dev/console
+if [ -f /dev/sky ]; then
+	/usr/etc/skyrc /usr/lib/sky.ucode			>/dev/console
+fi
+if [ -f /dev/fpa ]; then
+	/usr/etc/fpa/fpa_download -q -u /usr/etc/fpa/fpa_micro_bin -m /usr/etc/fpa/fpa_micro_map -c /usr/etc/fpa/fpa_constants -r		>/dev/console
+fi
+if [ -f /dev/fpa ]; then
+	/usr/etc/fpa/fparel					>/dev/console
+fi
+if [ -f /dev/gpone0a ]; then
+	/usr/etc/gpconfig gpone0 -f -b cgtwo0			>/dev/console
+fi
+(echo -n 'local daemons:')					>/dev/console
+if [ -f /usr/lib/sendmail -a -f /usr/lib/sendmail.cf ]; then
+	(cd /usr/spool/mqueue; rm -f nf* lf*)
+	/usr/lib/sendmail -bd -q1h & (echo -n ' sendmail')	>/dev/console
+fi
+if [ -f /etc/nd.local -a -f /dev/rndl0 ]; then
+	(echo -n ' nd'; /etc/nd - </etc/nd.local) 		>/dev/console
+	(echo -n ' rarpd'; \
+	/usr/etc/rarpd ec0 `/bin/hostname`; \
+	/usr/etc/rarpd ie0 `/bin/hostname`; \
+	/usr/etc/rarpd le0 `/bin/hostname`)			>/dev/console
+fi
+#
+# if nfs daemon exists and /etc/exports file exists become nfs server
+#
+if [ -f /etc/nfsd -a -f /etc/exports ]; then
+	/etc/nfsd 4 & (echo -n ' nfsd')		 		>/dev/console
+fi
+#
+# start up status monitor and locking daemon if present
+#
+if [ -f /etc/rpc.statd ]; then
+	/etc/rpc.statd & (echo -n ' statd')			>/dev/console
+fi
+if [ -f /etc/rpc.lockd ]; then
+	/etc/rpc.lockd & (echo -n ' lockd')			>/dev/console
+fi
+(echo '.')							>/dev/console

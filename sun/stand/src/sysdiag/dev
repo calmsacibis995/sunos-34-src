@@ -1,0 +1,463 @@
+#! /bin/csh -f
+#
+#       @(#)dev 1.1 9/25/86 Copyright 1985 Sun Micro
+#
+#	this is the script that actually beats
+#	up the following ($argv) devices:
+#		*xy*	- 	xylogics disks
+#		*xd*	- 	xylogics disks
+#		*sd*	-	scsi disks
+#		*mt*	-	real tapes
+#		*sky*   -       sky fast floating point board
+#		enet0	-	ethernet  board 1
+#		enet1	-	ethernet  board 2
+#		enet2	-	ethernet  board 3
+#		enet3	-	ethernet  board 4
+#		MC68881	-	floating point test on MC68881
+#		FPA	-	floating point test on FPA
+#		softfp	-	floating point test using software
+#		color	-	color board
+#		sp	-	serial ports 
+#		sp1-n	-	serial port board 1 "n" ports (8, 14 or 16)
+#		sp2-n	-	serial port board 2 "n" ports (8, 14 or 16)
+#		sp3-n	-	serial port board 3 "n" ports (8, 14 or 16)
+#		sp4-n	-	serial port board 4 "n" ports (8, 14 or 16)
+#		dcp	-	data communications processor 
+#		gp      -       graphics processor
+#		gp&b    -       graphics processor and  buffer
+#		*test*	-	test file for debugging
+onintr finit1
+@ pass = 1
+@ errors = 0
+@ error_limit = 5
+set sky_options = 0
+set sky_verbose = 0
+set error_dev
+
+set test_devices
+set test_args
+if ($?RUN_ON_ERROR) then
+  if ($RUN_ON_ERROR == enabled) then
+     set run_on_error
+  endif
+endif
+
+foreach arg ($argv)
+  if ($arg == sd || $arg =~ atn* || $arg == d || $arg == dd || $arg == v || $arg == lt || $arg == re || $arg =~ e[1-9] || $arg =~ e1[0-9] || $arg =~ b=*  || $arg =~ c=* || $arg =~ r=* || $arg =~ s=* || $arg =~ w=*) then
+    set test_args = ($test_args $arg)
+  else if ($arg == cf) then
+    set make_core_file
+  else
+    set test_devices = ($test_devices $arg)
+  endif
+  if ($arg == d) set debug
+  if ($arg == re) set run_on_error
+  if ($arg == lt) set sky_options = k
+end
+
+set logname=`nextlog dev`
+set start_logged
+echo dev: Started on $test_devices. `date` | tee $logname
+
+@ log_interval = 60
+
+if ($?LOG_PASS_MSG) then
+  set dt = `date`
+  set start_month = $dt[2]
+  @ d = $dt[3] 
+  set hm = $dt[4]
+  @ h = `expr substr $hm 1 2`
+  @ m = `expr substr $hm 4 2`
+  @ aa = $m + $log_interval
+  while ($aa >= 60)
+    @ h = $h + 1
+    @ aa = $aa - 60
+  end
+  @ m = $aa
+  if ($h >= 24) then
+    @ d = $d + 1
+    @ h = $h - 24
+  endif
+  @ d = $d * 10000 
+  @ h = $h * 100
+  @ log_time = $d + $h
+  @ log_time = $log_time + $m
+  set start_minute = $m
+  @ start_day = $d
+endif
+
+while(1)
+  foreach dev ($test_devices)
+
+    if ($dev =~ *test*) then
+        echo  dev: Testing $dev $test_args
+        devtest sd $dev $test_args
+        set return = $status
+        if ($?debug) echo Return status = $return
+        if ($return == 20) goto finit1
+        if ($return != 0) then
+	  @ errors++
+	  set error_dev = $dev
+	  set log_error_msg
+          if (!($?run_on_error)) goto finit
+        endif
+
+    else if ($dev =~ *x[dy]*) then
+        set it=`/etc/dkinfo $dev`
+        if ($#it < 16) then
+          echo dev: UNIX '"dkinfo"' command failed on $dev. `date` \
+	  | tee -a $logname
+          goto finit1
+        endif
+        set it=`/etc/dkinfo $dev | egrep '\ sectors\ ' | awk '{print $1}'`
+        echo dev: $it blocks on $dev $test_args
+        devtest sd /dev/r$dev b=$it $test_args
+        set return = $status
+        if ($?debug) echo Return status = $return
+        if ($return == 20) goto finit1
+        if ($return != 0) then
+	  @ errors++
+	  set error_dev = $dev
+	  set log_error_msg
+          if (!($?run_on_error)) goto finit
+        endif
+
+    else if ($dev =~ *sd*) then
+        set it=`/etc/dkinfo $dev`
+        if ($#it < 17) then
+          echo dev: UNIX '"dkinfo"' command failed on $dev. `date` \
+	  | tee -a $logname
+          goto finit1
+        endif
+        set it=`/etc/dkinfo $dev | egrep '\ sectors\ ' | awk '{print $1}'`
+        echo dev: $it blocks on $dev $test_args
+        devtest sd /dev/r$dev b=$it $test_args
+        set return = $status
+        if ($?debug) echo Return status = $return
+        if ($return == 20) goto finit1
+        if ($return != 0) then
+	  @ errors++
+	  set error_dev = $dev
+	  set log_error_msg
+          if (!($?run_on_error)) goto finit
+        endif
+
+    else if ($dev =~ *mt*) then
+        echo dev: Testing $dev $test_args
+        devtest sd /dev/r$dev w=1000 $test_args
+        set return = $status
+        if ($?debug) echo Return status = $return
+        if ($return == 20) goto finit1
+        if ($return != 0) then
+	  @ errors++
+	  set error_dev = $dev
+	  set log_error_msg
+          if (!($?run_on_error)) goto finit
+        endif
+        if ($dev =~ *0*) then
+          devtest sd /dev/rmt8 w=1000 $test_args
+          set return = $status
+        if ($?debug) echo Return status = $return
+          if ($return == 20) goto finit1
+        if ($return != 0) then
+	  @ errors++
+	  set error_dev = $dev
+	  set log_error_msg
+          if (!($?run_on_error)) goto finit
+        endif
+        else
+          devtest sd /dev/rmt9 w=1000 $test_args
+          set return = $status
+        if ($?debug) echo Return status = $return
+          if ($return == 20) goto finit1
+        if ($return != 0) then
+	  @ errors++
+	  set error_dev = $dev
+	  set log_error_msg
+          if (!($?run_on_error)) goto finit
+        endif
+        endif
+
+    else if ($dev =~ enet*) then
+        echo dev: Testing $dev $test_args
+        reply sd $dev $test_args
+        set return = $status
+        if ($?debug) echo Return status = $return
+        if ($return == 20) goto finit1
+        if ($return != 0) then
+          @ errors++
+	  set error_dev = $dev
+	  set log_error_msg
+          if (!($?run_on_error)) goto finit
+        endif
+
+    else if ($dev == color) then
+        echo dev: Testing $dev $test_args
+        c160 sd $test_args
+        set return = $status
+        if ($?debug) echo Return status = $return
+        if ($return == 20) goto finit1
+        if ($return != 0) then
+          @ errors++
+	  set error_dev = $dev
+	  set log_error_msg
+          if (!($?run_on_error)) goto finit
+        endif
+
+    else if ($dev == dcp) then
+        echo dev: Testing $dev $test_args
+        dcptest sd $test_args
+        set return = $status
+        if ($?debug) echo Return status = $return
+        if ($return == 20) goto finit1
+        if ($return != 0) then
+          @ errors++
+	  set error_dev = $dev
+	  set log_error_msg
+          if (!($?run_on_error)) goto finit
+        endif
+
+    else if ($dev == sp) then
+        echo dev: Testing $dev $test_args
+        sptest sd $test_args
+        set return = $status
+        if ($?debug) echo Return status = $return
+        if ($return == 20) goto finit1
+        if ($return != 0) then
+          @ errors++
+	  set error_dev = $dev
+	  set log_error_msg
+          if (!($?run_on_error)) goto finit
+        endif
+
+    else if (($dev =~ sp[0-3]-8) || ($dev =~ sp[0-3]-14) || ($dev =~ sp[0-3]-16)) then
+        if ($SUN_MANUFACTURING == yes) then 
+          if ($dev =~ sp0*) then
+              set b = first.
+          else if ($dev =~ sp1*) then
+              set b = second.
+          else if ($dev =~ sp2*) then
+              set b = third.
+          else if ($dev =~ sp3*) then
+              set b = fourth.
+          endif
+          echo dev: Testing $dev $test_args
+          if ($dev =~ *-8) then
+              sptest sd "$b"double8 $test_args
+              set return = $status
+          else if ($dev =~ *-14) then
+              sptest sd "$b"double14 $test_args
+              set return = $status 
+          else
+              sptest sd "$b"pairs $test_args
+              set return = $status
+          endif
+          if ($?debug) echo Return status = $return
+          if ($return == 20) goto finit1
+          if ($return != 0) then
+            @ errors++
+	    set error_dev = $dev
+	    set log_error_msg
+            if (!($?run_on_error)) goto finit
+          endif
+        endif
+
+    else if ($dev == gp) then
+        echo dev: Testing $dev $test_args
+        if ($SUN_MANUFACTURING == yes) then 
+          gpmtest sd $test_args
+          set return = $status
+          if ($?debug) echo Return status = $return
+        endif
+        if ($return == 20) goto finit1
+        if ($return != 0) then
+          @ errors++
+	  set error_dev = $dev
+	  set log_error_msg
+          if (!($?run_on_error)) goto finit
+        endif
+
+    else if ($dev == gp\&\b) then
+        echo dev: Testing $dev $test_args
+        if ($SUN_MANUFACTURING == yes) then 
+          gpmtest sd gb $test_args
+          set return = $status
+          if ($?debug) echo Return status = $return
+        endif
+        if ($return == 20) goto finit1
+        if ($return != 0) then
+          @ errors++
+	  set error_dev = $dev
+	  set log_error_msg
+          if (!($?run_on_error)) goto finit
+        endif
+
+    else if ($dev == FPA) then
+        echo dev: Testing $dev # $test_args
+        fpatest sd # $test_args
+        set return = $status
+        if ($?debug) echo Return status = $return
+        if ($return == 20) goto finit1
+        if ($return != 0) then
+          @ errors++
+	  set error_dev = $dev
+	  set log_error_msg
+          if (!($?run_on_error)) goto finit
+        endif
+
+    else if ($dev == MC68881) then
+        echo dev: Testing $dev # $test_args
+        mc68881 sd # $test_args
+        set return = $status
+        if ($?debug) echo Return status = $return
+        if ($return == 20) goto finit1
+        if ($return != 0) then
+          @ errors++
+	  set error_dev = $dev
+	  set log_error_msg
+          if (!($?run_on_error)) goto finit
+        endif
+
+    else if ($dev == softfp) then
+        echo dev: Testing $dev # $test_args
+        softfp sd # $test_args
+        set return = $status
+        if ($?debug) echo Return status = $return
+        if ($return == 20) goto finit1
+        if ($return != 0) then
+          @ errors++
+	  set error_dev = $dev
+	  set log_error_msg
+          if (!($?run_on_error)) goto finit
+        endif
+
+    else if ($dev =~ *sky*) then
+        if ($pass == 1) then
+          set skylog=`nextlog sky`
+          echo dev: Starting sky test. `date` >>! $skylog
+          if (-e sky.ucode == 0) then
+            if (-e /etc/sky.ucode) then
+              ln -s /etc/sky.ucode
+            else
+              if (-e /usr/lib/sky.ucode) then
+                ln -s /usr/lib/sky.ucode
+              else                    
+               echo dev: '"/etc/sky.ucode"' or '"/usr/lib/sky.ucode"' not found.
+               if ($TERM == sun) then
+                 exec /bin/csh     
+                 else exit(1)        
+               endif               
+              endif                   
+            endif                     
+          endif    
+        endif
+        echo dev: Testing $dev
+
+        # NOTE: ffpusr argv is used by 'endt' 
+
+	if ($?debug) set sky_verbose = v
+	if ($SD_LOAD_TEST == yes) set sky_options = k
+
+        nice +10 ffpusr sd >>! $skylog <<EOF
+$sky_verbose
+$sky_options
+d
+q
+EOF
+        set return = $status
+        if ($?debug) echo Return status = $return
+        if ($return == 1) goto finit1  # 1 = hangup
+        if ($return == 2) goto finit1  # 2 = interrupt
+        if ($return == 15) goto finit1 # 15 = terminate
+        if ($return != 0) then
+          @ errors++
+	  set error_dev = $dev
+	  set log_error_msg
+          if (!($?run_on_error)) goto finit
+        endif
+
+    else
+        echo dev: Unknown device - $dev \? `date` | tee -a $logname
+        goto finit1
+    endif
+
+    if ($?log_error_msg) then
+      echo ERROR: dev, error on $error_dev, pass $pass, errors $errors. `date` | tee -a $logname
+      unset log_error_msg
+      set error_dev
+      if ($errors >= $error_limit) then
+        echo dev: Error limit exceeded. `date` | tee -a $logname
+        goto finit
+      endif
+      set return = 0
+    endif
+
+
+  end   #foreach dev ($test_devices)
+
+	if ($?LOG_PASS_MSG) then
+	  set dt = `date`
+	  set current_month = $dt[2]
+	  @ d = $dt[3] 
+	  set hm = $dt[4]
+	  @ h = `expr substr $hm 1 2`
+	  @ m = `expr substr $hm 4 2`
+	  @ d = $d * 10000 
+          @ h = $h * 100
+          @ current_time = $d + $h
+	  @ current_time = $current_time + $m
+          if ($current_month != $start_month) then
+            @ log_time = 10000
+            set start_month = $current_month
+          endif
+          if ($current_time >= $log_time) then
+            set log_pass_msg
+            @ aa = $m + $log_interval
+            while ($aa >= 60)
+              @ h = $h + 100
+              @ aa = $aa - 60
+            end
+            if ($h >= 2400) then
+              @ d = $d + 10000
+              @ h = $h - 2400
+            endif
+            @ start_minute = $aa
+            @ start_day = $d
+            @ log_time = $d + $h
+            @ log_time = $log_time + $start_minute
+          endif
+	endif
+
+	if ($?log_pass_msg) then
+	  echo dev: Pass $pass, errors $errors. `date` | tee -a $logname
+	  unset log_pass_msg
+	else
+	  echo dev: Pass $pass, errors $errors. `date`
+	endif
+	@ pass++
+end
+
+finit:
+
+echo dev: Terminated abnormally on $dev. `date` | tee -a $logname
+if (-e core) then
+	set corename=`nextlog core`
+	mv core $corename
+	echo dev: Corefile moved to "'$corename'". `date` \
+		| tee -a $logname
+endif
+
+finit1:
+
+if ($?start_logged) then
+
+  echo dev: Stopped, pass $pass, errors $errors. `date` | tee -a $logname
+
+  foreach dev ($test_devices)
+	if ($dev =~ *mt*) then
+		echo dev: Rewinding $dev
+		mt -f /dev/r$dev rew >> $logname
+	endif
+  end
+endif
+if($TERM == sun) exec /bin/csh

@@ -1,0 +1,68 @@
+% disk_controller
+cntlr=xy addr=ee40
+% disk
+cntlr=xy unit=0 cyls=836 heads=20 secs/track=46
+partition=a start_cyl=0 sectors=15884
+partition=b start_cyl=18 sectors=33440
+partition=c start_cyl=0 sectors=769120
+partition=d start_cyl=390 sectors=15884
+partition=e start_cyl=408 sectors=57960
+partition=f start_cyl=471 sectors=92000
+partition=g start_cyl=571 sectors=243800
+partition=h start_cyl=55 sectors=308200
+% disk
+cntlr=xy unit=1 cyls=586 heads=7 secs/track=32
+partition=a start_cyl=0 sectors=15884
+partition=b start_cyl=71 sectors=33440
+partition=c start_cyl=0 sectors=131264
+partition=g start_cyl=221 sectors=81760
+% disk_controller
+cntlr=xy addr=ee48
+% disk
+cntlr=xy unit=2 cyls=840 heads=20 secs/track=46
+partition=a start_cyl=0 sectors=15884
+partition=b start_cyl=18 sectors=7360
+partition=c start_cyl=26 sectors=7360
+partition=d start_cyl=390 sectors=15884
+partition=e start_cyl=408 sectors=92000
+partition=f start_cyl=508 sectors=92000
+partition=g start_cyl=608 sectors=209760
+partition=h start_cyl=34 sectors=327520
+% disk
+cntlr=xy unit=3 cyls=840 heads=20 secs/track=46
+partition=a start_cyl=0 sectors=15884
+partition=b start_cyl=18 sectors=7360
+partition=c start_cyl=26 sectors=7360
+partition=d start_cyl=390 sectors=15884
+partition=e start_cyl=408 sectors=92000
+partition=f start_cyl=508 sectors=92000
+partition=g start_cyl=608 sectors=209760
+partition=h start_cyl=34 sectors=327520
+% disk_controller
+cntlr=sd addr=ff260800
+% disk
+cntlr=sd unit=0 cyls=825 heads=6 secs/track=17
+partition=a start_cyl=0 sectors=15884
+partition=b start_cyl=156 sectors=16422
+partition=c start_cyl=0 sectors=84150
+partition=g start_cyl=317 sectors=51816
+% disk
+cntlr=sd unit=1 cyls=825 heads=6 secs/track=17
+partition=a start_cyl=0 sectors=15884
+partition=b start_cyl=156 sectors=16422
+partition=c start_cyl=0 sectors=84150
+partition=g start_cyl=317 sectors=51816
+% disk_controller
+cntlr=sd addr=ff260808
+% disk
+cntlr=sd unit=2 cyls=825 heads=6 secs/track=17
+partition=a start_cyl=0 sectors=15884
+partition=b start_cyl=156 sectors=16422
+partition=c start_cyl=0 sectors=84150
+partition=g start_cyl=317 sectors=51816
+% disk
+cntlr=sd unit=3 cyls=825 heads=6 secs/track=17
+partition=a start_cyl=0 sectors=15884
+partition=b start_cyl=156 sectors=16422
+partition=c start_cyl=0 sectors=84150
+partition=g start_cyl=317 sectors=51816

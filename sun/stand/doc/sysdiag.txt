@@ -1,0 +1,602 @@
+.de SX		\" call 'so' something else so derof
+.so \\$1
+..
+.\" .SX /usr/lib/tmac/tmac.e
+.po 1.5i
+.nr PO 1.5i
+.hy 14		\" don't hyphenate in bad places
+.pn 1		\" start page number at 'A'
+.af % A
+.ds PN "\\\\n%
+.nr sf 3	\" set section headings in bold face
+.nr si 2	\" indent nested sections 2 spaces
+.de $0		\" macro to enter section heading in to table of contents
+.(x C
+.if (\\$3=1) .sp
+\\$2   \\$1
+.)x \\*(PN
+..
+.de [R		\" routine declaration
+.ds RC \\$1
+.sp
+.ne 10
+.(l L
+.fi
+.na
+..
+.de *Q
+.ds RM \\$1 \\$2
+\\*(RM
+..
+.de *R
+.ds RN \\$1
+.(x R
+\\*(RN - \\*(RC
+.)x
+\\$1
+..
+.de {R
+\\*(RN
+.nf
+.ad
+..
+.de [R
+.)l
+..
+.de }R
+..
+.de {E			\" possible errors sub-section
+.lp
+Possible errors:
+.nr ps 0n
+.LB \\(bu
+..
+.de }E
+.LE
+.nr ps 1n
+.lp
+..
+.de WP
+.lp
+\fb***\fp
+..
+.de IP
+.ip "\fB\\$1\fP"
+..
+.de EB
+.sp -1
+.nf
+\L'|\\$1-1'\h'-1n'\1'\\n(.lu'\h-1n'\L'-1\\$1+1'\1-\\ln(.lu'
+.fi
+..
+.nr ii 5
+.nr hm 3v
+.nr tm 6v
+.nr fm 4v
+.nr bm 7v
+.de $h
+.tl 'APPROVAL SECTION''\*(PN'
+..
+.de $f
+.tl 'Copyright \*(td''DO NOT COPY'
+.tl 'SUN MICROSYSTEMS INC''COMPANY CONFIDENTIAL'
+..
+.bp
+.sp
+.ce 2
+\fBE X T E R N A L  S P E C I F I C A T I O N
+(User Perspective)
+.sp
+.\" Fill in you project's name in place of the dot below and elsewhere
+.\" in this file.
+TITLE	     : 	120 / 170  System Diagnostic External Specification\fR
+.sp
+AUTHOR	     :	Sunny Kirsten
+.sp
+REPORT NO.   :
+.sp
+REVISION NO. :	@(#) sysdiag.txt 1.1 9/25/86
+.sp
+DATE         :		\*(td    \"td=printing date if reformated
+.sp
+STATUS       :  	Preliminary
+.sp 2
+.(l L
+APPROVALS    :						DATE
+.de SG			\" Macro to define signiture lines
+.ip "\\$1" 20n		\" Position and signiture line
+------------------------------------------------------------
+.br
+\\$2			\" Name Underneath
+..
+.SG "Originator" "Sunny Kirsten"
+.SG "Test Engineering"
+.SG "Manufacturing"
+.SG "Production"
+.SG "Quality Control"
+.)l
+.bp
+.(l L
+.ce
+Document Review Form
+.lp
+Please make note and initial on this page all corrections and/or
+proposed amendments by page number and/or section number.
+.sp
+.ce
+---------------------------------------------
+Recommendations, Differences, Construction Errors, and comments:
+.sp 36
+.ce 2
+---------------------------------------------
+Typographical Errors:
+.sp 4
+.ce 2
+---------------------------------------------
+Attach additional sheet(s) as needed.
+.)l
+.\" redefine headers for the body of the document
+.de $h
+.tl '120 / 170 System Diagnostic EXTERNAL SPECIFICATION ''
+.tl '(User\'s Perspective)''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fB120 / 170 System Diagnostic EXTERNAL SPECIFICATION\fR
+.sh 1 "INTRODUCTION"
+.sh 2 "Purpose"
+.\"	1.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+This document details the structure and operation of the Sun 2
+System Diagnostic \fIsysdiag\fR, which performs system
+level test on a Sun workstation,
+as required for burn-in prior to shipment, and for
+field-service or customer level diagnostics.
+.sh 2 "Applicable Documents"
+.\"	1.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+All documents about the UNIX system, and all hardware reference
+manuals for the hardware included in the system configuration will apply.
+.sh 3 "Ethernet boards"
+.sh 4 "3Com Ethernet board"
+.sh 4 "Sun Ethernet board"
+.sh 3 "TapeMaster board"
+.sh 3 "Xylogics board"
+.sh 3 "Sky Fast Floating Point board"
+.lp
+The Sun document \fISky diagnostic \fBffpusr\fI External Specification\fR
+and the test procedure \fISky FFP Test Procedure\fR give details about the
+Sky board diagnostic \fIffpusr\fR and test procedure for this board.
+The Sun document 800-1104-01 describes the Sky board, its
+installation, and tells something of the Sky version of \fIffpusr\fR, and
+associated software.  This document is not needed to operate the program,
+though it would be useful if you wanted to decipher hardware bit patterns
+mentioned in error messages, to isolate problems within the Sky board.  This
+is rarely done at Sun where we swap bad boards back to Sky for repairs.
+.sh 2 "Definitional Conventions"
+.\"	1.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 3 "Notations"
+.\"	1.3.1
+.lp
+Program names and document names are usually shown in itallics.  Thus command
+names are also shown usually in itallics, since most commands invoke programs
+by the same name.  Bold is used for a variety of contextual emphasis purposes.
+.lp
+As in the C language,
+the prefix \'0x\' is used when a number is in hexadecimal (base 16)
+format. The notation \'nnnnn\' is used when indicating numeric values which
+vary.
+.sh 3 "Syntax"
+.\"	1.3.2
+When dealing with the syntax of terminal input, it is conventional to use
+the term \fBkey-in\fR to mean that the operator should type exactly the
+characters/words/phrases specified.  The term \fBenter\fR implies that
+the operator should press the \fBcarriage return\fR key after
+\fBkeying-in\fR the specified data.
+.sh 3 "Terminology"
+.\"	1.3.3
+.sp 2
+.sh 1 "SYSTEM OVERVIEW"
+.\"	2.
+.sh 2 "General Description"
+.\"	2.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+The System Diagnostic operates on top of the UNIX environment.  It consists of
+test scripts and programs to exercise the various hardware components, and
+shell scripts which provide a multi-windowing interface
+where different windows are provided for each major diagnostic function.
+The test automatically adapts to test the UNIX configuration in \fB/dev\fR.
+The system is configured to default to using \fB/dev/console\fR
+as the system console, a Sun Workstation,
+and to operate in the multi-windowing mode.  It may be
+manually configured to use a standard alphanumeric terminal in non-windowed
+mode, attached to \fBport A\fR, which conforms to the \fBRS423\fR standard.
+.sh 2 "Features"
+.\"	2.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 3 "User Interface"
+.lp
+.sh 4 "Operation on an alphanumeric terminal"
+.lp
+\fIsysdiag\fR intermixes all the output from all the windows normally
+displayed on the Sun workstation, on a line by line basis, on the standard
+alphanumeric terminal.  Error messages are tagged by the generating 
+program to prevent ambiguity when the messages appear all in one "window".
+The command \fIkillme\fR issued at the console will terminate \fIsysdiag\fR
+when operated in the non-windowing mode.  The command \fIsetterm\fR issued
+by root on any tty will set the terminal type of the console.
+.sh 4 "Operation on a Sun workstation"
+.lp
+Sysdiag is partitioned into three active test windows.  In addition, it
+also displays windows for date/time, the performance monitor graphs, and a
+CONSOLE window which displays UNIX system error messages.  Most commonly,
+the following messages will appear on the CONSOLE window:
+.sp
+ NOTICE: Window display lock broken after time limit was exceeded by process n
+ WARNING: You may see display garbage because of this action
+.sp
+Note that the above messages are \fBnormal\fR on a system which is loaded as
+heavily as \fIsysdiag\fR loads it.
+.lp
+The three active test windows are dedicated as follows:
+.sh 5 "Disk test"
+.lp
+In the upper left corner we run a disk diagnostic \fIdisk\fR which
+constructs random disk data images in memory, exercises the disk via
+file system I/O, and compares two the two identical files it wrote
+as it reads them back from the disk.
+\fIdisk\fR uses new memory routines, and stops on errors
+for post-mortems instead of filling the file system with error logs.
+.sh 5 "Memory test"
+.lp
+In the window at the bottom left corner are run two memory exercisers.
+.sh 6 "pmem"
+uses a virtual page which it remaps repeatedly thru memory, in order to
+read all physical memory, instead of allocating a huge block of physical
+memory, in order to leave some space for UNIX to continue to function.
+.sh 6 "vmem"
+allocates, writes, and reads a 2MB array of \fBvirtual\fR memory.
+.sh 5 "Peripherals tests"
+.lp
+In the lower right corner we run the peripherals tests.
+Sysdiag automatically configures itself by probing via \fIdevtop\fR
+for all xylogics and scsi disks, and for all scsi,  1/2 in., and archive
+tape controllers, and for a sky board.  For each such device
+it first checks to see that if it's a tape drive, that the tape drive
+is online, and rewound, then it automatically tests (via \fIdev\fR),
+with a generic read/write diagnostic \fIdevtest\fR, which uses the
+biggest allowable block size for most of a file transfer,
+followed by some small blocks for the balance of the file.
+In the case of the Sky board, \fIdev\fR calls \fIffpusr\fR.
+Note that the \fBSCSI tape\fR and the \fBarchive tape\fR are
+only tested every 5th pass, in order to
+limit the accumulated run time during the burn-in period, to less than 8
+hours (the head cleaning period).
+.sh 6 "devtop"
+finds the hardware configuration by looking in \fB/dev\fR, which it passes to:
+.sh 6 "dev"
+tests each of the peripherals found by \fIdevtop\fR by calling:
+.sh 6 "devtest"
+which reads or writes/reads a device for
+a given number of blocks (used in place of dd and tar
+in the device tests).
+.sh 6 "ffpusr"
+which tests the Sky Fast Floating Point processor board.
+.sh 3 "Error Logs"
+./"	2.2.2
+.lp
+Sysdiag produces a variety of error logs.  In the case of the Sky
+board, an execution log is produced, named "logsky".  In the case of the
+peripherals tests, error logs are created if required by each test.  In
+the case of the disk test and the memory tests, each produces it's own log.
+The error logs are all created in the sysdiag directory, and all have a
+name which begins with \fIlog\fR.  Most end with a number to uniquely identify
+them, which is particularly useful in case of multiple invocations of
+\fIsysdiag\fR.  When \fIsysdiag\fR is terminated,
+it automatically reviews the logs
+for the operator, via the "more log*" command.  This same command may
+be manually entered by the operator, at any time, in the CONSOLE window,
+during the execution of \fIsysdiag\fR, to observe the current status of tests.
+.sh 2 "Required Configuration"
+.\"	2.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+\fIsysdiag\fR will automatically adapt to test different configurations of
+peripherals, including various combinations of disk and tape, and the Sky board.
+\fIsysdiag\fR itself is dependent on the hardware configuration for which UNIX
+is built.  Thus it is very important that the UNIX system be built properly for
+the specific hardware configuration to be tested correctly.  Specifically, raw
+/dev files should reflect the devices attached.
+.lp
+NOTE:  At the current time, the hardware combination of \fBtapemaster\fR
+board and \fBSCSI\fR board does not work in UNIX software, because the 
+\fBSCSI\fR controller eats \fBtapemaster\fR command blocks.
+.sh 2 "Error Handling"
+.\"	2.4
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+General class error messages are displayed in the appropriate window on the
+system console, while detailed error messages are logged to disk files for
+later review by the operator.  Error logs may be reviewed during \fIsysdiag\fR
+operation, and are automatically displayed to the operator when the test is
+terminated.
+.sh 2 "General Performance Characteristics"
+.\"	2.5
+.lp
+\fIsysdiag\fR tends to load the UNIX system rather heavily.
+It is CPU, I/O, memory, disk, and swap intensive.
+On a one megabyte system, UNIX will thrash tediously.
+On a two megabyte system, some reasonable performance levels will be achieved,
+so that the system appears to be responsive.
+Mouse and keyboard response may seem to be absent, when
+in actuality the response is just very slow.
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.sh 2 "Planned Extensions"
+.\"	2.5
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+The sky board diagnostic will be rewritten to be more thorough.
+Add a serial-port self-loopback test.
+Modify \fIdevtop\fR to test for the existance of devices by testing for response
+from the hardware status registers, rather than believing the configuration in
+\fB/dev\fR.
+.sh 2 "Limitations"
+.\"	2.7
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+\fIsysdiag\fR does not test the serial ports, which it could be doing.  It
+would seem to be a good idea to add a self-loopback test for each port, and
+the test could be disabled for \fBserial port A\fR when it was in use as
+the system CONSOLE when operating in the non-windowed mode.
+.lp
+\fIsysdiag\fR does not handle the color board, which is tested separately.
+.lp
+It takes a while to terminate \fIsysdiag\fR given the slowness of keyboard / 
+mouse response.
+.sp 2
+.\" Replace the dot below with the name of the major component you are
+.\" describing.  Repeat the entire section for each of your major components.
+.\" The subsections below are some of the ones that may be applicable.
+.\" Delete the ones that do not apply, and add new ones as necessary.
+.sh 1 "120 / 170 System Diagnostic SPECIFICATION"
+.sh 2 "User Interface"
+.\"	3.1
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+The user interface for sysdiag is based on multiple windows.  Different
+windows display and control various tests.  In the case of the
+alphanumeric terminal version, there is the equivalent of only one
+window, in which all messages are intermixed, in time order.
+.sh 2 "Input/Output"
+.\"	3.2
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+There are no program paramaters at the top level of sysdiag, so
+user input is usually restricted to the
+functions of terminating the test, and reviewing the error logs.  The
+individual tests within sysdiag may be used independently by calling
+them with the appropriate paramaters, described below.  Since
+the SunWindows environment is used, a mouse is required, in order to 
+direct keyboard input to the appropriate window.  There is one error
+condition which requires operator intervention and interaction with the
+\fBperipherals test\fR window.
+.sh 3 "Setting the Terminal Type"
+.sh 3 "Use of the Mouse"
+.sh 3 "Termination of Sysdiag"
+.sh 4 "\fBkillme\fR to terminate terminal version"
+.sh 4 "\fB^C\fR to terminate windows version"
+.sh 3 "Responding to \fIdevtop\fR on mag tape errors"
+.sh 2 "Operation"
+.\"	3.3
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+To use \fIsysdiag\fR, the first step is to configure the operator's
+terminal, if it is other than a Sun workstation. To configure another
+terminal as the console for sysdiag, login as root and use the
+\fIsetterm\fR command to set your terminal type.
+.lp
+Log-in as the user named sysdiag.
+The login procedure for sysdiag will display the system's idea of the current
+date and time, requesting verification via a simple carriage-return, or update
+in the standard format of the unix date command.  Once the date has been 
+verified, the SunWindows environment is initiated, and various tests initiated
+in the corresponding windows.
+.sh 3 "User Interface"
+.lp
+.sh 4 "Operation on an alphanumeric terminal"
+.lp
+To operate \fIsysdiag\fR from an alphanumeric terminal, you will first need to
+login as root and use the \fIsetterm\fR command to set the terminal type
+of the system console, to other than a Sun workstation.  Once this is
+accomplished, then you may proceed as follows.
+.sh 4 "Operation on a Sun workstation"
+.lp
+To operate \fIsysdiag\fR you will need to login as the user \fBsysdiag\fR.
+The systems version of the current date and time is displayed, and if it
+is correct, simply key-in a carriage return.  Otherwise enter the date/time
+in YYMMDDHHMM[.SS] format.
+.sh 5 "Disk test"
+.lp
+Typical startup messages appearing in this window are:
+.sp
+ Disk REV 1.3 5/21/84 starting
+ Wed May 23 16:18:31 1984
+ Pass 1
+ Pass 2
+ Pass 3
+ ......
+.sh 5 "Memory test"
+.sp
+ Starting mem
+ starting scanner
+ [1] 104
+ Started scanner Wed May 23 16:18:37 1984
+ scanner: started with 0x3e0000 
+ bytes to check Wed May 23 16:18:39 1984
+ scanner: pass 1 errors 0
+ scanner: pass 2 errors 0
+ scanner: pass 3 errors 0
+ vmem: testing 0x200000 bytes.
+ scanner: pass 4 errors 0
+ scanner: pass 5 errors 0
+ scanner: pass 6 errors 0
+ scanner: pass 7 errors 0
+ scanner: pass 8 errors 0
+ vmem: Written
+ scanner: pass 9 errors 0
+ scanner: pass 10 errors 0
+ scanner: pass 11 errors 0
+ scanner: pass 12 errors 0
+ scanner: pass 13 errors 0
+ vmem: Read
+ scanner: pass 14 errors 0
+ scanner: pass 15 errors 0
+ scanner: pass 16 errors 0
+ scanner: pass 17 errors 0
+ scanner: pass 18 errors 0
+ Pass 1, no errors
+.sh 6 "pmem"
+.sh 6 "vmem"
+.sh 5 "Peripherals tests"
+.lp
+Typical startup messages for the peripherals test window are:
+.sp
+.sh 6 "devtop"
+.sh 7 "if no peripherals attached
+ Probing ..
+ So why bother me at all?
+.sh 7 "if all peripherals attached
+ Probing .. xy0c st0 mt0 sky
+ Thu May 24 16:00:00 PDT 1984 Starting testing of xy0c st0 mt0 sky
+ 769120 blocks to do on xy0c
+ 84150 blocks to do on sd0c
+ Testing sky
+ end of pass 1
+ 769120 blocks to do on xy0c
+ 84150 blocks to do on sd0c
+ Testing sky
+ end of pass 2
+ 769120 blocks to do on xy0c
+ 84150 blocks to do on sd0c
+ Testing sky
+ end of pass 3
+ 769120 blocks to do on xy0c
+ 84150 blocks to do on sd0c
+ Testing sky
+ end of pass 4
+ 769120 blocks to do on xy0c
+ 84150 blocks to do on sd0c
+ Testing st0
+ Testing sky
+ end of pass 5
+.sh 6 "dev"
+.lp
+Disk drives are tested in read-only mode.  Tape drives are tested in write/
+read mode.
+.sh 6 "devtest"
+.sh 6 "ffpusr"
+.sh 2 "Error Handling"
+.\"	3.4
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+When massive quantities of errors occur in a given subsystem, it's usually
+pretty easy to determine that a specific subassembly needs to be replaced.
+Most of the subsystems are prone to transient errors which require a good
+judgement call to determine their severity.  Experienced floor support
+personell are required in these cases.
+.sh 3 "Error Messages (displayed on console)"
+./"	3.4.1
+.lp
+.sh 3 "Error Logs (written to disk files)"
+./"	3.4.2
+.sh 4 "Error Log contents"
+.sh 5 "sysdiag	\fIlogtimes$$\fR"
+.lp
+ Thu May 24 16:00:00 PDT 1984 window version started
+ Thu May 24 18:00:00 PDT 1984 window version stopped
+.sh 5 "disk	\fIlogdisk$$\fR"
+.lp
+ Disk REV 1.3   5/21/84 starting Thu May 24 16:00:00 1984
+ disk: ending pass 189 Thu May 24 16:00:00 1984
+.sh 5 "pmem	\fIlogpmem$$\fR"
+.lp
+ Started scanner Thu May 24 16:00:00 1984
+ scanner: started with 0x100000 bytes to check Thu May 24 16:00:00 1984
+ errors 0 stopping at pass 9 SIGINT Thu May 24 16:00:00 1984
+ errors 0 stopping at pass 9 SIGHUP Thu May 24 16:00:00 1984
+.sh 5 "vmem	\fIlogmem.$$\fR"
+.lp
+ starting scanner
+ Thu May 24 18:00:00 1984 mem stopped pass 100
+.sh 5 "devtop	\fIlogdevtop$$\fR"
+.lp
+There is normally no log produced by \fIdevtest\fR.
+.sh 5 "dev	\fIlogdev$$\fR"
+.lp
+ Thu May 24 16:00:00 PDT 1984 Starting testing of sd0C
+ Thu May 24 16:00:00 PDT 1984 Test stopped on pass 999
+.sh 5 "devtest	\fIlogdevtest$$\fR"
+.lp
+There is normally no log produced by \fIdevtest\fR.
+.sh 5 "ffpusr	\fIlogsky\fR"
+.sh 2 "Performance"
+.\"	3.5
+.\"	(paragraph each major topic .sh 3; sub-par .sh 4)
+.\"	(enclose your title for any level of .sh in quotes as above)
+.lp
+Performance is everything.
+.\" Redefine headers for the appendix.
+.ds PN "A-\\\\n%
+.de $h
+.tl '120 / 170 System Diagnostic APPENDIX''\*(PN'
+..
+.pn 1	\" restart page numbering beginning with 'A-1'
+.af % 1
+.bp	\" NOW we can begin the new page
+.ce
+\fBAPPENDIX\fR
+.sh 1 "APPENDIX SECTION"
+.sh 2 "Files comprising \fIsysdiag\fR"
+.sp
+.bp 
+.ds PN "I-\\\\n%	\" redefine headers for the index.
+.de $h
+.tl '120 / 170 System Diagnostic INDEX''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fBINDEX\fR
+.sh 1 "INDEX SECTION"
+.ds PN "\\\\n%
+.de $h
+.tl 'TABLE OF CONTENTS''\*(PN'
+..
+.pn 1
+.af % 1
+.bp
+.ce
+\fBTABLE OF CONTENTS\fR
+.sp 3
+.xp C

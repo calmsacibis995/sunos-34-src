@@ -1,0 +1,9 @@
+1 i\
+/* Define file containing constant name and data (in mapping ram) */
+2 i\
+/* Contains all constants accessible to the user with mapped addresses (9 bits) */
+/^[/ *	]/d
+s/^\(s.*\)	\(.*\)	\(.*\)$/#define \1 0x\3/
+s/^\(d.*\)	\(.*\)	\(........\)\(........\)$/#define \1 0x\3,0x\4/
+s/^\(c_s.*\)	\(.*\)	\(.*\)$/#define \1 0x\3/
+s/^\(c_d.*\)	\(.*\)	\(........\)\(........\)$/#define \1 0x\3,0x\4/

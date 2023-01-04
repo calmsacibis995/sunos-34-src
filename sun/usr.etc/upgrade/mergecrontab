@@ -1,0 +1,13 @@
+# !/bin/sh
+#
+#	Script written to merge changes in 3.2pilot crontab to 3.2beta crontab
+#
+#       @(#) mergecrontab 1.1 86/09/25
+#
+
+ed $1 <<NEW
+/nfsjunk/
+s/nfsjunk/nfs/
+w
+q
+NEW

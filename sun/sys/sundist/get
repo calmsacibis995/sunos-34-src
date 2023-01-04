@@ -1,0 +1,133 @@
+#! /bin/sh
+#	@(#)get	1.1	9/25/86
+#
+# Shell script to build a mini-root file system
+# in preparation for building a distribution tape.
+# The file system created here is image copied onto
+# tape, then image copied onto disk as the "first"
+# step in a cold boot of 4.1b-4.2 systems.
+#
+DISTROOT=/proto
+#
+if [ `pwd` = '/' ]
+then
+	echo You just '(almost)' destroyed the root
+	exit
+fi
+date > .MINIROOT
+cp $DISTROOT/*vmunix* .
+rm -rf bin; mkdir bin
+rm -rf etc; mkdir etc
+rm -rf stand; mkdir stand
+rm -rf a; mkdir a
+rm -rf tmp; mkdir tmp
+rm -rf usr; mkdir usr usr/tmp usr/mdec usr/ucb usr/bin usr/lib usr/etc usr/etc/upgrade
+# cp $DISTROOT/etc/disktab etc
+# cp $DISTROOT/etc/makefs etc; strip etc/makefs
+cp $DISTROOT/etc/newfs etc; strip etc/newfs
+cp $DISTROOT/etc/dkinfo etc; strip etc/dkinfo
+cp $DISTROOT/etc/mkfs etc; strip etc/mkfs
+cp $DISTROOT/etc/restore etc; strip etc/restore
+ln etc/restore etc/rrestore
+cp $DISTROOT/etc/init etc; strip etc/init
+cp $DISTROOT/etc/mount etc; strip etc/mount
+cp $DISTROOT/etc/mknod etc; strip etc/mknod
+cp $DISTROOT/etc/fsck etc; strip etc/fsck
+cp $DISTROOT/etc/umount etc; strip etc/umount
+cp $DISTROOT/etc/ifconfig etc; strip etc/ifconfig
+cp $DISTROOT/etc/fsirand etc; strip etc/fsirand
+cp $DISTROOT/bin/sun2 bin
+cp $DISTROOT/bin/sun3 bin
+cp $DISTROOT/bin/mt bin; strip bin/mt
+cp $DISTROOT/bin/ls bin; strip bin/ls
+cp $DISTROOT/bin/sh bin; strip bin/sh
+cp $DISTROOT/bin/mv bin; strip bin/mv
+cp $DISTROOT/bin/sync bin; strip bin/sync
+cp $DISTROOT/bin/cat bin; strip bin/cat
+cp $DISTROOT/bin/mkdir bin; strip bin/mkdir
+cp $DISTROOT/bin/stty bin; strip bin/stty; ln bin/stty bin/STTY
+cp $DISTROOT/bin/echo bin; strip bin/echo
+cp $DISTROOT/bin/rm bin; strip bin/rm
+cp $DISTROOT/bin/cp bin; strip bin/cp
+cp $DISTROOT/bin/expr bin; strip bin/expr
+cp $DISTROOT/bin/awk bin; strip bin/awk
+cp $DISTROOT/bin/tar bin; strip bin/tar
+cp $DISTROOT/bin/dd bin; strip bin/dd
+cp $DISTROOT/bin/ed bin; strip bin/ed
+cp $DISTROOT/bin/hostname bin; strip bin/hostname
+cp $DISTROOT/bin/grep bin; strip bin/grep
+cp $DISTROOT/bin/sed bin; strip bin/sed
+cp $DISTROOT/bin/test bin; strip bin/test; ln bin/test 'bin/['
+cp $DISTROOT/bin/chmod bin; strip bin/chmod
+cp $DISTROOT/bin/date bin; strip bin/date
+cp $DISTROOT/bin/ln bin; strip bin/ln
+cp $DISTROOT/usr/ucb/rsh usr/ucb; strip usr/ucb/rsh
+cp $DISTROOT/usr/ucb/rlogin usr/ucb; strip usr/ucb/rlogin
+cp $DISTROOT/usr/ucb/rcp usr/ucb; strip usr/ucb/rcp
+cp $DISTROOT/usr/mdec/* usr/mdec
+cp /sys/stand/boot boot
+cp $DISTROOT/.profile .profile
+cp $DISTROOT/etc/rc.boot etc
+cp $DISTROOT/etc/hosts etc
+cp $DISTROOT/etc/networks etc
+cp $DISTROOT/etc/services etc
+cp $DISTROOT/etc/protocols etc
+
+cp $DISTROOT/usr/etc/upgrade/UPGRADE usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/adm_tool usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/merge_tool usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/extracting usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/opt_software usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/verify_tapevol_arch usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/3.0crontab_3.2crontab usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/3.0group_3.2group usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/3.0protocols_3.2protocols usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/3.0rcboot_3.2rcboot usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/3.0rclocal_3.2rclocal usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/3.0rpc_3.2rpc usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/3.0servers_3.2servers usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/3.0services_3.2services usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/3.0ttys_3.2ttys usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/pilotprotocols_3.2protocols usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/pilotrcboot_3.2rcboot usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/pilotrclocal_3.2rclocal usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/pilotrpc_3.2rpc usr/etc/upgrade
+cp $DISTROOT/usr/etc/upgrade/pilotservices_3.2services usr/etc/upgrade
+cp $DISTROOT/usr/etc/setup usr/etc
+(cd $DISTROOT/usr/etc; tar vcf - setup.files) | (cd usr/etc; tar xpBf -)
+cp /usr/src/sun/sys/sundist/chroot usr/etc/setup.files
+(cd etc; ln -s /usr/etc/setup)
+cp $DISTROOT/usr/ucb/tset usr/ucb
+cp $DISTROOT/usr/etc/termcap usr/etc
+(cd etc; ln -s /usr/etc/termcap)
+(cd $DISTROOT/usr/lib; tar vcf - tabset) | (cd usr/lib; tar xpBf -)
+mkdir usr/lib/fonts
+(cd $DISTROOT/usr/lib/fonts;tar vcf - fixedwidth*) | (cd usr/lib/fonts;tar xpBf -)
+(cd $DISTROOT/usr/lib; tar vcf - defaults) | (cd usr/lib/; tar xpBf -)
+cp $DISTROOT/etc/portmap etc
+ln -s /usr/etc/setup.files/setup.window usr/bin/selection_svc
+ln -s /usr/etc/setup.files/setup.window usr/bin/suntools
+cp $DISTROOT/usr/bin/sort usr/bin
+cp $DISTROOT/etc/nd etc
+cp $DISTROOT/etc/ttys etc
+cp $DISTROOT/bin/true bin
+cp $DISTROOT/bin/false bin
+
+
+cat >etc/passwd <<EOF
+root::0:10::/:/bin/sh
+EOF
+cat >etc/group <<EOF
+wheel:*:0:
+staff:*:10:
+EOF
+rm -rf dev; mkdir dev
+cp /sys/dist/MAKEDEV dev
+chmod +x dev/MAKEDEV
+cp /dev/null dev/MAKEDEV.local
+cd dev
+./MAKEDEV std 
+./MAKEDEV xy0 xy1 xy2 xy3 sd0 sd1 sd2 sd3 ip0 ip1 ip2 ip3	# all disks
+./MAKEDEV bwone bwtwo win0 pty0 pty1				# window sys
+cd ..
+sync

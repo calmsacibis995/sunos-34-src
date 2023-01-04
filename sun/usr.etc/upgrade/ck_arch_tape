@@ -1,0 +1,56 @@
+#! /bin/sh
+#
+# @(#) ck_arch_tape 1.1 86/09/25
+#
+# ck_arch_tape arch tapen tapedev tapeserver
+#
+cmdname=$0
+arch=$1
+tapen=$2 
+tapedev=$3
+tapeserver=$4
+ARCH_TAPE=""
+TAPE_NUM=""
+ERRMSG="Sorry, you have the wrong release tape on drive \"${tapedev}\"."
+
+if [ $# -lt 3 -o $# -gt 4 ]; then
+        echo Usage: $0 arch tapen tapedev tapeserver
+        exit 1
+fi
+
+if [ "${tapeserver}" != "" ]; then
+        remote="rsh ${tapeserver} -n"
+fi
+
+COUNT=0
+while [ "${ARCH_TAPE}" != "${arch}" -o "${TAPE_NUM}" != "${tapen}" ]; do
+
+	if [ ${COUNT} -ne 0 ]; then
+                echo;echo "${ERRMSG}"
+        fi
+	echo
+	echo -n "Load release tape #${tapen} for ${arch}: "
+	read x
+	STRING=`${remote} mt -f ${tapedev} rew 2>&1`
+	if [ -z "${STRING}" ]; then
+	   ${remote} mt -f ${tapedev} fsf 1
+	else
+	   echo "${STRING}"
+	   echo "Tape drive ${tapedev} not ready."
+	   exit 1
+	fi
+	#
+	# get TOC from release tape(dd format)
+	#
+	if [ "${tapeserver}" = "" ]; then
+	   dd if=${tapedev} > /tmp/_TOC 2>&1
+	else
+	   ${remote} "dd if=${tapedev}" > /tmp/_TOC
+	fi
+
+	ARCH_TAPE=`awk '/MC/ {print $1}' < /tmp/_TOC `
+	TAPE_NUM=`awk '/MC/ {print $3}' < /tmp/_TOC `
+	COUNT=1
+done
+${remote} mt -f ${tapedev} rew
+sync; sync

@@ -1,0 +1,38 @@
+#! /bin/csh -f
+
+# This script installs the SunPro stuff for Sun2 systems
+
+set arch =
+if (-d /usr.MC68010) then
+	set arch = .MC68010
+endif
+
+cd /usr$arch/sunpro
+
+# First save the 3.2 stuff
+mkdir 3.2
+mv /pub$arch/lib/compile /pub$arch/lib/cpp /pub$arch/bin/ld /usr$arch/bin/m4 /pub$arch/bin/make 3.2
+if (-f /usr$arch/man/man1/make.1) then
+	/usr$arch/man/man1/make.1 3.2
+endif
+
+# Then install the SunPro stuff
+mv compile /pub$arch/lib/compile
+mv cpp /pub$arch/lib/cpp
+mv ld /pub$arch/bin/ld
+mv m4 /usr$arch/bin/m4
+mv make /pub$arch/bin/make
+mkdir /usr$arch/include/make
+mv default.mk /usr$arch/include/make/default.mk
+chmod 444 /usr$arch/include/make/default.mk
+if (-d /usr$arch/man/man1) then
+	mv make.1 filemerge.1 /usr$arch/man/man1
+endif
+mv filemerge /usr$arch/bin
+
+if (-d /usr.MC68020) then
+	if ($1 ==) then
+		cd /usr.MC68020/sunpro
+		install_sunpro recursive
+	endif
+endif

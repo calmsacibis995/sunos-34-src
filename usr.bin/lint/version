@@ -1,0 +1,56 @@
+#!/bin/csh
+# @(#)version	1.1 (Sun) 3/15/86
+# Usage:
+#	version diffs
+# produces a list of diffs since the files in this
+# directory were checked in for release 3.2DEV3
+#	version get
+# retrieves the versions of the files in this
+# directory used to build release 3.2DEV3
+#
+if ($#argv != 1) then
+    echo usage: version "{diffs|get}"
+    exit(1)
+else
+    set cmd = $argv[1]
+    if ($cmd != "diffs" && $cmd != "get") then
+	echo usage: version "{diffs|get}"
+	exit(1)
+    endif
+endif
+set list = ( \
+    2.26 /usr/src/lib/mip/pftn.c \
+    2.14 /usr/src/lib/mip/cgram.y \
+    1.15 /usr/src/lib/mip/common.c \
+    2.12 /usr/src/lib/mip/cpass1.h \
+    2.13 /usr/src/lib/mip/mip.h \
+    2.8 /usr/src/lib/mip/optim.c \
+    2.21 /usr/src/lib/mip/scan.c \
+    2.23 /usr/src/lib/mip/trees.c \
+    2.7 /usr/src/lib/mip/xdefs.c \
+    1.4 /usr/src/lib/mip/yyerror.c \
+    1.4 machdep.h \
+    1.3 lmanifest \
+    1.10 lint.c \
+    1.3 hash.c \
+    1.13 llib-lc \
+    1.7 llib-lcore \
+    1.3 llib-lcurses \
+    1.3 llib-lm \
+    1.4 llib-lmp \
+    1.7 llib-lpixrect \
+    1.13 llib-lsuntool \
+    1.5 llib-lsunwindow \
+    1.14 Makefile \
+    0 )
+while ( $list[1] != 0 )
+    set vers = $list[1]
+    shift list
+    set file = $list[1]
+    shift list
+    if ($cmd == "get") then
+	sccs get -r$vers -G$file $file
+    else
+	sccs diffs -r$vers $file
+    endif
+end

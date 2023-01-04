@@ -1,0 +1,71 @@
+#! /bin/sh
+#
+# merge_tool filename release
+#
+#       @(#)  merge_tool 1.1 86/09/25
+#
+#       Copyright (c) 1986 by Sun Microsystems, Inc.
+#
+
+HOME=/; export HOME
+PATH=/bin:/usr/bin:/etc:/usr/etc:/usr/etc/upgrade:/usr/ucb
+
+CMDNAME=$0
+FILENAME=$1
+RELEASE=$2 
+HOST=$3
+
+if [ $# -ne 3 ]; then
+        echo Usage: $0 filename release host 
+        exit 1
+fi
+
+case "$FILENAME" in
+	"/a/private/usr/lib/crontab" | "/a/usr/lib/crontab" | "/a/${HOST}/private/usr/lib/crontab" )
+		if [ "$RELEASE" = "3.0FCS" ]; then
+			3.0crontab_3.2crontab ${FILENAME} > /dev/null 2>&1
+		fi ;;
+	"/a/etc/group" | "/a/${HOST}/etc/group" )
+                if [ "$RELEASE" = "3.0FCS" ]; then   
+                        3.0group_3.2group ${FILENAME} > /dev/null 2>&1
+                fi ;;	
+	"/a/etc/protocols" | "/a/${HOST}/etc/protocols" )
+                if [ "$RELEASE" = "3.0FCS" ]; then   
+                        3.0protocols_3.2protocols ${FILENAME} > /dev/null 2>&1
+                elif [ "$RELEASE" = "3.2PILOT" -o "$RELEASE" = "3.2+extensions" ]; then
+                        pilotprotocols_3.2protocols ${FILENAME} > /dev/null 2>&1
+                fi ;;
+	"/a/etc/rc.boot" | "/a/${HOST}/etc/rc.boot" )
+                if [ "$RELEASE" = "3.0FCS" ]; then
+                        3.0rcboot_3.2rcboot ${FILENAME} > /dev/null 2>&1
+                elif [ "$RELEASE" = "3.2PILOT" -o "$RELEASE" = "3.2+extensions" ]; then
+                        pilotrcboot_3.2rcboot ${FILENAME} > /dev/null 2>&1
+                fi ;;
+	"/a/etc/rc.local" | "/a/${HOST}/etc/rc.local" )
+                if [ "$RELEASE" = "3.0FCS" ]; then   
+                        3.0rclocal_3.2rclocal ${FILENAME} > /dev/null 2>&1
+                elif [ "$RELEASE" = "3.2PILOT" -o "$RELEASE" = "3.2+extensions" ]; then
+                        pilotrclocal_3.2rclocal ${FILENAME} > /dev/null 2>&1
+                fi ;;
+	"/a/etc/rpc" | "/a/${HOST}/etc/rpc" )
+                if [ "$RELEASE" = "3.0FCS" ]; then   
+                        3.0rpc_3.2rpc ${FILENAME} > /dev/null 2>&1
+                elif [ "$RELEASE" = "3.2PILOT" -o "$RELEASE" = "3.2+extensions" ]; then
+                        pilotrpc_3.2rpc ${FILENAME} > /dev/null 2>&1
+                fi ;;
+	"/a/etc/servers" | "/a/${HOST}/etc/servers" )
+                if [ "$RELEASE" = "3.0FCS" ]; then    
+                        3.0servers_3.2servers ${FILENAME} > /dev/null 2>&1
+                fi ;; 
+        "/a/etc/services" | "/a/${HOST}/etc/services" )
+                if [ "$RELEASE" = "3.0FCS" ]; then    
+                        3.0services_3.2services ${FILENAME} > /dev/null 2>&1
+                elif [ "$RELEASE" = "3.2PILOT" -o "$RELEASE" = "3.2+extensions" ]; then
+                        pilotservices_3.2services ${FILENAME} > /dev/null 2>&1
+                fi ;; 
+        "/a/etc/ttys" )
+                if [ "$RELEASE" = "3.0FCS" ]; then
+                        3.0ttys_3.2ttys ${FILENAME} > /dev/null 2>&1
+                fi ;;
+esac
+sync; sync

@@ -1,0 +1,6 @@
+exit
+for i in
+do
+	touch /usr/spool/uucp/C./C.${i}n0000
+done
+/usr/lib/uucp/uucico -r1

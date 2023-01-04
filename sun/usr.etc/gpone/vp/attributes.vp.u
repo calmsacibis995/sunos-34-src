@@ -1,0 +1,160 @@
+| Copyright (c) 1985 by Sun Microsystems, Inc.
+|	@(#)attributes.vp.u 1.1 86/09/25 SMI
+
+| vector attributes
+#define veccmd r[17]
+#define op r[13]
+#define color r[12]
+#define clipplanes r[11]
+#define matrixptr r[9]
+
+| polygon attributes
+#define polyclpplns r[12]
+#define polycolorop r[13]
+#define polyshadestyle r[24]
+
+
+
+|	incw cmdptr,cmdptr;	;		jmap SETCLIPPLANES;;
+SETCLIPPLANES:
+	addw frameptr,CLPPLNS_FRMOFF,y;;	;		;
+	IMM;			am->shmemp;	;		;
+	movw acc,y;		am->shmem;	jmap getcmd;	;
+
+
+
+|	movw 0,y;		am->fpdp;	jmap SETMATRIX_2D; ;			  | zero fpr dst ptr
+SETMATRIX_2D: rolw 5,acc,y;	am->am;		push,go 5;	;			  | d <- index*32 (index is passed in acc)
+	addw d,XFRM_FRMOFF,acc;	shmem->fpregh;	;		;		shp+	  | copy from cmd list in shmem to fpr[0]
+	IMM;			shmem->fpregl;	rfct;		;		shp+,dp+  | acc <- XFRM_FRMOFF + index*32
+	addw frameptr,acc,y;	am->shmemp;	;		;			  | shmemp <- addr to store matrix
+	movw 0,y;		am->fpap;	push,go 5;	;			  | zero fpr src ptr
+	movw 13,acc;		fpregh->shmem;	;		;		shp+	  | copy from fpr[0] to frame in shmem
+	IMM;			fpregl->shmem;	rfct;		;		shp+,abp+
+	addw cmdptr,acc,cmdptr;	;		jmap getcmd;	;
+
+
+
+|	movw 0,y;		am->fpdp;	jmap GETMATRIX_2D; ;			  | zero fpr dst ptr
+GETMATRIX_2D: rolw 5,acc,acc;	0->fpap;	;		;			  | acc <- index*32 (index is passed in acc)
+	addw d,acc,acc;		XFRM_FRMOFF->am;;		;			  | fpap <- 0
+	addw frameptr,acc,y;	am->shmemp;	push,go 5;	;			  | shmemp <- addr to retrieve matrix
+	incw cmdptr,acc;	shmem->fpregh;	;		;		shp+	  | copy from frame in shmem to fpr[0]
+	;			shmem->fpregl;	rfct;		;		shp+,dp+  | acc has shmem addr of flag
+	incw acc,y;		am->shmemp;	push,go 5;	;			  | shmemp <- addr to store matrix
+	addw acc,13,cmdptr;	fpregh->shmem;	;		;		shp+	  | copy from fpr[0] to shmem cmd area
+	IMM;			fpregl->shmem;	rfct;		;		shp+,abp+ | cmdptr += 14
+	movw acc,y;		am->shmemp;	;		;
+	movw 0,y;		am->shmem;	jmap getcmd;	;			  | flag <- 0; jump to cmd loop
+
+
+
+|	movw 0,y;		am->fpdp;	jmap SETVWP_2D; ;			  | zero fpr dst ptr
+SETVWP_2D: movw 0,y;		am->fpap;	push,go 3;	;			  | zero fpr src ptr
+	movw VWPXSCL_FRMOFF,acc;shmem->fpregh;	;		;		shp+	  | copy from cmd list in shmem to fpr[0]
+	IMM;			shmem->fpregl;	rfct;		;		shp+,dp+
+	addw frameptr,acc,y;	am->shmemp;	push,go 3;	;			  | add frameptr and viewport frame offset
+	movw 9,acc;		fpregh->shmem;	;		;		shp+	  | copy from fpr[0] to frame in shmem
+	IMM;			fpregl->shmem;	rfct;		;		shp+,abp+
+	addw cmdptr,acc,cmdptr;	;		jmap getcmd;	;
+
+
+
+|	tvec_attr -- setup attributes for drawing fat and textured vectors
+|
+|	Input Parameters:	shmemp -- points at frame's texture
+
+tvec_attr: movw,s d,y;		shmem->am;	jmap tvec_attr_pp; ;			| Test first segment of pattern.
+
+
+
+|	vec_attr -- setup attributes for drawing vectors
+|
+|	Input Parameters:	shmemp -- points at beginning of attribute frame
+
+vec_attr: movw d,veccmd;	PPVECXF->am;	push, ~go;	;			  | will send solid vec cmd to fifo
+	;			PPVECXFINIT->fifo1; loop, f1nf;	;			  | initialization for solid xf vectors
+	subw,s d,fbindx,y;	shmem->am;	;		;			  | tst oldfbindx - newfbindx
+vecatt2: movw d,acc;		shmem->am;	cjs,~zer getfbaddr; ;		shp+	  | if oldfbindx != newfbindx, send to PP
+	movw PPMASK,acc;	=wrfifo->brreg;	;		;			  | send PPMASK command to PP
+	;			am->fifo1;	cjs,f1f;	;
+	movw d,acc;		shmem->am;	cjs,go;		;		shp+	  | send bit plane mask
+	movw d,op;		shmem->am;	;		;		shp+	  | save op
+	movw d,color;		shmem->am;	;		;		shp+	  | save color
+	movw d,clipplanes;	shmem->am;	;		;		shp+	  | save clipplanes
+	movw d,matrixptr;	shmem->am;	push,~go;	;		shp+	  | save matrixptr
+	mov2nw 8,acc;		PPSTCLIP->fifo1;loop,f1nf;	;			  | send Rectlist
+	addw frameptr,acc,y;	am->shmemp;	;		;			  | starts at frame offset 0x100
+	movw d,acc;		shmem->am;	cjs,go;		;		shp+	  | Number of rectangles.
+vecatt1:sub2nw,s 0,acc;		;		push,go 3;	;			  | 4 values in one rectangle
+	;			shmem->fifo1;	cjp,f1f .;	;
+	;			;		rfct;		;		shp+
+	;			;		cjp, ~zer vecatt1;;
+	;			;		crtn,go;	;
+
+
+
+polygon_attr_3D:
+|   Low byte of arg passed in acc indicates shading style:
+|   constant: 0, Gouraud: 1, textured: 2 (high byte assumed to be 0).  After
+|   setting up regular 2-D polygon attributes, check hidden surface
+|   flag.  Return if no hidden surface removal (HSR) else check whether
+|   gbuffer is present.  If not, return; else test if gbuffer is
+|   associated with the current frame buffer; if not, return; else
+|   set bit 8 of shade style register and return.  Upper byte of
+|   polyshadestyle indicates hidden surface method: none: 0,
+|   zbuffer: 1.
+	movw acc, polyshadestyle; ;		cjs,go polygon_attr_2D; ;		| Move low byte of command to style.
+	addw d,frameptr,acc;	HIDDENSURF_FRMOFF->am;;		;			  | 
+	movw acc,y;		am->shmemp;	;		;			  | 
+	movw d, acc;		shmem->am;	;		;		shp+	| 
+	btstw,s 1, polyshadestyle; ;		;		;			| if (shadestyle & 2) textured.
+	movw d, r[0];		shmem->am;	cjp, zer pa3hsr; ;			| Get depth.
+	btstw,s 3, r[0];	;		;		;			| if (depth == 8)
+	bclrw 1, polyshadestyle; ;		cjp, zer pa3tex1; ;			| 
+	bsetw 10, polyshadestyle; ;		cjp, go pa3hsr;	;			| 
+pa3tex1: bsetw 9, polyshadestyle; ;		;		;			| else (depth == 1)
+pa3hsr:	movw,s acc, y;		;		;		;			| Test acc for HSR.
+	;			;		crtn,zer;	;			  | return if no hidden surface removal
+	;			;		cjs,go gb_board_inq;;			  | 
+	xorw,s fbindx,acc,y;	;		crtn,neg;	;			  | 
+	;			;		crtn,~zer;	;			  | 
+	bsetw 8,polyshadestyle;	;		crtn,go;	;			  | 
+
+
+polygon_attr_2D:
+	subw,s d,fbindx,y;	shmem->am;	;		;			  | tst oldfbindx - newfbindx
+	movw d,acc;		shmem->am;	cjs,~zer getfbaddr;;		shp+	  | if oldfbindx != newfbindx, send to PP
+	movw PPMASK,acc;	=wrfifo->brreg;	;		;			  | send PPMASK command to PP
+	;			am->fifo1;	cjs,f1f;	;
+	movw d,acc;		shmem->am;	cjs,go;		;		shp+	  | send bit plane mask
+	movw d,acc;		shmem->am;	;		;		shp+	  | get op
+	andw d,acc,acc;		0x1F->am;	;		;			  | mask off upper 11 bits
+	rolw 5,d,polycolorop;	shmem->am;	;		;		shp+	  | get color
+	andw d,polycolorop,polycolorop; 0x1FE0->am;;		;			  | mask out noncolor bits
+	orw polycolorop,acc,polycolorop;;	;		;			  | combine color and op into polycolorop
+	movw d,polyclpplns;	shmem->am;	;		;		shp+	  | save clipplanes
+	movw d,matrixptr;	shmem->am;	push,~go;	;		shp+	  | save matrixptr
+	mov2nw 8,acc;		PPSTCLIP->fifo1;loop,f1nf;	;			  | send Rectlist
+	addw frameptr,acc,y;	am->shmemp;	;		;			  | starts at frame offset 0x100
+	movw d,acc;		shmem->am;	cjs,go;		;		shp+	  | acc <- # of rectangles & send to PP
+plyatt1:sub2nw,s 0,acc;		;		push,go 3;	;			  | 4 values in one rectangle.
+	;			shmem->fifo1;	cjp,f1f .;	;
+	;			;		rfct;		;		shp+
+	;			;		cjp, ~zer plyatt1;;
+	;			;		crtn,go;	;
+
+
+
+#undef veccmd
+#undef op 
+#undef color 
+#undef clipplanes 
+#undef matrixptr 
+
+#undef polyclpplns
+#undef polycolorop
+#undef polyshadestyle
+
+#include "tex.vp.u"
+

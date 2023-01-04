@@ -1,0 +1,8 @@
+#! /bin/csh -f
+#
+#       @(#)setterm 1.1 9/25/86 Copyright 1985 Sun Micro
+#
+sed "/console/s/^.* /$1 /" /etc/ttytype > /tmp/tmp.$$
+mv /tmp/tmp.$$ /etc/ttytype
+echo console set to $1, relogin as sysdiag now.
+chmod 644 /etc/ttytype
